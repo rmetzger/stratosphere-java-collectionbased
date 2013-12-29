@@ -143,6 +143,17 @@ public abstract class FileInputFormat<OT> implements InputFormat<OT, FileInputSp
 	 */
 	protected long openTimeout = DEFAULT_OPENING_TIMEOUT;
 
+	
+	// --------------------------------------------------------------------------------------------
+	//  Constructors
+	// --------------------------------------------------------------------------------------------	
+
+	public FileInputFormat() {}
+	
+	protected FileInputFormat(Path filePath) {
+		this.filePath = filePath;
+	}
+	
 	// --------------------------------------------------------------------------------------------
 	//  Getters/setters for the configurable parameters
 	// --------------------------------------------------------------------------------------------

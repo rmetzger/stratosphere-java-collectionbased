@@ -10,16 +10,18 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  **********************************************************************************************************************/
-package eu.stratosphere.api.java.tuple;
 
-/**
- *
- */
-public abstract class Tuple {
+package eu.stratosphere.api.common;
+
+public class InvalidProgramException extends RuntimeException {
 	
-	public static final int MAX_ARITY = 22;
+	private static final long serialVersionUID = 3119881934024032887L;
 	
-	public abstract <T> T getField(int pos);
+	public InvalidProgramException() {
+		super();
+	}
 	
-	public abstract <T> void setField(T value, int pos);
+	public InvalidProgramException(String message) {
+		super(message);
+	}
 }

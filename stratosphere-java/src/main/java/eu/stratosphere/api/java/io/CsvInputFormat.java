@@ -1,4 +1,5 @@
 /***********************************************************************************************************************
+ *
  * Copyright (C) 2010-2013 by the Stratosphere project (http://stratosphere.eu)
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
@@ -9,17 +10,34 @@
  * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
- **********************************************************************************************************************/
-package eu.stratosphere.api.java.tuple;
-
-/**
  *
- */
-public abstract class Tuple {
+ **********************************************************************************************************************/
+package eu.stratosphere.api.java.io;
+
+
+import eu.stratosphere.api.common.io.GenericCsvInputFormat;
+import eu.stratosphere.api.java.tuple.Tuple;
+import eu.stratosphere.core.fs.Path;
+
+
+public class CsvInputFormat<OUT extends Tuple> extends GenericCsvInputFormat<OUT> {
+
+	private static final long serialVersionUID = 1L;
+
 	
-	public static final int MAX_ARITY = 22;
+	public CsvInputFormat(Path filePath, String lineDelimiter, char fieldDelimiter, Class<?> ... types) {
+		super(filePath);
+		
+		setDelimiter(lineDelimiter);
+		setFieldDelim(fieldDelimiter);
+	}
 	
-	public abstract <T> T getField(int pos);
 	
-	public abstract <T> void setField(T value, int pos);
+	
+
+	@Override
+	public boolean readRecord(OUT target, byte[] bytes, int offset, int numBytes) {
+		return false;
+	}
+
 }

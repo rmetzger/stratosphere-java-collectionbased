@@ -15,7 +15,7 @@ package eu.stratosphere.api.java.tuple;
 import java.io.File;
 import java.io.PrintWriter;
 
-import eu.stratosphere.types.Value;
+//import eu.stratosphere.types.Value;
 
 /**
  *
@@ -26,9 +26,9 @@ public class TupleGenerator {
 	
 	private static final String PACKAGE = "eu.stratosphere.api.java.tuple";
 	
-	private static final String VALUE_TYPE_FULL = Value.class.getName();
-	
-	private static final String VALUE_TYPE = Value.class.getSimpleName();
+//	private static final String VALUE_TYPE_FULL = Value.class.getName();
+//	
+//	private static final String VALUE_TYPE = Value.class.getSimpleName();
 	
 	private static final String GEN_TYPE_PREFIX = "T";
 	
@@ -65,8 +65,8 @@ public class TupleGenerator {
 		// package and imports
 		w.println("package " + PACKAGE + ';');
 		w.println();
-		w.println("import " + VALUE_TYPE_FULL + ';');
-		w.println();
+//		w.println("import " + VALUE_TYPE_FULL + ';');
+//		w.println();
 		
 		// class declaration
 		w.print("public final class " + className + "<");
@@ -74,7 +74,8 @@ public class TupleGenerator {
 			if (i > 1) {
 				w.print(", ");
 			}
-			w.print(GEN_TYPE_PREFIX + i + " extends " + VALUE_TYPE);
+			w.print(GEN_TYPE_PREFIX + i);
+//			w.print(GEN_TYPE_PREFIX + i + " extends " + VALUE_TYPE);
 		}
 		w.println("> extends Tuple {");
 		w.println();
@@ -151,5 +152,6 @@ public class TupleGenerator {
 		"\n" +
 		"// --------------------------------------------------------------\n" +
 		"//  THIS IS A GENERATED SOURCE FILE. DO NOT EDIT!\n" +
+		"//  GENERATED FROM " + TupleGenerator.class.getName() + ".\n" +
 		"// --------------------------------------------------------------\n\n\n";
 }

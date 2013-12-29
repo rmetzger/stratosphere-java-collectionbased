@@ -20,6 +20,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.primitives.Ints;
 
 import eu.stratosphere.core.fs.FileInputSplit;
+import eu.stratosphere.core.fs.Path;
 import eu.stratosphere.types.Value;
 import eu.stratosphere.types.parser.FieldParser;
 import eu.stratosphere.util.InstantiationUtil;
@@ -77,6 +78,10 @@ public abstract class GenericCsvInputFormat<OT> extends DelimitedInputFormat<OT>
 	public GenericCsvInputFormat(char fieldDelimiter, Class<? extends Value> ... fields) {
 		setFieldDelim(fieldDelimiter);
 		setFieldTypes(fields);
+	}
+	
+	protected GenericCsvInputFormat(Path filePath) {
+		super(filePath);
 	}
 	
 	// --------------------------------------------------------------------------------------------

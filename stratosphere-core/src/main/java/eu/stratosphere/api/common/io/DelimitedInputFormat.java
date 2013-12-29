@@ -154,8 +154,17 @@ public abstract class DelimitedInputFormat<OT> extends FileInputFormat<OT> {
 	
 	
 	// --------------------------------------------------------------------------------------------
-	//  Getters/setters for the configurable parameters
+	//  Constructors & Getters/setters for the configurable parameters
 	// --------------------------------------------------------------------------------------------
+	
+	public DelimitedInputFormat() {
+		super();
+	}
+	
+	protected DelimitedInputFormat(Path filePath) {
+		super(filePath);
+	}
+	
 	
 	public byte[] getDelimiter() {
 		return delimiter;

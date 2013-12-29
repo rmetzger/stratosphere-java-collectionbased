@@ -13,7 +13,7 @@
 
 package eu.stratosphere.api.common.operators;
 
-import eu.stratosphere.api.common.InvalidJobException;
+import eu.stratosphere.api.common.InvalidProgramException;
 import eu.stratosphere.api.common.aggregators.AggregatorRegistry;
 import eu.stratosphere.api.common.functions.AbstractFunction;
 import eu.stratosphere.api.common.operators.util.UserCodeClassWrapper;
@@ -113,16 +113,16 @@ public class BulkIteration extends SingleInputOperator<AbstractFunction> impleme
 	/**
 	 * @throws Exception
 	 */
-	public void validate() throws InvalidJobException {
+	public void validate() throws InvalidProgramException {
 		if (this.input == null || this.input.isEmpty()) {
 			throw new RuntimeException("Operator for initial partial solution is not set.");
 		}
 		if (this.iterationResult == null) {
-			throw new InvalidJobException("Operator producing the next version of the partial " +
+			throw new InvalidProgramException("Operator producing the next version of the partial " +
 					"solution (iteration result) is not set.");
 		}
 		if (this.numberOfIterations <= 0) {
-			throw new InvalidJobException("No termination condition is set " +
+			throw new InvalidProgramException("No termination condition is set " +
 					"(neither fix number of iteration nor termination criterion).");
 		}
 //		if (this.terminationCriterion != null && this.numberOfIterations > 0) {

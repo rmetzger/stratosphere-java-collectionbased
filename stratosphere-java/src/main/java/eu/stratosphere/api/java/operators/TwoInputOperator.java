@@ -1,4 +1,5 @@
 /***********************************************************************************************************************
+ *
  * Copyright (C) 2010-2013 by the Stratosphere project (http://stratosphere.eu)
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
@@ -9,17 +10,38 @@
  * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
+ *
  **********************************************************************************************************************/
-package eu.stratosphere.api.java.tuple;
+package eu.stratosphere.api.java.operators;
+
+import eu.stratosphere.api.java.DataSet;
+import eu.stratosphere.api.java.tuple.Tuple;
 
 /**
  *
+ * @param <IN1> The data type of the first input data set.
+ * @param <IN2> The data type of the second input data set.
+ * @param <OUT> The data type of the returned data set.
  */
-public abstract class Tuple {
+public abstract class TwoInputOperator<IN1 extends Tuple, IN2 extends Tuple, OUT extends Tuple> extends Operator<OUT> {
 	
-	public static final int MAX_ARITY = 22;
+	private final DataSet<IN1> input1;
+	private final DataSet<IN2> input2;
 	
-	public abstract <T> T getField(int pos);
 	
-	public abstract <T> void setField(T value, int pos);
+	protected TwoInputOperator(DataSet<IN1> input1, DataSet<IN2> input2, Class<?>[] resultTypes) {
+		super(input1.getExecutionContext(), resultTypes);
+		
+		DataSet.checkSameExecutionContext(input1, input2);
+		this.input1 = input1;
+		this.input2 = input2;
+	}
+	
+	public DataSet<IN1> getInput1() {
+		return this.input1;
+	}
+	
+	public DataSet<IN2> getInput2() {
+		return this.input2;
+	}
 }
