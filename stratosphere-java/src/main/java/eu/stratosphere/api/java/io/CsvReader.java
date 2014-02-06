@@ -16,7 +16,7 @@ package eu.stratosphere.api.java.io;
 
 import java.util.ArrayList;
 
-import eu.stratosphere.api.java.ExecutionContext;
+import eu.stratosphere.api.java.ExecutionEnvironment;
 import eu.stratosphere.api.java.operators.DataSource;
 import eu.stratosphere.api.java.tuple.Tuple1;
 import eu.stratosphere.api.java.tuple.Tuple2;
@@ -33,7 +33,7 @@ public class CsvReader {
 
 	private final Path path;
 	
-	private final ExecutionContext executionContext;
+	private final ExecutionEnvironment executionContext;
 	
 	
 	private boolean[] includedMask;
@@ -45,12 +45,12 @@ public class CsvReader {
 	
 	// --------------------------------------------------------------------------------------------
 	
-	public CsvReader(Path path, ExecutionContext executionContext) {
+	public CsvReader(Path path, ExecutionEnvironment executionContext) {
 		this.path = path;
 		this.executionContext = executionContext;
 	}
 	
-	public CsvReader(String path, ExecutionContext executionContext) {
+	public CsvReader(String path, ExecutionEnvironment executionContext) {
 		this.path = new Path(path);
 		this.executionContext = executionContext;
 	}

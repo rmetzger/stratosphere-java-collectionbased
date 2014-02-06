@@ -14,11 +14,23 @@
  **********************************************************************************************************************/
 package eu.stratosphere.api.java.functions;
 
-import eu.stratosphere.api.common.functions.AbstractFunction;
+import java.util.Iterator;
+
 import eu.stratosphere.util.Collector;
 
 
-public abstract class FlatMapFunction<IN, OUT> extends AbstractFunction {
+public abstract class FlatMapIterator<IN, OUT> extends FlatMapFunction<IN, OUT> {
 
-	public abstract void flatMap(IN value, Collector<OUT> out) throws Exception;
+	
+	public abstract Iterator<OUT> flatMap(IN value) throws Exception;
+
+	
+	// --------------------------------------------------------------------------------------------
+	
+	@Override
+	public final void flatMap(IN value, Collector<OUT> out) throws Exception {
+		for (Iterator<OUT> iter = flatMap(value); iter.hasNext(); ) {
+			out.collect(iter.next());
+		}
+	}
 }

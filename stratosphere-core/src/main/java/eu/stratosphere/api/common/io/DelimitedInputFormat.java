@@ -244,14 +244,14 @@ public abstract class DelimitedInputFormat<OT> extends FileInputFormat<OT> {
 	 * The parsed content is then returned by setting the pair variables. If the
 	 * byte array contains invalid content the record can be skipped by returning <tt>false</tt>.
 	 * 
-	 * @param target The holder for the line that is read.
+	 * @param reuse An optionally reusable object.
 	 * @param bytes Binary data of serialized records.
 	 * @param offset The offset where to start to read the record data. 
 	 * @param numBytes The number of bytes that can be read starting at the offset position.
 	 * 
 	 * @return returns whether the record was successfully deserialized or not.
 	 */
-	public abstract boolean readRecord(OT target, byte[] bytes, int offset, int numBytes);
+	public abstract OT readRecord(OT reuse, byte[] bytes, int offset, int numBytes);
 	
 	// --------------------------------------------------------------------------------------------
 	//  Pre-flight: Configuration, Splits, Sampling
@@ -453,12 +453,12 @@ public abstract class DelimitedInputFormat<OT> extends FileInputFormat<OT> {
 	}
 	
 	@Override
-	public boolean nextRecord(OT record) throws IOException {
+	public OT nextRecord(OT record) throws IOException {
 		if (readLine()) {
 			return readRecord(record, this.currBuffer, this.currOffset, this.currLen);
 		} else {
 			this.end = true;
-			return false;
+			return null;
 		}
 	}
 

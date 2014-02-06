@@ -12,13 +12,13 @@
  * specific language governing permissions and limitations under the License.
  *
  **********************************************************************************************************************/
-package eu.stratosphere.api.java.functions;
-
-import eu.stratosphere.api.common.functions.AbstractFunction;
-import eu.stratosphere.util.Collector;
+package eu.stratosphere.api.java;
 
 
-public abstract class FlatMapFunction<IN, OUT> extends AbstractFunction {
-
-	public abstract void flatMap(IN value, Collector<OUT> out) throws Exception;
+public class LocalEnvironment extends ExecutionEnvironment {
+	
+	@Override
+	public String toString() {
+		return "Local Context (DOP = " + getDegreeOfParallelism() + ") : " + getIdString();
+	}
 }

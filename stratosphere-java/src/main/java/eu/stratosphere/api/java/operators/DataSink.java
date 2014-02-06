@@ -14,34 +14,45 @@
  **********************************************************************************************************************/
 package eu.stratosphere.api.java.operators;
 
-import eu.stratosphere.api.java.DataSet;
+import eu.stratosphere.api.common.io.OutputFormat;
+import eu.stratosphere.api.java.ExecutionEnvironment;
 import eu.stratosphere.api.java.typeutils.TypeInformation;
 
-/**
- *
- * @param <IN1> The data type of the first input data set.
- * @param <IN2> The data type of the second input data set.
- * @param <OUT> The data type of the returned data set.
- */
-public abstract class TwoInputOperator<IN1, IN2, OUT> extends Operator<OUT> {
+
+public class DataSink<T> {
 	
-	private final DataSet<IN1> input1;
-	private final DataSet<IN2> input2;
+	private final OutputFormat<T> format;
+	
+	private final ExecutionEnvironment context;
+	
+	private final TypeInformation<T> type;
 	
 	
-	protected TwoInputOperator(DataSet<IN1> input1, DataSet<IN2> input2, TypeInformation<OUT> resultType) {
-		super(input1.getExecutionEnvironment(), resultType);
+	public DataSink(ExecutionEnvironment context, OutputFormat<T> format, TypeInformation<T> type) {
+		if (format == null)
+			throw new IllegalArgumentException("Teh output format must not be null.");
+		if (type == null)
+			throw new IllegalArgumentException("The input type information must not be null.");
+		if (context == null)
+			throw new IllegalArgumentException("The execution environment must not be null.");
 		
-		DataSet.checkSameExecutionContext(input1, input2);
-		this.input1 = input1;
-		this.input2 = input2;
+		
+		this.format = format;
+		this.context = context;
+		this.type = type;
+	}
+
+	
+	public OutputFormat<T> getFormat() {
+		return format;
 	}
 	
-	public DataSet<IN1> getInput1() {
-		return this.input1;
+	public ExecutionEnvironment getContext() {
+		return context;
 	}
 	
-	public DataSet<IN2> getInput2() {
-		return this.input2;
+	public TypeInformation<T> getType() {
+		return type;
 	}
+
 }

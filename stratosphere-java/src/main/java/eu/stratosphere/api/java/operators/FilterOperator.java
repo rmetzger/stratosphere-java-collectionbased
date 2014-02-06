@@ -16,20 +16,19 @@ package eu.stratosphere.api.java.operators;
 
 import eu.stratosphere.api.java.DataSet;
 import eu.stratosphere.api.java.functions.FilterFunction;
-import eu.stratosphere.api.java.tuple.Tuple;
 import eu.stratosphere.configuration.Configuration;
 
 /**
  *
  * @param <IN> The type of the data set filtered by the operator.
  */
-public class FilterOperator<IN extends Tuple> extends SingleInputOperator<IN, IN> {
+public class FilterOperator<IN> extends SingleInputOperator<IN, IN> {
 	
 	protected final FilterFunction<IN> function;
 	
 	
 	public FilterOperator(DataSet<IN> input, FilterFunction<IN> function) {
-		super(input, input.getTypes());
+		super(input, input.getType());
 		
 		if (function == null)
 			throw new NullPointerException("Filter function must not be null.");

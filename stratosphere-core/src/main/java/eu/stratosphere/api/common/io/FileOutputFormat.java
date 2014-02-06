@@ -34,6 +34,19 @@ import eu.stratosphere.core.fs.Path;
 public abstract class FileOutputFormat<IT> implements OutputFormat<IT> {
 	private static final long serialVersionUID = 1L;
 	
+	// --------------------------------------------------------------------------------------------
+	
+	/**
+	 * Defines the behavior for creating output directories. 
+	 */
+	public static enum OutputDirectoryMode {
+		ALWAYS,			// A directory is always created, regardless of number of write tasks
+		PARONLY			// A directory is only created for parallel output tasks, i.e., number of output tasks > 1.
+						// If number of output tasks = 1, the output is written to a single file.
+	}
+	
+	// --------------------------------------------------------------------------------------------
+	
 	/**
 	 * The LOG for logging messages in this class.
 	 */
@@ -71,6 +84,9 @@ public abstract class FileOutputFormat<IT> implements OutputFormat<IT> {
 	 */
 	public static final String OUTPUT_STREAM_OPEN_TIMEOUT_KEY = "stratosphere.output.file.timeout";
 	
+	// --------------------------------------------------------------------------------------------
+	
+	
 	/**
 	 * The path of the file to be written.
 	 */
@@ -87,40 +103,69 @@ public abstract class FileOutputFormat<IT> implements OutputFormat<IT> {
 	protected OutputDirectoryMode outDirMode;
 	
 	/**
-	 * The stream to which the data is written;
-	 */
-	protected FSDataOutputStream stream;
-	
-	/**
 	 * Stream opening timeout.
 	 */
 	private long openTimeout;
+	
+	/**
+	 * The stream to which the data is written;
+	 */
+	protected transient FSDataOutputStream stream;
 
 	// --------------------------------------------------------------------------------------------
-
-	/**
-	 * Defines the behavior for creating output directories. 
-	 *
-	 */
-	public static enum OutputDirectoryMode {
-		ALWAYS,			// A directory is always created, regardless of number of write tasks
-		PARONLY			// A directory is only created for parallel output tasks, i.e., number of output tasks > 1.
-						// If number of output tasks = 1, the output is written to a single file.
+	
+	public void setFilePath(Path filePath) {
+		this.outputFilePath = filePath;
 	}
 	
+	public Path getFilePath() {
+		return this.outputFilePath;
+	}
+	
+	
+	public void setWriteMode(WriteMode writeMode) {
+		this.writeMode = writeMode;
+	}
+	
+	public WriteMode getWriteMode() {
+		return this.writeMode;
+	}
+	
+	
+	public void setDirectoryCreationMode(OutputDirectoryMode outDirMode) {
+		this.outDirMode = outDirMode;
+	}
+	
+	public OutputDirectoryMode getDirectoryCreationMode() {
+		return this.outDirMode;
+	}
+	
+	
+	public void setOpenTimeout(long openTimeout) {
+		this.openTimeout = openTimeout;
+	}
+	
+	public long getOpenTimeout() {
+		return this.openTimeout;
+	}
+	
+	// --------------------------------------------------------------------------------------------
+
 	@Override
 	public void configure(Configuration parameters) {
-		// get the file parameter
+		// see if there is a file parameter in the config
 		String filePath = parameters.getString(FILE_PARAMETER_KEY, null);
-		if (filePath == null) {
-			throw new IllegalArgumentException("Configuration file FileOutputFormat does not contain the file path.");
+		if (filePath != null) {
+			try {
+				this.outputFilePath = new Path(filePath);
+			}
+			catch (RuntimeException rex) {
+				throw new RuntimeException("Could not create a valid URI from the given file path name: " + rex.getMessage()); 
+			}
 		}
 		
-		try {
-			this.outputFilePath = new Path(filePath);
-		}
-		catch (RuntimeException rex) {
-			throw new RuntimeException("Could not create a valid URI from the given file path name: " + rex.getMessage()); 
+		if (this.outputFilePath == null) {
+			throw new IllegalArgumentException("No file path has been specified, neither as a parameter, nor through the configuration.");
 		}
 		
 		// get the write mode parameter
@@ -182,22 +227,6 @@ public abstract class FileOutputFormat<IT> implements OutputFormat<IT> {
 		}
 	}
 	
-	public Path getOutputFilePath() {
-		return this.outputFilePath;
-	}
-	
-	public WriteMode getWriteMode() {
-		return this.writeMode;
-	}
-	
-	public OutputDirectoryMode getOutDirMode() {
-		return this.outDirMode;
-	}
-	
-	public long getOpenTimeout() {
-		return this.openTimeout;
-	}
-	
 	// ============================================================================================
 	
 	private static final class OutputPathOpenThread extends Thread {
@@ -222,9 +251,9 @@ public abstract class FileOutputFormat<IT> implements OutputFormat<IT> {
 
 		
 		public OutputPathOpenThread(FileOutputFormat<?> fof, int taskIndex, int numTasks) {
-			this.path = fof.getOutputFilePath();
+			this.path = fof.getFilePath();
 			this.writeMode = fof.getWriteMode();
-			this.outDirMode = fof.getOutDirMode();
+			this.outDirMode = fof.getDirectoryCreationMode();
 			this.timeoutMillies = fof.getOpenTimeout();
 			this.taskIndex = taskIndex;
 			this.numTasks = numTasks;

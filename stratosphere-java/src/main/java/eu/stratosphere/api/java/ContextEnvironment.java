@@ -12,13 +12,25 @@
  * specific language governing permissions and limitations under the License.
  *
  **********************************************************************************************************************/
-package eu.stratosphere.api.java.functions;
-
-import eu.stratosphere.api.common.functions.AbstractFunction;
-import eu.stratosphere.util.Collector;
+package eu.stratosphere.api.java;
 
 
-public abstract class FlatMapFunction<IN, OUT> extends AbstractFunction {
-
-	public abstract void flatMap(IN value, Collector<OUT> out) throws Exception;
+public class ContextEnvironment {
+	
+	private static ExecutionEnvironment systemContext;
+	
+	
+	public static ExecutionEnvironment getContextEnvironment() {
+		if (systemContext != null)
+			return systemContext;
+		else
+			throw new IllegalStateException("System context has not been initialized.");
+	}
+	
+	public static void initializeContextEnvironment(ExecutionEnvironment ctx) {
+		if (systemContext != null)
+			throw new IllegalStateException("System context has already been initialized.");
+		
+		systemContext = ctx;
+	}
 }

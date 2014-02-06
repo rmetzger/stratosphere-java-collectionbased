@@ -16,12 +16,11 @@ package eu.stratosphere.api.java.operators;
 
 import eu.stratosphere.api.java.DataSet;
 import eu.stratosphere.api.java.aggregation.Aggregations;
-import eu.stratosphere.api.java.tuple.Tuple;
 
 /**
  * @param <IN> The type of the data set aggregated by the operator.
  */
-public class AggregateOperator<IN extends Tuple> extends SingleInputOperator<IN, IN> {
+public class AggregateOperator<IN> extends SingleInputOperator<IN, IN> {
 	
 	private final Aggregations[] aggregationFunctions;
 	
@@ -35,12 +34,12 @@ public class AggregateOperator<IN extends Tuple> extends SingleInputOperator<IN,
 	 * one is an aggregation operator as well.
 	 */
 	public AggregateOperator(DataSet<IN> input, Aggregations function, int field) {
-		super( (input != null && input.getClass() == AggregateOperator.class) ? ((AggregateOperator<IN>) input).getInput() : input , input.getTypes());
+		super( (input != null && input.getClass() == AggregateOperator.class) ? ((AggregateOperator<IN>) input).getInput() : input , input.getType());
 		
 		if (input == null || function == null)
 			throw new NullPointerException();
 		
-		if (field < 0 || field >= input.getTupleArity())
+		if (field < 0 || field >= input.getType().getArity())
 			throw new IllegalArgumentException("Field position is out of range.");
 		
 		// check if this is the first of multiple chained aggregation operators
@@ -68,12 +67,12 @@ public class AggregateOperator<IN extends Tuple> extends SingleInputOperator<IN,
 	}
 	
 	public AggregateOperator(GroupedDataSet<IN> input, Aggregations function, int field) {
-		super(input.getDataSet(), input.getDataSet().getTypes());
+		super(input.getDataSet(), input.getDataSet().getType());
 		
 		if (input == null || function == null)
 			throw new NullPointerException();
 		
-		if (field < 0 || field >= input.getDataSet().getTupleArity())
+		if (field < 0 || field >= input.getDataSet().getType().getArity())
 			throw new IllegalArgumentException("Aggregation field position is out of range.");
 		
 		// set the aggregation fields

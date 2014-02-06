@@ -15,21 +15,21 @@
 package eu.stratosphere.api.java.operators;
 
 import eu.stratosphere.api.java.DataSet;
-import eu.stratosphere.api.java.ExecutionContext;
-import eu.stratosphere.api.java.tuple.Tuple;
+import eu.stratosphere.api.java.ExecutionEnvironment;
+import eu.stratosphere.api.java.typeutils.TypeInformation;
 import eu.stratosphere.configuration.Configuration;
 
 
 /**
  * @param <OUT> The type of the data set produced by this operator.
  */
-public abstract class Operator<OUT extends Tuple> extends DataSet<OUT> {
+public abstract class Operator<OUT> extends DataSet<OUT> {
 	
 	protected Configuration parameters;
 	
 	
-	protected Operator(ExecutionContext context, Class<?>[] resultTypes) {
-		super(context, resultTypes);
+	protected Operator(ExecutionEnvironment context, TypeInformation<OUT> resultType) {
+		super(context, resultType);
 	}
 	
 	

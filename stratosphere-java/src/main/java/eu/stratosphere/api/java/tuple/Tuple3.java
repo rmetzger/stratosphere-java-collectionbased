@@ -15,25 +15,47 @@
 
 // --------------------------------------------------------------
 //  THIS IS A GENERATED SOURCE FILE. DO NOT EDIT!
+//  GENERATED FROM eu.stratosphere.api.java.tuple.TupleGenerator.
 // --------------------------------------------------------------
 
 
 package eu.stratosphere.api.java.tuple;
 
+import eu.stratosphere.util.StringUtils;
+
+@SuppressWarnings({ "restriction"})
 public final class Tuple3<T1, T2, T3> extends Tuple {
 
-	public T1 _1;
-	public T2 _2;
-	public T3 _3;
+	private T1 _1;
+	private T2 _2;
+	private T3 _3;
 
 	public Tuple3() {}
 
-	public Tuple3(T1 _1, T2 _2, T3 _3) {
-		this._1 = _1;
-		this._2 = _2;
-		this._3 = _3;
+	public Tuple3(T1 value1, T2 value2, T3 value3) {
+		this._1 = value1;
+		this._2 = value2;
+		this._3 = value3;
 	}
 
+	public T1 T1() {
+		return this._1;
+	}
+	public T2 T2() {
+		return this._2;
+	}
+	public T3 T3() {
+		return this._3;
+	}
+	public void T1(T1 value) {
+		this._1 = value;
+	}
+	public void T2(T2 value) {
+		this._2 = value;
+	}
+	public void T3(T3 value) {
+		this._3 = value;
+	}
 	@Override
 	@SuppressWarnings("unchecked")
 	public <T> T getField(int pos) {
@@ -58,6 +80,41 @@ public final class Tuple3<T1, T2, T3> extends Tuple {
 				this._3 = (T3) value;
 				break;
 			default: throw new IndexOutOfBoundsException(String.valueOf(pos));
+		}
+	}
+
+	// -------------------------------------------------------------------------------------------------
+	// standard utilities
+	// -------------------------------------------------------------------------------------------------
+
+	@Override
+	public String toString() {
+		return "(" + StringUtils.arrayAwareToString(this._1)
+			+ ", " + StringUtils.arrayAwareToString(this._2)
+			+ ", " + StringUtils.arrayAwareToString(this._3)
+			+ ")";
+	}
+
+	// -------------------------------------------------------------------------------------------------
+	// unsafe fast field access
+	// -------------------------------------------------------------------------------------------------
+
+	@SuppressWarnings({ "unchecked"})
+	public <T> T getFieldFast(int pos) {
+		return (T) UNSAFE.getObject(this, offsets[pos]);
+	}
+
+	private static final sun.misc.Unsafe UNSAFE = eu.stratosphere.core.memory.MemoryUtils.UNSAFE;
+
+	private static final long[] offsets = new long[3];
+
+	static {
+		try {
+			offsets[0] = UNSAFE.objectFieldOffset(Tuple3.class.getField("_1"));
+			offsets[1] = UNSAFE.objectFieldOffset(Tuple3.class.getField("_2"));
+			offsets[2] = UNSAFE.objectFieldOffset(Tuple3.class.getField("_3"));
+		} catch (Throwable t) {
+			throw new RuntimeException("Could not initialize fast field accesses for tuple data type.");
 		}
 	}
 }

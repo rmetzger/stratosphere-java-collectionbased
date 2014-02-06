@@ -17,18 +17,11 @@ package eu.stratosphere.api.java.functions;
 import java.util.Iterator;
 
 import eu.stratosphere.api.common.functions.AbstractFunction;
-import eu.stratosphere.api.java.tuple.Tuple;
 import eu.stratosphere.util.Collector;
 
 
-public abstract class GroupReduceFunction<IN extends Tuple, OUT extends Tuple> extends AbstractFunction {
+public abstract class GroupReduceFunction<IN, OUT> extends AbstractFunction {
 	
-	public abstract Iterator<OUT> reduceGroup(Iterator<IN> values) throws Exception;
+	public abstract void reduce(Iterator<IN> values, Collector<OUT> out) throws Exception;
 	
-	
-	public void reduce(Iterator<IN> values, Collector<OUT> out) throws Exception {
-		for (Iterator<OUT> iter = reduceGroup(values); iter.hasNext(); ) {
-			out.collect(iter.next());
-		}
-	}
 }

@@ -17,12 +17,11 @@ package eu.stratosphere.api.java.io;
 import java.nio.charset.Charset;
 
 import eu.stratosphere.api.common.io.DelimitedInputFormat;
-import eu.stratosphere.api.java.tuple.Tuple1;
 import eu.stratosphere.configuration.Configuration;
 import eu.stratosphere.core.fs.Path;
 
 
-public class TextInputFormat extends DelimitedInputFormat<Tuple1<String>> {
+public class TextInputFormat extends DelimitedInputFormat<String> {
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -74,10 +73,8 @@ public class TextInputFormat extends DelimitedInputFormat<Tuple1<String>> {
 	// --------------------------------------------------------------------------------------------
 
 	@Override
-	public boolean readRecord(Tuple1<String> target, byte[] bytes, int offset, int numBytes) {
-		String result = new String(bytes, offset, numBytes, this.charset);
-		target._1 = result;
-		return true;
+	public String readRecord(String target, byte[] bytes, int offset, int numBytes) {
+		return new String(bytes, offset, numBytes, this.charset);
 	}
 	
 	// --------------------------------------------------------------------------------------------

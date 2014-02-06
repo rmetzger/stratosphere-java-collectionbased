@@ -24,15 +24,28 @@ import eu.stratosphere.util.Collector;
 import static eu.stratosphere.api.java.aggregation.Aggregations.*;
 
 
-public class WordCount {
+public class WordCount2 {
 	
-	public static final class Tokenizer extends FlatMapFunction<String, Tuple2<String, Integer>> {
+	public static class WC {
+		
+		public String word;
+		public int count;
+		
+		public WC() {}
+		
+		public WC(String word, int count) {
+			this.word = word;
+			this.count = count;
+		}
+	}
+	
+	public static final class Tokenizer extends FlatMapFunction<String, WC> {
 		
 		@Override
-		public void flatMap(String value, Collector<Tuple2<String, Integer>> out) {
+		public void flatMap(String value, Collector<WC> out) {
 			String[] tokens = value.toLowerCase().split("\\W");
 			for (String token : tokens) {
-				out.collect(new Tuple2<String, Integer>(token, 1));
+				out.collect(new WC(token, 1));
 			}
 		}
 	}
@@ -49,7 +62,7 @@ public class WordCount {
 		final ExecutionEnvironment context = ExecutionEnvironment.getExecutionEnvironment();
 		
 		DataSet<String> text = context.readTextFile(new Path(inputPath));
-		DataSet<Tuple2<String, Integer>> result = text.flatMap(new Tokenizer()).groupBy(0).aggregate(SUM, 1);
+		DataSet<Tuple2<String, Integer>> result = text.flatMap(new Tokenizer()).groupBy("word").aggregate(SUM, "count");
 		
 		result.writeAsText(new Path(outputPath));
 	}

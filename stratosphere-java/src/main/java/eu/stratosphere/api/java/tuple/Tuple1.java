@@ -15,21 +15,31 @@
 
 // --------------------------------------------------------------
 //  THIS IS A GENERATED SOURCE FILE. DO NOT EDIT!
+//  GENERATED FROM eu.stratosphere.api.java.tuple.TupleGenerator.
 // --------------------------------------------------------------
 
 
 package eu.stratosphere.api.java.tuple;
 
+import eu.stratosphere.util.StringUtils;
+
+@SuppressWarnings({ "restriction"})
 public final class Tuple1<T1> extends Tuple {
 
-	public T1 _1;
+	private T1 _1;
 
 	public Tuple1() {}
 
-	public Tuple1(T1 _1) {
-		this._1 = _1;
+	public Tuple1(T1 value1) {
+		this._1 = value1;
 	}
 
+	public T1 T1() {
+		return this._1;
+	}
+	public void T1(T1 value) {
+		this._1 = value;
+	}
 	@Override
 	@SuppressWarnings("unchecked")
 	public <T> T getField(int pos) {
@@ -46,6 +56,37 @@ public final class Tuple1<T1> extends Tuple {
 				this._1 = (T1) value;
 				break;
 			default: throw new IndexOutOfBoundsException(String.valueOf(pos));
+		}
+	}
+
+	// -------------------------------------------------------------------------------------------------
+	// standard utilities
+	// -------------------------------------------------------------------------------------------------
+
+	@Override
+	public String toString() {
+		return "(" + StringUtils.arrayAwareToString(this._1)
+			+ ")";
+	}
+
+	// -------------------------------------------------------------------------------------------------
+	// unsafe fast field access
+	// -------------------------------------------------------------------------------------------------
+
+	@SuppressWarnings({ "unchecked"})
+	public <T> T getFieldFast(int pos) {
+		return (T) UNSAFE.getObject(this, offsets[pos]);
+	}
+
+	private static final sun.misc.Unsafe UNSAFE = eu.stratosphere.core.memory.MemoryUtils.UNSAFE;
+
+	private static final long[] offsets = new long[1];
+
+	static {
+		try {
+			offsets[0] = UNSAFE.objectFieldOffset(Tuple1.class.getField("_1"));
+		} catch (Throwable t) {
+			throw new RuntimeException("Could not initialize fast field accesses for tuple data type.");
 		}
 	}
 }

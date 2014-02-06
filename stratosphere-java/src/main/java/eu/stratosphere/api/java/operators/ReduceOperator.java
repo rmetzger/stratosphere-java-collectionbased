@@ -16,14 +16,13 @@ package eu.stratosphere.api.java.operators;
 
 import eu.stratosphere.api.java.DataSet;
 import eu.stratosphere.api.java.functions.ReduceFunction;
-import eu.stratosphere.api.java.tuple.Tuple;
 import eu.stratosphere.configuration.Configuration;
 
 /**
  *
  * @param <IN> The type of the data set reduced by the operator.
  */
-public class ReduceOperator<IN extends Tuple> extends SingleInputOperator<IN, IN> {
+public class ReduceOperator<IN> extends SingleInputOperator<IN, IN> {
 	
 	private final ReduceFunction<IN> function;
 	
@@ -38,7 +37,7 @@ public class ReduceOperator<IN extends Tuple> extends SingleInputOperator<IN, IN
 	 * @param function
 	 */
 	public ReduceOperator(DataSet<IN> input, ReduceFunction<IN> function) {
-		super(input, input.getTypes());
+		super(input, input.getType());
 		
 		if (function == null)
 			throw new NullPointerException("Reduce function must not be null.");
@@ -49,7 +48,7 @@ public class ReduceOperator<IN extends Tuple> extends SingleInputOperator<IN, IN
 	
 	
 	public ReduceOperator(GroupedDataSet<IN> input, ReduceFunction<IN> function) {
-		super(input.getDataSet(), input.getDataSet().getTypes());
+		super(input.getDataSet(), input.getDataSet().getType());
 		
 		if (function == null)
 			throw new NullPointerException("Reduce function must not be null.");

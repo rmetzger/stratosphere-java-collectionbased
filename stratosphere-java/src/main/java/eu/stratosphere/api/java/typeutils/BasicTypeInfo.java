@@ -12,25 +12,20 @@
  * specific language governing permissions and limitations under the License.
  *
  **********************************************************************************************************************/
-package eu.stratosphere.api.java;
+package eu.stratosphere.api.java.typeutils;
 
 
-public class SystemExecutionContext {
+/**
+ *
+ */
+public abstract class BasicTypeInfo<T> implements TypeInformation<T> {
+
 	
-	private static ExecutionContext systemContext;
 	
 	
-	public static ExecutionContext getSystemExecutionContext() {
-		if (systemContext != null)
-			return systemContext;
-		else
-			throw new IllegalStateException("System context has not been initialized.");
-	}
 	
-	public static void initializeSystemExecutionContext(ExecutionContext ctx) {
-		if (systemContext != null)
-			throw new IllegalStateException("System context has already been initialized.");
-		
-		systemContext = ctx;
+	
+	public static BasicTypeInfo<String> getStringInfo() {
+		return null;
 	}
 }

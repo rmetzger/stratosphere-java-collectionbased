@@ -16,8 +16,7 @@ package eu.stratosphere.api.java.operators;
 
 import eu.stratosphere.api.java.DataSet;
 import eu.stratosphere.api.java.functions.FlatMapFunction;
-import eu.stratosphere.api.java.tuple.Tuple;
-import eu.stratosphere.api.java.util.TypeExtractor;
+import eu.stratosphere.api.java.typeutils.TypeExtractor;
 import eu.stratosphere.configuration.Configuration;
 
 /**
@@ -25,13 +24,13 @@ import eu.stratosphere.configuration.Configuration;
  * @param <IN> The type of the data set consumed by the operator.
  * @param <OUT> The type of the data set created by the operator.
  */
-public class FlatMapOperator<IN extends Tuple, OUT extends Tuple> extends SingleInputOperator<IN, OUT> {
+public class FlatMapOperator<IN, OUT> extends SingleInputOperator<IN, OUT> {
 	
 	protected final FlatMapFunction<IN, OUT> function;
 	
 	
 	public FlatMapOperator(DataSet<IN> input, FlatMapFunction<IN, OUT> function) {
-		super(input, TypeExtractor.getReturnTypes(function));
+		super(input, TypeExtractor.getFlatMapReturnTypes(function));
 		
 		if (function == null)
 			throw new NullPointerException("FlatMap function must not be null.");

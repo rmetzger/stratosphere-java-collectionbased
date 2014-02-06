@@ -15,20 +15,19 @@
 package eu.stratosphere.api.java.operators;
 
 import eu.stratosphere.api.java.DataSet;
-import eu.stratosphere.api.java.tuple.Tuple;
 import eu.stratosphere.configuration.Configuration;
 
 /**
  * @param <IN> The type of the data set filtered by the operator.
  */
-public class DistinctOperator<IN extends Tuple> extends SingleInputOperator<IN, IN> {
+public class DistinctOperator<IN> extends SingleInputOperator<IN, IN> {
 	
 	private final int[] fields;
 	
 	public DistinctOperator(DataSet<IN> input, int ... fields) {
-		super(input, input.getTypes());
+		super(input, input.getType());
 		
-		final int inLength = input.getTupleArity();
+		final int inLength = 0; //input.getTupleArity();
 		
 		// null parameter means all fields are considered
 		if (fields == null || fields.length == 0) {

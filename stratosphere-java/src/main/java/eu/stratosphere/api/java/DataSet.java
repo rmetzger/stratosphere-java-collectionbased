@@ -14,19 +14,18 @@
  **********************************************************************************************************************/
 package eu.stratosphere.api.java;
 
-import java.io.PrintWriter;
-import java.util.Arrays;
-
-import eu.stratosphere.api.common.InvalidProgramException;
 import eu.stratosphere.api.common.io.FileOutputFormat;
 import eu.stratosphere.api.common.io.OutputFormat;
 import eu.stratosphere.api.java.aggregation.Aggregations;
 import eu.stratosphere.api.java.functions.FilterFunction;
 import eu.stratosphere.api.java.functions.FlatMapFunction;
 import eu.stratosphere.api.java.functions.GroupReduceFunction;
+import eu.stratosphere.api.java.functions.KeyExtractor;
 import eu.stratosphere.api.java.functions.MapFunction;
 import eu.stratosphere.api.java.functions.ReduceFunction;
+import eu.stratosphere.api.java.io.PrintingOutputFormat;
 import eu.stratosphere.api.java.operators.AggregateOperator;
+import eu.stratosphere.api.java.operators.DataSink;
 import eu.stratosphere.api.java.operators.DistinctOperator;
 import eu.stratosphere.api.java.operators.FilterOperator;
 import eu.stratosphere.api.java.operators.FlatMapOperator;
@@ -36,56 +35,46 @@ import eu.stratosphere.api.java.operators.MapOperator;
 import eu.stratosphere.api.java.operators.ReduceGroupOperator;
 import eu.stratosphere.api.java.operators.ReduceOperator;
 import eu.stratosphere.api.java.tuple.Tuple;
+import eu.stratosphere.api.java.typeutils.TypeInformation;
 import eu.stratosphere.core.fs.Path;
 
 /**
  *
  * @param <T> The data type of the data set.
  */
-public abstract class DataSet<T extends Tuple> {
+public abstract class DataSet<T> {
 	
-	private final ExecutionContext context;
+	private final ExecutionEnvironment context;
 	
-	private final Class<?>[] types;
+	private final TypeInformation<T> type;
 	
 	
-	protected DataSet(ExecutionContext context, Class<?>[] types) {
-		if (context == null || types == null)
+	protected DataSet(ExecutionEnvironment context, TypeInformation<T> type) {
+		if (context == null || type == null)
 			throw new NullPointerException();
 		
 		this.context = context;
-		this.types = types;
+		this.type = type;
 	}
 
 	
-	public ExecutionContext getExecutionContext() {
+	public ExecutionEnvironment getExecutionEnvironment() {
 		return this.context;
 	}
 	
-	public int getTupleArity() {
-		return this.types.length;
-	}
-	
-	public Class<?>[] getTypes() {
-		return this.types;
-	}
-	
-	public Class<?> getDataType(int field) {
-		if (field >= 0 && field < this.types.length)
-			return this.types[field];
-		else 
-			throw new IndexOutOfBoundsException("Field " + field + " is out of the tuple range [0, " + (this.types.length-1) + "].");
+	public TypeInformation<T> getType() {
+		return this.type;
 	}
 	
 	// --------------------------------------------------------------------------------------------
 	//  Operations / Transformations
 	// --------------------------------------------------------------------------------------------
 	
-	public <R extends Tuple> MapOperator<T, R> map(MapFunction<T, R> mapper) {
+	public <R> MapOperator<T, R> map(MapFunction<T, R> mapper) {
 		return new MapOperator<T, R>(this, mapper);
 	}
 	
-	public <R extends Tuple> FlatMapOperator<T, R> flatMap(FlatMapFunction<T, R> flatMapper) {
+	public <R> FlatMapOperator<T, R> flatMap(FlatMapFunction<T, R> flatMapper) {
 		return new FlatMapOperator<T, R>(this, flatMapper);
 	}
 	
@@ -105,6 +94,14 @@ public abstract class DataSet<T extends Tuple> {
 		return new ReduceGroupOperator<T, R>(this, reducer);
 	}
 	
+	public <K> DistinctOperator<T> distinct(KeyExtractor<T, K> keyExtractor) {
+		return null;
+	}
+	
+	public DistinctOperator<T> distinct(String... fieldExpression) {
+		return null;
+	}
+	
 	public DistinctOperator<T> distinct(int... fields) {
 		return new DistinctOperator<T>(this, fields);
 	}
@@ -112,70 +109,91 @@ public abstract class DataSet<T extends Tuple> {
 	// --------------------------------------------------------------------------------------------
 	//  Grouping and Joining
 	// --------------------------------------------------------------------------------------------
+
+	public <K> GroupedDataSet<T> groupBy(KeyExtractor<T, K> keyExtractor) {
+		return null;
+	}
+	
+	public GroupedDataSet<T> groupBy(String... fieldExpression) {
+		return null;
+	}
 	
 	public GroupedDataSet<T> groupBy(int... fields) {
 		return new GroupedDataSet<T>(this, fields);
 	}
 	
-	public <R extends Tuple> JoinOperatorSets<T, R> join(DataSet<R> other) {
-		return new JoinOperatorSets<T, R>(this, other, false, false);
+	
+	public <R> JoinOperatorSets<T, R> join(DataSet<R> other) {
+		return new JoinOperatorSets<T, R>(this, other);
 	}
 	
-	public <R extends Tuple> JoinOperatorSets<T, R> leftOuterJoin(DataSet<R> other) {
-		return new JoinOperatorSets<T, R>(this, other, true, false);
+	public <R> JoinOperatorSets<T, R> joinWithTiny(DataSet<R> other) {
+		return new JoinOperatorSets<T, R>(this, other);
 	}
 	
-	public <R extends Tuple> JoinOperatorSets<T, R> rightOuterJoin(DataSet<R> other) {
-		return new JoinOperatorSets<T, R>(this, other, false, true);
+	public <R> JoinOperatorSets<T, R> joinWithHuge(DataSet<R> other) {
+		return new JoinOperatorSets<T, R>(this, other);
 	}
-	
-	public <R extends Tuple> JoinOperatorSets<T, R> fullOuterJoin(DataSet<R> other) {
-		return new JoinOperatorSets<T, R>(this, other, true, true);
-	}
-	
 	
 	// --------------------------------------------------------------------------------------------
 	//  Result writing
 	// --------------------------------------------------------------------------------------------
 	
+	public void writeAsText(String path) {
+		writeAsText(new Path(path));
+	}
+	
 	public void writeAsText(Path filePath) {
-		// check that it is possible to write this as a text file, i.e., that the data type is Tuple1<String>
-		if (getTupleArity() != 1 || getDataType(0) != String.class) {
-			throw new InvalidProgramException("Can only write Tuple1<String> as text files.");
-		}
+		
+	}
+	
+	
+	public void writeAsCsv(String filePath) {
+		writeAsCsv(new Path(filePath));
 	}
 	
 	public void writeAsCsv(Path filePath) {
 		writeAsCsv(filePath, "\n", ",");
 	}
 	
-	public void writeAsCsv(String filePath) {
-		writeAsCsv(new Path(filePath));
+	public void writeAsCsv(String filePath, String rowDelimiter, String fieldDelimiter) {
+		writeAsCsv(new Path(filePath), rowDelimiter, fieldDelimiter);
 	}
 	
 	public void writeAsCsv(Path filePath, String rowDelimiter, String fieldDelimiter) {
 		
 	}
 	
-	public void writeAsCsv(String filePath, String rowDelimiter, String fieldDelimiter) {
-		writeAsCsv(new Path(filePath), rowDelimiter, fieldDelimiter);
-	}
-	
 	
 	public void print() {
-
+		output(new PrintingOutputFormat<T>(false));
 	}
 	
-	public void printTo(PrintWriter writer) {
-		
+	public void printToErr() {
+		output(new PrintingOutputFormat<T>(true));
 	}
 	
-	public void write(FileOutputFormat<T> outputFormat) {
+	
+	public void write(FileOutputFormat<T> outputFormat, String filePath) {
+		if (filePath == null)
+			throw new IllegalArgumentException("File path must not be null.");
 		
+		write(outputFormat, new Path(filePath));
 	}
 	
-	public void sendResultTo(OutputFormat<T> outputFormat) {
+	public void write(FileOutputFormat<T> outputFormat, Path filePath) {
+		if (filePath == null)
+			throw new IllegalArgumentException("File path must not be null.");
+		if (outputFormat == null)
+			throw new IllegalArgumentException("The output format must not be null.");
 		
+		outputFormat.setFilePath(filePath);
+		output(outputFormat);
+	}
+	
+	public void output(OutputFormat<T> outputFormat) {
+		DataSink<T> sink = new DataSink<T>(this.context, outputFormat, this.type);
+		this.context.registerDataSink(sink);
 	}
 	
 	
@@ -186,5 +204,17 @@ public abstract class DataSet<T extends Tuple> {
 	protected static void checkSameExecutionContext(DataSet<?> set1, DataSet<?> set2) {
 		if (set1.context != set2.context)
 			throw new IllegalArgumentException("The two inputs have different execution contexts.");
+	}
+	
+	
+	
+	
+	
+	public static class TupleDataSet<T extends Tuple> extends DataSet<T> {
+
+		protected TupleDataSet(ExecutionEnvironment context, TypeInformation<T> type) {
+			super(context, type);
+		}
+		
 	}
 }

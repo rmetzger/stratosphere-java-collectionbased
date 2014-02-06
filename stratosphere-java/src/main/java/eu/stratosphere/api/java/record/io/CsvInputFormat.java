@@ -190,15 +190,15 @@ public class CsvInputFormat extends GenericCsvInputFormat<Record> {
 	}
 	
 	@Override
-	public boolean readRecord(Record target, byte[] bytes, int offset, int numBytes) throws ParseException {
+	public Record readRecord(Record reuse, byte[] bytes, int offset, int numBytes) throws ParseException {
 		if (parseRecord(parsedValues, bytes, offset, numBytes)) {
 			// valid parse, map values into pact record
 			for (int i = 0; i < parsedValues.length; i++) {
-				target.setField(targetPositions[i], parsedValues[i]);
+				reuse.setField(targetPositions[i], parsedValues[i]);
 			}
-			return true;
+			return reuse;
 		} else {
-			return false;
+			return null;
 		}
 	}
 	

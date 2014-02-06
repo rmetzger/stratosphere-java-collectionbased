@@ -16,16 +16,20 @@ package eu.stratosphere.api.java;
 
 import java.util.UUID;
 
+import eu.stratosphere.api.common.io.InputFormat;
 import eu.stratosphere.api.java.io.CsvReader;
 import eu.stratosphere.api.java.io.TextInputFormat;
 import eu.stratosphere.api.java.io.TextValueInputFormat;
+import eu.stratosphere.api.java.operators.DataSink;
 import eu.stratosphere.api.java.operators.DataSource;
-import eu.stratosphere.api.java.tuple.Tuple1;
+import eu.stratosphere.api.java.typeutils.BasicTypeInfo;
+import eu.stratosphere.api.java.typeutils.TypeExtractor;
+import eu.stratosphere.api.java.typeutils.ValueTypeInfo;
 import eu.stratosphere.core.fs.Path;
 import eu.stratosphere.types.StringValue;
 
 
-public abstract class ExecutionContext {
+public abstract class ExecutionEnvironment {
 	
 	private final UUID executionId;
 	
@@ -36,7 +40,7 @@ public abstract class ExecutionContext {
 	//  Constructor and Properties
 	// --------------------------------------------------------------------------------------------
 	
-	protected ExecutionContext() {
+	protected ExecutionEnvironment() {
 		this.executionId = UUID.randomUUID();
 	}
 	
@@ -65,44 +69,44 @@ public abstract class ExecutionContext {
 
 	// ---------------------------------- Text Input Format ---------------------------------------
 	
-	public DataSet<Tuple1<String>> readTextFile(String filePath) {
+	public DataSet<String> readTextFile(String filePath) {
 		return readTextFile(new Path(filePath));
 	}
 	
-	public DataSet<Tuple1<String>> readTextFile(Path filePath) {
-		return new DataSource<Tuple1<String>>(this, new TextInputFormat(filePath), new Class<?>[] { String.class } );
+	public DataSet<String> readTextFile(Path filePath) {
+		return new DataSource<String>(this, new TextInputFormat(filePath), BasicTypeInfo.getStringInfo() );
 	}
 	
-	public DataSet<Tuple1<String>> readTextFile(String filePath, String charsetName, boolean skipInvalidLines) {
+	public DataSet<String> readTextFile(String filePath, String charsetName, boolean skipInvalidLines) {
 		return readTextFile(new Path(filePath), charsetName, skipInvalidLines);
 	}
 	
-	public DataSet<Tuple1<String>> readTextFile(Path filePath, String charsetName, boolean skipInvalidLines) {
+	public DataSet<String> readTextFile(Path filePath, String charsetName, boolean skipInvalidLines) {
 		TextInputFormat format = new TextInputFormat(filePath);
 		format.setCharsetName(charsetName);
 		format.setSkipInvalidLines(skipInvalidLines);
-		return new DataSource<Tuple1<String>>(this, format, new Class<?>[] { String.class } );
+		return new DataSource<String>(this, format, BasicTypeInfo.getStringInfo() );
 	}
 	
 	// -------------------------- Text Input Format With String Value------------------------------
 	
-	public DataSet<Tuple1<StringValue>> readTextFileWithValue(String filePath) {
+	public DataSet<StringValue> readTextFileWithValue(String filePath) {
 		return readTextFileWithValue(new Path(filePath));
 	}
 	
-	public DataSet<Tuple1<StringValue>> readTextFileWithValue(Path filePath) {
-		return new DataSource<Tuple1<StringValue>>(this, new TextValueInputFormat(filePath), new Class<?>[] { StringValue.class } );
+	public DataSet<StringValue> readTextFileWithValue(Path filePath) {
+		return new DataSource<StringValue>(this, new TextValueInputFormat(filePath), new ValueTypeInfo<StringValue>(StringValue.class) );
 	}
 	
-	public DataSet<Tuple1<StringValue>> readTextFileWithValue(String filePath, String charsetName, boolean skipInvalidLines) {
+	public DataSet<StringValue> readTextFileWithValue(String filePath, String charsetName, boolean skipInvalidLines) {
 		return readTextFileWithValue(new Path(filePath), charsetName, skipInvalidLines);
 	}
 	
-	public DataSet<Tuple1<StringValue>> readTextFileWithValue(Path filePath, String charsetName, boolean skipInvalidLines) {
+	public DataSet<StringValue> readTextFileWithValue(Path filePath, String charsetName, boolean skipInvalidLines) {
 		TextValueInputFormat format = new TextValueInputFormat(filePath);
 		format.setCharsetName(charsetName);
 		format.setSkipInvalidLines(skipInvalidLines);
-		return new DataSource<Tuple1<StringValue>>(this, format, new Class<?>[] { StringValue.class } );
+		return new DataSource<StringValue>(this, format, new ValueTypeInfo<StringValue>(StringValue.class) );
 	}
 	
 	// ----------------------------------- CSV Input Format ---------------------------------------
@@ -115,6 +119,15 @@ public abstract class ExecutionContext {
 		return new CsvReader(filePath, this);
 	}
 	
+	// ----------------------------------- Generic Input Format ---------------------------------------
+	
+	public <X> DataSet<X> createInput(InputFormat<X, ?> inputFormat) {
+		if (inputFormat == null)
+			throw new IllegalArgumentException("InputFormat must not be null.");
+		
+		return new DataSource<X>(this, inputFormat, TypeExtractor.extractInputFormatTypes(inputFormat));
+	}
+	
 	// --------------------------------------------------------------------------------------------
 	//  Results
 	// --------------------------------------------------------------------------------------------
@@ -123,36 +136,35 @@ public abstract class ExecutionContext {
 		// go do the magic
 	}
 	
-	void registerDataSink() {
+	void registerDataSink(DataSink<?> sink) {
 		
 	}
-	
 	
 	
 	// --------------------------------------------------------------------------------------------
 	//  Instantiation of Execution Contexts
 	// --------------------------------------------------------------------------------------------
 	
-	public static ExecutionContext getExecutionContext() {
-		return SystemExecutionContext.getSystemExecutionContext();
+	public static ExecutionEnvironment getExecutionEnvironment() {
+		return ContextEnvironment.getContextEnvironment();
 	}
 	
-	public static ExecutionContext createLocalExecutionContext() {
-		return new LocalExecutionContext();
+	public static ExecutionEnvironment createLocalEnvironment() {
+		return new LocalEnvironment();
 	}
 	
-	public static ExecutionContext createLocalExecutionContext(int degreeOfParallelism) {
-		LocalExecutionContext lee = new LocalExecutionContext();
+	public static ExecutionEnvironment createLocalEnvironment(int degreeOfParallelism) {
+		LocalEnvironment lee = new LocalEnvironment();
 		lee.setDegreeOfParallelism(degreeOfParallelism);
 		return lee;
 	}
 	
-	public static ExecutionContext createRemoteExecutionContext(String host, int port) {
-		return new RemoteExecutionContext(host, port);
+	public static ExecutionEnvironment createRemoteEnvironment(String host, int port) {
+		return new RemoteEnvironment(host, port);
 	}
 	
-	public static ExecutionContext createRemoteExecutionContext(String host, int port, int degreeOfParallelism) {
-		RemoteExecutionContext rec = new RemoteExecutionContext(host, port);
+	public static ExecutionEnvironment createRemoteEnvironment(String host, int port, int degreeOfParallelism) {
+		RemoteEnvironment rec = new RemoteEnvironment(host, port);
 		rec.setDegreeOfParallelism(degreeOfParallelism);
 		return rec;
 	}

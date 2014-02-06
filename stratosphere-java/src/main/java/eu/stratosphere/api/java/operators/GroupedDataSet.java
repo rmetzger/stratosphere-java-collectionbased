@@ -16,9 +16,8 @@ package eu.stratosphere.api.java.operators;
 
 import eu.stratosphere.api.java.DataSet;
 import eu.stratosphere.api.java.aggregation.Aggregations;
-import eu.stratosphere.api.java.tuple.Tuple;
 
-public class GroupedDataSet<T extends Tuple> {
+public class GroupedDataSet<T> {
 	
 	private final DataSet<T> dataSet;
 
@@ -63,7 +62,7 @@ public class GroupedDataSet<T extends Tuple> {
 	// --------------------------------------------------------------------------------------------
 	
 	private static int[] makeFields(int[] fields, DataSet<?> dataSet) {
-		int inLength = dataSet.getTupleArity();
+		int inLength = dataSet.getType().getArity();
 		
 		// null parameter means all fields are considered
 		if (fields == null || fields.length == 0) {

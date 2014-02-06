@@ -16,7 +16,7 @@ package eu.stratosphere.api.java.operators;
 
 import eu.stratosphere.api.java.DataSet;
 import eu.stratosphere.api.java.functions.MapFunction;
-import eu.stratosphere.api.java.tuple.Tuple;
+import eu.stratosphere.api.java.typeutils.TypeExtractor;
 import eu.stratosphere.configuration.Configuration;
 
 /**
@@ -24,13 +24,13 @@ import eu.stratosphere.configuration.Configuration;
  * @param <IN> The type of the data set consumed by the operator.
  * @param <OUT> The type of the data set created by the operator.
  */
-public class MapOperator<IN extends Tuple, OUT extends Tuple> extends SingleInputOperator<IN, OUT> {
+public class MapOperator<IN, OUT> extends SingleInputOperator<IN, OUT> {
 	
 	protected final MapFunction<IN, OUT> function;
 	
 	
 	public MapOperator(DataSet<IN> input, MapFunction<IN, OUT> function) {
-		super(input);
+		super(input, TypeExtractor.getMapReturnTypes(function));
 		
 		if (function == null)
 			throw new NullPointerException("Map function must not be null.");

@@ -17,13 +17,56 @@ package eu.stratosphere.api.java.operators;
 import eu.stratosphere.api.java.DataSet;
 import eu.stratosphere.api.java.functions.JoinFunction;
 import eu.stratosphere.api.java.tuple.Tuple;
-import eu.stratosphere.api.java.util.TypeExtractor;
+import eu.stratosphere.api.java.typeutils.TypeExtractor;
 import eu.stratosphere.configuration.Configuration;
 
 /**
  *
  */
-public class JoinOperator<I1 extends Tuple, I2 extends Tuple, OUT extends Tuple> extends TwoInputOperator<I1, I2, OUT> {
+public class JoinOperator<I1, I2, OUT> extends TwoInputOperator<I1, I2, OUT> {
+	
+	public static enum JoinHint {
+		/**
+		 * leave the choice how to do the join to the optimizer. If in doubt, the
+		 * optimizer will choose a repartitioning join.
+		 */
+		OPTIMIZER_CHOOSES,
+		
+		/**
+		 * Hint that the first join input is much smaller than the second. This results in
+		 * broadcasting and hashing the first input, unless the optimizer infers that
+		 * prior existing partitioning is available that is even cheaper to exploit.
+		 */
+		BROADCAST_HASH_FIRST,
+		
+		/**
+		 * Hint that the second join input is much smaller than the second. This results in
+		 * broadcasting and hashing the second input, unless the optimizer infers that
+		 * prior existing partitioning is available that is even cheaper to exploit.
+		 */
+		BROADCAST_HASH_SECOND,
+		
+		/**
+		 * Hint that the first join input is a bit smaller than the second. This results in
+		 * repartitioning both inputs and hashing the first input, unless the optimizer infers that
+		 * prior existing partitioning and orders are available that are even cheaper to exploit.
+		 */
+		REPARTITION_HASH_FIRST,
+		
+		/**
+		 * Hint that the second join input is a bit smaller than the second. This results in
+		 * repartitioning both inputs and hashing the second input, unless the optimizer infers that
+		 * prior existing partitioning and orders are available that are even cheaper to exploit.
+		 */
+		REPARTITION_HASH_SECOND,
+		
+		/**
+		 * Hint that the join should repartitioning both inputs and use sorting and merging
+		 * as the join strategy.
+		 */
+		REPARTITION_SORT_MERGE,
+	};
+	
 	
 	private final JoinFunction<I1, I2, OUT> function;
 	
@@ -37,7 +80,7 @@ public class JoinOperator<I1 extends Tuple, I2 extends Tuple, OUT extends Tuple>
 	public JoinOperator(DataSet<I1> input1, DataSet<I2> input2, 
 			int[] keyFields1, int[] keyFields2, JoinFunction<I1, I2, OUT> function)
 	{
-		super(input1, input2, TypeExtractor.getReturnTypes(function));
+		super(input1, input2, TypeExtractor.getJoinReturnTypes(function));
 		
 		if (keyFields1 == null || keyFields2 == null || keyFields1.length == 0 || keyFields2.length == 0)
 			throw new IllegalArgumentException("Equi-Join requires key fields.");
@@ -50,12 +93,12 @@ public class JoinOperator<I1 extends Tuple, I2 extends Tuple, OUT extends Tuple>
 		
 		// range checks
 		for (int field : keyFields1) {
-			if (field < 0 || field >= input1.getTupleArity())
+			if (field < 0 || field >= input1.getType().getArity())
 				throw new IllegalArgumentException("Tuple field is out of range.");
 		}
 		
 		for (int field : keyFields2) {
-			if (field < 0 || field >= input2.getTupleArity())
+			if (field < 0 || field >= input2.getType().getArity())
 				throw new IllegalArgumentException("Tuple field is out of range.");
 		}
 		
@@ -87,22 +130,19 @@ public class JoinOperator<I1 extends Tuple, I2 extends Tuple, OUT extends Tuple>
 	}
 	
 	
-	public static final class JoinOperatorSets<I1 extends Tuple, I2 extends Tuple> {
+	public static final class JoinOperatorSets<I1, I2> {
 		
 		private final DataSet<I1> input1;
 		private final DataSet<I2> input2;
 		
-		private final boolean preserve1;
-		private final boolean preserve2;
+		private final JoinHint joinHint;
 		
-		public JoinOperatorSets(DataSet<I1> input1, DataSet<I2> input2, boolean preserve1, boolean preserve2) {
+		public JoinOperatorSets(DataSet<I1> input1, DataSet<I2> input2) {
 			if (input1 == null || input2 == null)
 				throw new NullPointerException();
 			
 			this.input1 = input1;
 			this.input2 = input2;
-			this.preserve1 = preserve1;
-			this.preserve2 = preserve2;
 		}
 		
 		public JoinOperatorSetsPredicate1 where(int... fields) {
@@ -117,7 +157,7 @@ public class JoinOperator<I1 extends Tuple, I2 extends Tuple, OUT extends Tuple>
 				if (fields1 == null || fields1.length == 0)
 					throw new IllegalArgumentException("Equi-Join requires key fields.");
 				
-				int maxField = input1.getTupleArity();
+				int maxField = input1.getType().getArity();
 				for (int field : fields1) {
 					if (field < 0 || field > maxField)
 						throw new IllegalArgumentException("Tuple field is out of range.");
@@ -140,7 +180,7 @@ public class JoinOperator<I1 extends Tuple, I2 extends Tuple, OUT extends Tuple>
 					if (fields2 == null || fields2.length == 0)
 						throw new IllegalArgumentException("Equi-Join requires key fields.");
 					
-					int maxField = input2.getTupleArity();
+					int maxField = input2.getType().getArity();
 					for (int field : fields2) {
 						if (field < 0 || field > maxField)
 							throw new IllegalArgumentException("Tuple field is out of range.");

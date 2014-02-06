@@ -16,20 +16,19 @@ package eu.stratosphere.api.java.operators;
 
 import eu.stratosphere.api.common.io.InputFormat;
 import eu.stratosphere.api.java.DataSet;
-import eu.stratosphere.api.java.ExecutionContext;
-import eu.stratosphere.api.java.tuple.Tuple;
+import eu.stratosphere.api.java.ExecutionEnvironment;
+import eu.stratosphere.api.java.typeutils.TypeInformation;
 
 /**
  *
  */
-public class DataSource<OUT extends Tuple> extends DataSet<OUT> {
-
+public class DataSource<OUT> extends DataSet<OUT> {
 	
 	private final InputFormat<OUT, ?> inputFormat;
 	
 	
-	public DataSource(ExecutionContext context, InputFormat<OUT, ?> inputFormat, Class<?>[] types) {
-		super(context, types);
+	public DataSource(ExecutionEnvironment context, InputFormat<OUT, ?> inputFormat, TypeInformation<OUT> type) {
+		super(context, type);
 		
 		this.inputFormat = inputFormat;
 	}

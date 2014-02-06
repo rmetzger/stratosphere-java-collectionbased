@@ -16,7 +16,7 @@ package eu.stratosphere.example.java.relational;
 
 
 import eu.stratosphere.api.java.DataSet;
-import eu.stratosphere.api.java.ExecutionContext;
+import eu.stratosphere.api.java.ExecutionEnvironment;
 import eu.stratosphere.api.java.functions.FilterFunction;
 import eu.stratosphere.api.java.functions.JoinFunction;
 import eu.stratosphere.api.java.tuple.Tuple2;
@@ -27,6 +27,23 @@ import static eu.stratosphere.api.java.aggregation.Aggregations.*;
 
 
 public class RelQuery {
+	
+	public static class SomePOJO {
+		
+		public Integer f1;
+		public Integer f2;
+		public Integer f3;
+	}
+	
+	public class MyFilter extends FilterFunction<SomePOJO> {
+
+		@Override
+		public boolean filter(SomePOJO value) throws Exception {
+			return value.f1 > 0;
+		}
+		
+	}
+	
 	
 	public static void main(String[] args) {
 		if (args.length < 3) {
@@ -42,7 +59,7 @@ public class RelQuery {
 		final int yearFilter = 1990;
 		
 		// this will return the LocalExecutionContext, if invoked locally, and the ClusterExecutionContext, if invoked on the cluster
-		final ExecutionContext context = ExecutionContext.getExecutionContext();
+		final ExecutionEnvironment context = ExecutionEnvironment.getExecutionEnvironment();
 		
 		// orderkey, orderstatus, orderdate, orderprio, shipprio
 		DataSet<Tuple5<Long, String, String, String, String>> orders = context.readCsvFile(ordersPath)
@@ -59,9 +76,9 @@ public class RelQuery {
 			new FilterFunction<Tuple5<Long, String, String, String, String>>() {
 				@Override
 				public boolean filter(Tuple5<Long, String, String, String, String> value) throws Exception {
-					String orderStatus = value._2;
-					String orderPrio = value._4;
-					String orderDate = value._3;
+					String orderStatus = value.T2();
+					String orderPrio = value.T4();
+					String orderDate = value.T3();
 					return orderStatus.equals("F") && orderPrio.startsWith(prioFilter) && 
 							Integer.parseInt(orderDate.substring(0, 4)) > yearFilter;
 				}
@@ -85,7 +102,7 @@ public class RelQuery {
 		public Tuple3<Long, String, Double> join(Tuple5<Long, String, String, String, String> first,
 				Tuple2<Long, Double> second) throws Exception
 		{
-			return new Tuple3<Long, String, Double>(first._1, first._5, second._2);
+			return new Tuple3<Long, String, Double>(first.T1(), first.T5(), second.T2());
 		}
 		
 	}

@@ -32,12 +32,9 @@ public class CsvInputFormat<OUT extends Tuple> extends GenericCsvInputFormat<OUT
 		setFieldDelim(fieldDelimiter);
 	}
 	
-	
-	
 
 	@Override
-	public boolean readRecord(OUT target, byte[] bytes, int offset, int numBytes) {
-		return false;
+	public OUT readRecord(OUT reuse, byte[] bytes, int offset, int numBytes) {
+		return null;
 	}
-
 }

@@ -22,13 +22,12 @@ import java.nio.charset.CharsetDecoder;
 import java.util.Arrays;
 
 import eu.stratosphere.api.common.io.DelimitedInputFormat;
-import eu.stratosphere.api.java.tuple.Tuple1;
 import eu.stratosphere.configuration.Configuration;
 import eu.stratosphere.core.fs.Path;
 import eu.stratosphere.types.StringValue;
 
 
-public class TextValueInputFormat extends DelimitedInputFormat<Tuple1<StringValue>> {
+public class TextValueInputFormat extends DelimitedInputFormat<StringValue> {
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -39,8 +38,6 @@ public class TextValueInputFormat extends DelimitedInputFormat<Tuple1<StringValu
 	private transient CharsetDecoder decoder;
 	
 	private transient ByteBuffer byteWrapper;
-	
-	private transient StringValue value;
 	
 	private transient boolean ascii;
 	
@@ -80,18 +77,15 @@ public class TextValueInputFormat extends DelimitedInputFormat<Tuple1<StringValu
 		
 		this.decoder = Charset.forName(charsetName).newDecoder();
 		this.byteWrapper = ByteBuffer.allocate(1);
-		
-		this.value = new StringValue();
 	}
 
 	// --------------------------------------------------------------------------------------------
 
 	@Override
-	public boolean readRecord(Tuple1<StringValue> target, byte[] bytes, int offset, int numBytes) {
-		StringValue str = this.value;
-		
+	public StringValue readRecord(StringValue reuse, byte[] bytes, int offset, int numBytes) {
 		if (this.ascii) {
-			str.setValueAscii(bytes, offset, numBytes);
+			reuse.setValueAscii(bytes, offset, numBytes);
+			return reuse;
 		}
 		else {
 			ByteBuffer byteWrapper = this.byteWrapper;
@@ -104,11 +98,12 @@ public class TextValueInputFormat extends DelimitedInputFormat<Tuple1<StringValu
 				
 			try {
 				CharBuffer result = this.decoder.decode(byteWrapper);
-				str.setValue(result);
+				reuse.setValue(result);
+				return reuse;
 			}
 			catch (CharacterCodingException e) {
 				if (skipInvalidLines) {
-					return false;
+					return null;
 				} else {
 					byte[] copy = new byte[numBytes];
 					System.arraycopy(bytes, offset, copy, 0, numBytes);
@@ -116,9 +111,6 @@ public class TextValueInputFormat extends DelimitedInputFormat<Tuple1<StringValu
 				}
 			}
 		}
-		
-		target._1 = str;
-		return true;
 	}
 	
 	// --------------------------------------------------------------------------------------------

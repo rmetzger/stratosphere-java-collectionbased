@@ -15,10 +15,9 @@
 package eu.stratosphere.api.java.functions;
 
 import eu.stratosphere.api.common.functions.AbstractFunction;
-import eu.stratosphere.api.java.tuple.Tuple;
 
 
-public abstract class MapFunction<IN extends Tuple, OUT extends Tuple> extends AbstractFunction {
+public abstract class MapFunction<IN, OUT> extends AbstractFunction {
 
 	public abstract OUT map(IN value) throws Exception;
 }

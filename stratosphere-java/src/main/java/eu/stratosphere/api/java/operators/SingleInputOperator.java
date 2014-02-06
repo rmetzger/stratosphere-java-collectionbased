@@ -15,20 +15,20 @@
 package eu.stratosphere.api.java.operators;
 
 import eu.stratosphere.api.java.DataSet;
-import eu.stratosphere.api.java.tuple.Tuple;
+import eu.stratosphere.api.java.typeutils.TypeInformation;
 
 /**
  *
  * @param <IN> The data type of the input data set.
  * @param <OUT> The data type of the returned data set.
  */
-public abstract class SingleInputOperator<IN extends Tuple, OUT extends Tuple> extends Operator<OUT> {
+public abstract class SingleInputOperator<IN, OUT> extends Operator<OUT> {
 	
 	private final DataSet<IN> input;
 	
 	
-	protected SingleInputOperator(DataSet<IN> input, Class<?>[] resultTypes) {
-		super(input.getExecutionContext(), resultTypes);
+	protected SingleInputOperator(DataSet<IN> input, TypeInformation<OUT> resultType) {
+		super(input.getExecutionEnvironment(), resultType);
 		this.input = input;
 	}
 	

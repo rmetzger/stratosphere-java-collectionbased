@@ -19,9 +19,9 @@ package eu.stratosphere.api.java.aggregation;
  */
 public enum Aggregations {
 	
-	COUNT,
 	SUM,
 	MIN,
 	MAX,
-	AVG;
+	AVG,
+	STD_DEV;
 }

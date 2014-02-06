@@ -16,14 +16,14 @@ package eu.stratosphere.api.java.operators;
 
 import eu.stratosphere.api.java.DataSet;
 import eu.stratosphere.api.java.functions.GroupReduceFunction;
-import eu.stratosphere.api.java.tuple.Tuple;
+import eu.stratosphere.api.java.typeutils.TypeExtractor;
 import eu.stratosphere.configuration.Configuration;
 
 /**
  *
  * @param <T> The type of the data set created by the operator.
  */
-public class ReduceGroupOperator<IN extends Tuple, OUT extends Tuple> extends SingleInputOperator<IN, OUT> {
+public class ReduceGroupOperator<IN, OUT> extends SingleInputOperator<IN, OUT> {
 	
 	private final GroupReduceFunction<IN, OUT> function;
 	
@@ -33,7 +33,7 @@ public class ReduceGroupOperator<IN extends Tuple, OUT extends Tuple> extends Si
 	
 	
 	public ReduceGroupOperator(DataSet<IN> input, GroupReduceFunction<IN, OUT> function) {
-		super(input);
+		super(input, TypeExtractor.getGroupReduceReturnTypes(function));
 		
 		if (function == null)
 			throw new NullPointerException("GroupReduce function must not be null.");
@@ -43,7 +43,7 @@ public class ReduceGroupOperator<IN extends Tuple, OUT extends Tuple> extends Si
 	}
 	
 	public ReduceGroupOperator(GroupedDataSet<IN> input, GroupReduceFunction<IN, OUT> function) {
-		super(input != null ? input.getDataSet() : null);
+		super(input != null ? input.getDataSet() : null, TypeExtractor.getGroupReduceReturnTypes(function));
 		
 		if (function == null)
 			throw new NullPointerException("GroupReduce function must not be null.");

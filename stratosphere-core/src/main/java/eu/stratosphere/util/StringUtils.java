@@ -21,6 +21,7 @@ package eu.stratosphere.util;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.Arrays;
 
 /**
  * Utility class to convert objects into strings in vice-versa.
@@ -141,5 +142,50 @@ public final class StringUtils {
 		}
 
 		return sb.toString();
+	}
+	
+	
+	public static final String arrayAwareToString(Object o) {
+		if (o == null) {
+			return "null";
+		}
+		if (o.getClass().isArray()) {
+			return arrayToString(o);
+		}
+		
+		return o.toString();
+	}
+	
+	
+	public static final String arrayToString(Object array) {
+		if (array instanceof int[]) {
+			return Arrays.toString((int[]) array);
+		}
+		if (array instanceof long[]) {
+			return Arrays.toString((long[]) array);
+		}
+		if (array instanceof Object[]) {
+			return Arrays.toString((Object[]) array);
+		}
+		if (array instanceof byte[]) {
+			return Arrays.toString((byte[]) array);
+		}
+		if (array instanceof double[]) {
+			return Arrays.toString((double[]) array);
+		}
+		if (array instanceof float[]) {
+			return Arrays.toString((float[]) array);
+		}
+		if (array instanceof boolean[]) {
+			return Arrays.toString((boolean[]) array);
+		}
+		if (array instanceof char[]) {
+			return Arrays.toString((char[]) array);
+		}
+		if (array instanceof short[]) {
+			return Arrays.toString((short[]) array);
+		}
+		
+		return "<unknown array type>";
 	}
 }

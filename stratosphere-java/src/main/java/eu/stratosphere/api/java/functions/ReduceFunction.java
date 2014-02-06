@@ -15,10 +15,9 @@
 package eu.stratosphere.api.java.functions;
 
 import eu.stratosphere.api.common.functions.AbstractFunction;
-import eu.stratosphere.api.java.tuple.Tuple;
 
 
-public abstract class ReduceFunction<T extends Tuple> extends AbstractFunction {
+public abstract class ReduceFunction<T> extends AbstractFunction {
 	
 	public abstract T reduce(T value1, T value2) throws Exception;
 }

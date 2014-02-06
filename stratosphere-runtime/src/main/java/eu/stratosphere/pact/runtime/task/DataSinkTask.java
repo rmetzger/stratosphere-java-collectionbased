@@ -370,7 +370,7 @@ public class DataSinkTask<IT> extends AbstractOutputTask
 		
 		final String pathName = this.config.getStubParameter(FileOutputFormat.FILE_PARAMETER_KEY, null);
 		final WriteMode writeMode = ((FileOutputFormat<?>)this.format).getWriteMode();
-		final OutputDirectoryMode outDirMode = ((FileOutputFormat<?>)this.format).getOutDirMode();
+		final OutputDirectoryMode outDirMode = ((FileOutputFormat<?>)this.format).getDirectoryCreationMode();
 		final Path path;
 		
 		if (pathName == null) {

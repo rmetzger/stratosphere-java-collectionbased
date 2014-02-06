@@ -12,32 +12,40 @@
  * specific language governing permissions and limitations under the License.
  *
  **********************************************************************************************************************/
-package eu.stratosphere.api.java;
+package eu.stratosphere.api.java.typeutils;
 
 
-public class RemoteExecutionContext extends ExecutionContext {
+/**
+ *
+ */
+public interface TypeInformation<T> {
 	
-	private final String host;
+//	
+//	
+//	public boolean isBasicType() {
+//		
+//	}
+//	
+//	public boolean isValueType() {
+//		
+//	}
+//	
+//	public boolean isTupleType() {
+//		
+//	}
+//	
+//	public boolean isAvroType() {
+//		
+//	}
+//	
+//	public boolean isHadoopWritableType() {
+//		
+//	}
 	
-	private final int port;
+	public int getArity();
 	
+	public Class<?> getType();
 	
-	
-	public RemoteExecutionContext(String host, int port) {
-		super();
-		
-		if (host == null)
-			throw new NullPointerException("Host must not be null.");
-		
-		if (port < 1 || port >= 0xffff)
-			throw new IllegalArgumentException("Port out of range");
-		
-		this.host = host;
-		this.port = port;
-	}
+	public Class<?> getTypeAt(int pos);
 
-	@Override
-	public String toString() {
-		return "Remote Context (" + this.host + ":" + this.port + " - DOP = " + getDegreeOfParallelism() + ") : " + getIdString();
-	}
 }

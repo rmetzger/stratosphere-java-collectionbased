@@ -15,10 +15,9 @@
 package eu.stratosphere.api.java.functions;
 
 import eu.stratosphere.api.common.functions.AbstractFunction;
-import eu.stratosphere.api.java.tuple.Tuple;
 
 
-public abstract class JoinFunction<IN1 extends Tuple, IN2 extends Tuple, OUT extends Tuple> extends AbstractFunction {
+public abstract class JoinFunction<IN1, IN2, OUT> extends AbstractFunction {
 
 	public abstract OUT join(IN1 first, IN2 second) throws Exception;
 }

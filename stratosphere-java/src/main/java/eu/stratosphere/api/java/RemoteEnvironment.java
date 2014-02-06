@@ -12,13 +12,32 @@
  * specific language governing permissions and limitations under the License.
  *
  **********************************************************************************************************************/
-package eu.stratosphere.api.java.functions;
-
-import eu.stratosphere.api.common.functions.AbstractFunction;
-import eu.stratosphere.util.Collector;
+package eu.stratosphere.api.java;
 
 
-public abstract class FlatMapFunction<IN, OUT> extends AbstractFunction {
+public class RemoteEnvironment extends ExecutionEnvironment {
+	
+	private final String host;
+	
+	private final int port;
+	
+	
+	
+	public RemoteEnvironment(String host, int port) {
+		super();
+		
+		if (host == null)
+			throw new NullPointerException("Host must not be null.");
+		
+		if (port < 1 || port >= 0xffff)
+			throw new IllegalArgumentException("Port out of range");
+		
+		this.host = host;
+		this.port = port;
+	}
 
-	public abstract void flatMap(IN value, Collector<OUT> out) throws Exception;
+	@Override
+	public String toString() {
+		return "Remote Context (" + this.host + ":" + this.port + " - DOP = " + getDegreeOfParallelism() + ") : " + getIdString();
+	}
 }

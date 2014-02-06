@@ -12,13 +12,12 @@
  * specific language governing permissions and limitations under the License.
  *
  **********************************************************************************************************************/
-package eu.stratosphere.api.java;
+package eu.stratosphere.api.java.functions;
 
+/**
+ *
+ */
+public interface KeyExtractor<IN, KEY> {
 
-public class LocalExecutionContext extends ExecutionContext {
-	
-	@Override
-	public String toString() {
-		return "Local Context (DOP = " + getDegreeOfParallelism() + ") : " + getIdString();
-	}
+	KEY getKey(IN value);
 }

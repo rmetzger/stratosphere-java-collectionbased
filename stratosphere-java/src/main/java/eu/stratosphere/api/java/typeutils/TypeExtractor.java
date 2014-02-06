@@ -12,31 +12,52 @@
  * specific language governing permissions and limitations under the License.
  *
  **********************************************************************************************************************/
-package eu.stratosphere.api.java.util;
+package eu.stratosphere.api.java.typeutils;
 
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
+import eu.stratosphere.api.common.io.InputFormat;
 import eu.stratosphere.api.java.functions.FlatMapFunction;
+import eu.stratosphere.api.java.functions.GroupReduceFunction;
 import eu.stratosphere.api.java.functions.InvalidTypesException;
 import eu.stratosphere.api.java.functions.JoinFunction;
+import eu.stratosphere.api.java.functions.MapFunction;
 
 
 public class TypeExtractor {
 
 	
-	public static Class<?>[] getReturnTypes(FlatMapFunction<?, ?> flatMapFunction) {
-		ParameterizedType returnTupleType = getTemplateTypesChecked(flatMapFunction.getClass(), 1);
-		return getTemplateClassTypes(returnTupleType);
+	public static <X> TypeInformation<X> getMapReturnTypes(MapFunction<?, X> mapFunction) {
+		return null;
+	}
+	
+	public static <X> TypeInformation<X> getFlatMapReturnTypes(FlatMapFunction<?, X> flatMapFunction) {
+		return null;
+	}
+	
+	public static <X> TypeInformation<X> getGroupReduceReturnTypes(GroupReduceFunction<?, X> groupReduceFunction) {
+		return null;
+	}
+	
+	public static <X> TypeInformation<X> getJoinReturnTypes(JoinFunction<?, ?, X> joinFunction) {
+		return null;
 	}
 	
 	
-	public static Class<?>[] getReturnTypes(JoinFunction<?, ?, ?> joinFunction) {
-		ParameterizedType returnTupleType = getTemplateTypesChecked(joinFunction.getClass(), 2);
-		return getTemplateClassTypes(returnTupleType);
+
+	
+	public static <X> TypeInformation<X> extractInputFormatTypes(InputFormat<X, ?> format) {
+		@SuppressWarnings("unchecked")
+		Class<InputFormat<X, ?>> formatClass = (Class<InputFormat<X, ?>>) format.getClass();
+		return extractInputFormatTypes(formatClass);
 	}
 	
+	public static <X> TypeInformation<X> extractInputFormatTypes(Class<InputFormat<X, ?>> formatClass) {
+		Type type = findGenericParameter(formatClass, InputFormat.class, 0);
+		return getTypeInformation(type);
+	}
 	
 	// --------------------------------------------------------------------------------------------
 	//  Generic utility methods
@@ -90,6 +111,17 @@ public class TypeExtractor {
 		}
 		return types;
 	}
+	
+	
+	public static <X> TypeInformation<X> getTypeInformation(Type type) {
+		return null;
+	}
+	
+	public static Type findGenericParameter(Class<?> clazz, Class<?> genericSuperClass, int genericArgumentNum) {
+		return null;
+	}
+	
+	
 	
 	
 	private TypeExtractor() {}

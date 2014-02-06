@@ -12,13 +12,46 @@
  * specific language governing permissions and limitations under the License.
  *
  **********************************************************************************************************************/
-package eu.stratosphere.api.java.functions;
+package eu.stratosphere.api.java.typeutils;
 
-import eu.stratosphere.api.common.functions.AbstractFunction;
-import eu.stratosphere.util.Collector;
+import eu.stratosphere.types.Value;
 
 
-public abstract class FlatMapFunction<IN, OUT> extends AbstractFunction {
+/**
+ *
+ */
+public class ValueTypeInfo<T extends Value> implements TypeInformation<T> {
 
-	public abstract void flatMap(IN value, Collector<OUT> out) throws Exception;
+	private final Class<T> type;
+
+	
+	public ValueTypeInfo(Class<T> type) {
+		this.type = type;
+	}
+	
+	
+	@Override
+	public int getArity() {
+		return 1;
+	}
+
+	/* (non-Javadoc)
+	 * @see eu.stratosphere.api.java.typeutils.TypeInformation#getType()
+	 */
+	@Override
+	public Class<?> getType() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	/* (non-Javadoc)
+	 * @see eu.stratosphere.api.java.typeutils.TypeInformation#getTypeAt(int)
+	 */
+	@Override
+	public Class<?> getTypeAt(int pos) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	
 }
