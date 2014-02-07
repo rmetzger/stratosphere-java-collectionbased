@@ -16,8 +16,12 @@ package eu.stratosphere.api.common.io;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import com.google.common.base.Preconditions;
+import com.google.common.primitives.Ints;
+
 import eu.stratosphere.core.fs.FileInputSplit;
 import eu.stratosphere.core.fs.Path;
+import eu.stratosphere.types.Value;
 import eu.stratosphere.types.parser.FieldParser;
 import eu.stratosphere.util.InstantiationUtil;
 
@@ -122,7 +126,7 @@ public abstract class GenericCsvInputFormat<OT> extends DelimitedInputFormat<OT>
 	}
 	
 	
-	protected void setFieldTypes(Class<?> ... fieldTypes) {
+	protected void setFieldTypesGeneric(Class<?> ... fieldTypes) {
 		if (fieldTypes == null)
 			throw new IllegalArgumentException("Field types must not be null.");
 		
@@ -143,6 +147,40 @@ public abstract class GenericCsvInputFormat<OT> extends DelimitedInputFormat<OT>
 		}
 		
 		Class<?>[] denseTypeArray = (Class<?>[]) types.toArray(new Class[types.size()]);
+		this.fieldTypes = denseTypeArray;
+	}
+	
+	protected void setFieldsGeneric(int[] sourceFieldIndices, Class<?>[] fieldTypes) {
+		Preconditions.checkNotNull(fieldTypes);
+		Preconditions.checkArgument(sourceFieldIndices.length == fieldTypes.length,
+			"Number of field indices and field types must match.");
+
+		for (int i : sourceFieldIndices) {
+			if (i < 0) {
+				throw new IllegalArgumentException("Field indices must not be smaller than zero.");
+			}
+		}
+
+		int largestFieldIndex = Ints.max(sourceFieldIndices);
+		this.fieldIncluded = new boolean[largestFieldIndex + 1];
+		ArrayList<Class<?>> types = new ArrayList<Class<?>>();
+
+		// check if we support parsers for these types
+		for (int i = 0; i < fieldTypes.length; i++) {
+			Class<?> type = fieldTypes[i];
+
+			if (type != null) {
+				if (FieldParser.getParserForType(type) == null) {
+					throw new IllegalArgumentException("The type '" + type.getName()
+						+ "' is not supported for the CSV input format.");
+				}
+				types.add(type);
+				fieldIncluded[sourceFieldIndices[i]] = true;
+			}
+		}
+
+		@SuppressWarnings("unchecked")
+		Class<? extends Value>[] denseTypeArray = (Class<? extends Value>[]) types.toArray(new Class[types.size()]);
 		this.fieldTypes = denseTypeArray;
 	}
 

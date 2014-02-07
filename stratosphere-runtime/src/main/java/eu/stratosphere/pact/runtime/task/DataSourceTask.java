@@ -105,8 +105,8 @@ public class DataSourceTask<OT> extends AbstractInputTask<InputSplit>
 
 
 	@Override
-	public void invoke() throws Exception
-	{
+	public void invoke() throws Exception {
+		
 		if (LOG.isInfoEnabled())
 			LOG.info(getLogString("Start PACT code"));
 		
@@ -116,7 +116,7 @@ public class DataSourceTask<OT> extends AbstractInputTask<InputSplit>
 			
 			// get input splits to read
 			final Iterator<InputSplit> splitIterator = getInputSplits();
-			final OT record = this.serializer.createInstance();
+			OT record = this.serializer.createInstance();
 	
 			// for each assigned input split
 			while (!this.taskCanceled && splitIterator.hasNext())
@@ -138,7 +138,7 @@ public class DataSourceTask<OT> extends AbstractInputTask<InputSplit>
 				try {
 					// ======= special-case the Record, to help the JIT and avoid some casts ======
 					if (record.getClass() == Record.class) {
-						final Record pactRecord = (Record) record;
+						Record typedRecord = (Record) record;
 						@SuppressWarnings("unchecked")
 						final InputFormat<Record, InputSplit> inFormat = (InputFormat<Record, InputSplit>) format;
 						
@@ -147,9 +147,9 @@ public class DataSourceTask<OT> extends AbstractInputTask<InputSplit>
 							final RecordOutputCollector output = (RecordOutputCollector) this.output;
 							while (!this.taskCanceled && !inFormat.reachedEnd()) {
 								// build next pair and ship pair if it is valid
-								pactRecord.clear();
-								if (inFormat.nextRecord(pactRecord)) {
-									output.collect(pactRecord);
+								typedRecord.clear();
+								if ((typedRecord = inFormat.nextRecord(typedRecord)) != null) {
+									output.collect(typedRecord);
 								}
 							}
 						} else if (this.output instanceof ChainedMapDriver) {
@@ -160,10 +160,10 @@ public class DataSourceTask<OT> extends AbstractInputTask<InputSplit>
 							// as long as there is data to read
 							while (!this.taskCanceled && !inFormat.reachedEnd()) {
 								// build next pair and ship pair if it is valid
-								pactRecord.clear();
-								if (inFormat.nextRecord(pactRecord)) {
+								typedRecord.clear();
+								if ((typedRecord = inFormat.nextRecord(typedRecord)) != null) {
 									// This is where map of UDF gets called
-									output.collect(pactRecord);
+									output.collect(typedRecord);
 								}
 							}
 						} else {
@@ -173,9 +173,9 @@ public class DataSourceTask<OT> extends AbstractInputTask<InputSplit>
 							// as long as there is data to read
 							while (!this.taskCanceled && !inFormat.reachedEnd()) {
 								// build next pair and ship pair if it is valid
-								pactRecord.clear();
-								if (inFormat.nextRecord(pactRecord)) {
-									output.collect(pactRecord);
+								typedRecord.clear();
+								if ((typedRecord = inFormat.nextRecord(typedRecord)) != null){
+									output.collect(typedRecord);
 								}
 							}
 						}
@@ -187,7 +187,7 @@ public class DataSourceTask<OT> extends AbstractInputTask<InputSplit>
 							// as long as there is data to read
 							while (!this.taskCanceled && !format.reachedEnd()) {
 								// build next pair and ship pair if it is valid
-								if (format.nextRecord(record)) {
+								if ((record = format.nextRecord(record)) != null) {
 									output.collect(record);
 								}
 							}
@@ -197,7 +197,7 @@ public class DataSourceTask<OT> extends AbstractInputTask<InputSplit>
 							// as long as there is data to read
 							while (!this.taskCanceled && !format.reachedEnd()) {
 								// build next pair and ship pair if it is valid
-								if (format.nextRecord(record)) {
+								if ((record = format.nextRecord(record)) != null) {
 									output.collect(record);
 								}
 							}
@@ -206,7 +206,7 @@ public class DataSourceTask<OT> extends AbstractInputTask<InputSplit>
 							// as long as there is data to read
 							while (!this.taskCanceled && !format.reachedEnd()) {
 								// build next pair and ship pair if it is valid
-								if (format.nextRecord(record)) {
+								if ((record = format.nextRecord(record)) != null) {
 									output.collect(record);
 								}
 							}
