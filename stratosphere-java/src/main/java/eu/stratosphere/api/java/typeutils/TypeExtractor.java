@@ -17,7 +17,9 @@ package eu.stratosphere.api.java.typeutils;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.Map;
 
+import com.google.common.collect.Maps;
 import eu.stratosphere.api.common.io.InputFormat;
 import eu.stratosphere.api.java.functions.FlatMapFunction;
 import eu.stratosphere.api.java.functions.GroupReduceFunction;
@@ -35,7 +37,7 @@ public class TypeExtractor {
 	}
 	
 	public static <X> TypeInformation<X> getFlatMapReturnTypes(FlatMapFunction<?, X> flatMapFunction) {
-		Type returnType = getTemplateTypes (flatMapFunction.getClass(), 1);
+		Type returnType = getTemplateTypes (FlatMapFunction.class, flatMapFunction.getClass(), 1);
 		return createTypeInfo(returnType);
 	}
 	
@@ -98,8 +100,8 @@ public class TypeExtractor {
 	}
 	
 	
-	public static ParameterizedType getTemplateTypesChecked(Class<?> clazz, int pos) {
-		Type t = getTemplateTypes(clazz, pos);
+	public static ParameterizedType getTemplateTypesChecked(Class<?> baseClass, Class<?> clazz, int pos) {
+		Type t = getTemplateTypes(baseClass, clazz, pos);
 		if (t instanceof ParameterizedType) {
 			return (ParameterizedType) t;
 		} else {
@@ -108,8 +110,8 @@ public class TypeExtractor {
 	}
 	
 	
-	public static Type getTemplateTypes(Class<?> clazz, int pos) {
-		return getTemplateTypes(getSuperParameterizedType(clazz))[pos];
+	public static Type getTemplateTypes(Class<?> baseClass, Class<?> clazz, int pos) {
+		return getTemplateTypes(getSuperParameterizedType(baseClass, clazz))[pos];
 	}
 	
 	public static Type[] getTemplateTypes(ParameterizedType paramterizedType) {
@@ -122,11 +124,14 @@ public class TypeExtractor {
 		return types;
 	}
 	
-	public static ParameterizedType getSuperParameterizedType(Class<?> clazz) {
+	public static ParameterizedType getSuperParameterizedType(Class<?> baseClass, Class<?> clazz) {
 		Type type = clazz.getGenericSuperclass();
-		while (true) {
+//		while (true) {
 			if (type instanceof ParameterizedType) {
-				return (ParameterizedType) type;
+				ParameterizedType parameterizedType = (ParameterizedType) type;
+				if (parameterizedType.getRawType().equals(baseClass)) {
+				  return parameterizedType;
+				}
 			}
 
 			if (clazz.getGenericSuperclass() == null) {
@@ -135,7 +140,8 @@ public class TypeExtractor {
 
 			type = clazz.getGenericSuperclass();
 			clazz = clazz.getSuperclass();
-		}
+//		}
+		throw new IllegalArgumentException("Generic function base class must be immediate super class.");
 	}
 	
 	public static Class<?>[] getTemplateClassTypes(ParameterizedType paramterizedType) {
