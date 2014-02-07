@@ -15,33 +15,20 @@
 package eu.stratosphere.api.java.operators;
 
 import eu.stratosphere.api.java.DataSet;
-import eu.stratosphere.configuration.Configuration;
 
 /**
- * @param <IN> The type of the data set filtered by the operator.
+ * @param <IN> The type of the data set made distinct by the operator.
  */
 public class DistinctOperator<IN> extends SingleInputOperator<IN, IN> {
 	
-	private final int[] fields;
+	private final Keys<IN> keys;
 	
-	public DistinctOperator(DataSet<IN> input, int ... fields) {
+	public DistinctOperator(DataSet<IN> input, Keys<IN> keys) {
 		super(input, input.getType());
 		
-		final int inLength = 0; //input.getTupleArity();
+		if (keys == null)
+			throw new NullPointerException();
 		
-		// null parameter means all fields are considered
-		if (fields == null || fields.length == 0) {
-			this.fields = new int[inLength];
-			for (int i = 0; i < inLength; i++) {
-				this.fields[i] = i;
-			}
-		} else {
-			this.fields = OperatorUtil.rangeCheckAndOrderFields(fields, inLength - 1);
-		}
-	}
-	
-	public DistinctOperator<IN> withParameters(Configuration parameters) {
-		setParameters(parameters);
-		return this;
+		this.keys = keys;
 	}
 }

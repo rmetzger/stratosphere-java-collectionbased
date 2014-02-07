@@ -16,7 +16,6 @@ package eu.stratosphere.api.java.operators;
 
 import eu.stratosphere.api.java.DataSet;
 import eu.stratosphere.api.java.functions.ReduceFunction;
-import eu.stratosphere.configuration.Configuration;
 
 /**
  *
@@ -24,9 +23,11 @@ import eu.stratosphere.configuration.Configuration;
  */
 public class ReduceOperator<IN> extends SingleInputOperator<IN, IN> {
 	
+	@SuppressWarnings("unused")
 	private final ReduceFunction<IN> function;
 	
-	private final int[] groupingFields;
+	@SuppressWarnings("unused")
+	private final Grouping<IN> grouper;
 	
 	
 	/**
@@ -43,24 +44,18 @@ public class ReduceOperator<IN> extends SingleInputOperator<IN, IN> {
 			throw new NullPointerException("Reduce function must not be null.");
 		
 		this.function = function;
-		this.groupingFields = OperatorUtil.EMPTY_INTS;
+		this.grouper = null;
 	}
 	
 	
-	public ReduceOperator(GroupedDataSet<IN> input, ReduceFunction<IN> function) {
+	public ReduceOperator(Grouping<IN> input, ReduceFunction<IN> function) {
 		super(input.getDataSet(), input.getDataSet().getType());
 		
 		if (function == null)
 			throw new NullPointerException("Reduce function must not be null.");
 		
 		this.function = function;
-		this.groupingFields = input.getGroupingFields();
+		this.grouper = input;
 	}
 	
-	
-	
-	public ReduceOperator<IN> withParameters(Configuration parameters) {
-		setParameters(parameters);
-		return this;
-	}
 }

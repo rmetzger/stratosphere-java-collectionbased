@@ -14,17 +14,42 @@
  **********************************************************************************************************************/
 package eu.stratosphere.api.java.typeutils;
 
+import java.io.Serializable;
+import java.lang.reflect.Field;
+
+import eu.stratosphere.api.java.functions.KeyExtractor;
+
 
 /**
  *
  */
-public interface TypeInformation<T> {
+public class ReflectKeyExtractorGenerator {
 	
-	boolean isBasicType();
-
-	boolean isTupleType();
 	
-	public int getArity();
-	
-	public Class<T> getType();
+	public static <IN, KEY> KeyExtractor<IN, KEY> generateKeyExtractor(TypeInformation<IN> type, String expression) {
+		return null;
 	}
+	
+	
+	@SuppressWarnings("unused")
+	private static final class DirectReflectKeyAccessor<IN, KEY> implements KeyExtractor<IN, KEY>, Serializable {
+		private static final long serialVersionUID = 1L;
+		
+		private final Field field;
+		
+		private DirectReflectKeyAccessor(Field field) {
+			this.field = field;
+			this.field.setAccessible(true);
+		}
+		
+		@SuppressWarnings("unchecked")
+		@Override
+		public KEY getKey(IN value) {
+			try {
+				return (KEY) field.get(value);
+			} catch (Throwable t) {
+				throw new RuntimeException("Reflection key accessor could not extract key: " + t.getMessage(), t);
+			}
+		}
+	}
+}

@@ -49,6 +49,7 @@ public class WordCount {
 		final ExecutionEnvironment context = ExecutionEnvironment.getExecutionEnvironment();
 		
 		DataSet<String> text = context.readTextFile(new Path(inputPath));
+		
 		DataSet<Tuple2<String, Integer>> result = text.flatMap(new Tokenizer()).groupBy(0).aggregate(SUM, 1);
 		
 		result.writeAsText(new Path(outputPath));

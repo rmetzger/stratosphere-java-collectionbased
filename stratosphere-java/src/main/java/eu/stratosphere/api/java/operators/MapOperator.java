@@ -17,14 +17,13 @@ package eu.stratosphere.api.java.operators;
 import eu.stratosphere.api.java.DataSet;
 import eu.stratosphere.api.java.functions.MapFunction;
 import eu.stratosphere.api.java.typeutils.TypeExtractor;
-import eu.stratosphere.configuration.Configuration;
 
 /**
  *
  * @param <IN> The type of the data set consumed by the operator.
  * @param <OUT> The type of the data set created by the operator.
  */
-public class MapOperator<IN, OUT> extends SingleInputOperator<IN, OUT> {
+public class MapOperator<IN, OUT> extends SingleInputUdfOperator<IN, OUT, MapOperator<IN, OUT>> {
 	
 	protected final MapFunction<IN, OUT> function;
 	
@@ -36,11 +35,5 @@ public class MapOperator<IN, OUT> extends SingleInputOperator<IN, OUT> {
 			throw new NullPointerException("Map function must not be null.");
 		
 		this.function = function;
-	}
-	
-	
-	public MapOperator<IN, OUT> withParameters(Configuration parameters) {
-		setParameters(parameters);
-		return this;
 	}
 }

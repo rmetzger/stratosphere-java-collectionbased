@@ -29,8 +29,10 @@ import eu.stratosphere.api.java.operators.DataSink;
 import eu.stratosphere.api.java.operators.DistinctOperator;
 import eu.stratosphere.api.java.operators.FilterOperator;
 import eu.stratosphere.api.java.operators.FlatMapOperator;
-import eu.stratosphere.api.java.operators.GroupedDataSet;
+import eu.stratosphere.api.java.operators.Grouping;
+import eu.stratosphere.api.java.operators.JoinOperator.JoinHint;
 import eu.stratosphere.api.java.operators.JoinOperator.JoinOperatorSets;
+import eu.stratosphere.api.java.operators.Keys;
 import eu.stratosphere.api.java.operators.MapOperator;
 import eu.stratosphere.api.java.operators.ReduceGroupOperator;
 import eu.stratosphere.api.java.operators.ReduceOperator;
@@ -67,7 +69,7 @@ public abstract class DataSet<T> {
 	}
 	
 	// --------------------------------------------------------------------------------------------
-	//  Operations / Transformations
+	//  Filter & Transformations
 	// --------------------------------------------------------------------------------------------
 	
 	public <R> MapOperator<T, R> map(MapFunction<T, R> mapper) {
@@ -81,6 +83,10 @@ public abstract class DataSet<T> {
 	public FilterOperator<T> filter(FilterFunction<T> filter) {
 		return new FilterOperator<T>(this, filter);
 	}
+
+	// --------------------------------------------------------------------------------------------
+	//  Non-grouped aggregations
+	// --------------------------------------------------------------------------------------------
 	
 	public AggregateOperator<T> aggregate(Aggregations agg, int field) {
 		return new AggregateOperator<T>(this, agg, field);
@@ -90,50 +96,74 @@ public abstract class DataSet<T> {
 		return new ReduceOperator<T>(this, reducer);
 	}
 	
-	public <R extends Tuple> ReduceGroupOperator<T, R> reduceGroup(GroupReduceFunction<T, R> reducer) {
+	public <R> ReduceGroupOperator<T, R> reduceGroup(GroupReduceFunction<T, R> reducer) {
 		return new ReduceGroupOperator<T, R>(this, reducer);
 	}
 	
+	// --------------------------------------------------------------------------------------------
+	//  distinct
+	// --------------------------------------------------------------------------------------------
+	
 	public <K> DistinctOperator<T> distinct(KeyExtractor<T, K> keyExtractor) {
-		return null;
+		return new DistinctOperator<T>(this, new Keys.SelectorFunctionKeys<T, K>(keyExtractor, getType()));
 	}
 	
-	public DistinctOperator<T> distinct(String... fieldExpression) {
-		return null;
+	public DistinctOperator<T> distinct(String fieldExpression) {
+		return new DistinctOperator<T>(this, new Keys.ExpressionKeys<T>(fieldExpression, getType()));
 	}
 	
 	public DistinctOperator<T> distinct(int... fields) {
-		return new DistinctOperator<T>(this, fields);
+		return new DistinctOperator<T>(this, new Keys.FieldPositionKeys<T>(fields, getType()));
 	}
 	
 	// --------------------------------------------------------------------------------------------
-	//  Grouping and Joining
+	//  Grouping
 	// --------------------------------------------------------------------------------------------
 
-	public <K> GroupedDataSet<T> groupBy(KeyExtractor<T, K> keyExtractor) {
-		return null;
+	public <K> Grouping<T> groupBy(KeyExtractor<T, K> keyExtractor) {
+		return new Grouping<T>(this, new Keys.SelectorFunctionKeys<T, K>(keyExtractor, getType()));
 	}
 	
-	public GroupedDataSet<T> groupBy(String... fieldExpression) {
-		return null;
+	public Grouping<T> groupBy(String fieldExpression) {
+		return new Grouping<T>(this, new Keys.ExpressionKeys<T>(fieldExpression, getType()));
 	}
 	
-	public GroupedDataSet<T> groupBy(int... fields) {
-		return new GroupedDataSet<T>(this, fields);
+	public Grouping<T> groupBy(int... fields) {
+		return new Grouping<T>(this, new Keys.FieldPositionKeys<T>(fields, getType()));
 	}
 	
+	// --------------------------------------------------------------------------------------------
+	//  Grouping  Joining
+	// --------------------------------------------------------------------------------------------
 	
 	public <R> JoinOperatorSets<T, R> join(DataSet<R> other) {
 		return new JoinOperatorSets<T, R>(this, other);
 	}
 	
 	public <R> JoinOperatorSets<T, R> joinWithTiny(DataSet<R> other) {
-		return new JoinOperatorSets<T, R>(this, other);
+		return new JoinOperatorSets<T, R>(this, other, JoinHint.BROADCAST_HASH_SECOND);
 	}
 	
 	public <R> JoinOperatorSets<T, R> joinWithHuge(DataSet<R> other) {
-		return new JoinOperatorSets<T, R>(this, other);
+		return new JoinOperatorSets<T, R>(this, other, JoinHint.BROADCAST_HASH_FIRST);
 	}
+	
+	// --------------------------------------------------------------------------------------------
+	//  Co-Grouping
+	// --------------------------------------------------------------------------------------------
+
+	// --------------------------------------------------------------------------------------------
+	//  Cross
+	// --------------------------------------------------------------------------------------------
+	
+	
+	// --------------------------------------------------------------------------------------------
+	//  Union
+	// --------------------------------------------------------------------------------------------
+
+	// --------------------------------------------------------------------------------------------
+	//  Top-K
+	// --------------------------------------------------------------------------------------------
 	
 	// --------------------------------------------------------------------------------------------
 	//  Result writing

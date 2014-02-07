@@ -28,23 +28,6 @@ import static eu.stratosphere.api.java.aggregation.Aggregations.*;
 
 public class RelQuery {
 	
-	public static class SomePOJO {
-		
-		public Integer f1;
-		public Integer f2;
-		public Integer f3;
-	}
-	
-	public class MyFilter extends FilterFunction<SomePOJO> {
-
-		@Override
-		public boolean filter(SomePOJO value) throws Exception {
-			return value.f1 > 0;
-		}
-		
-	}
-	
-	
 	public static void main(String[] args) {
 		if (args.length < 3) {
 			System.out.println("Usage: <input orders> <input lineitem> <output path>");
@@ -83,16 +66,15 @@ public class RelQuery {
 							Integer.parseInt(orderDate.substring(0, 4)) > yearFilter;
 				}
 		});
+		 
 		
-		DataSet<Tuple3<Long, String, Double>> joined = filtered.join(lineitem).where(0).equalTo(0).join(new OLiJoinFunction());
+		
+		DataSet<Tuple3<Long, String, Double>> joined = filtered.join(lineitem).where(0).equalTo(0).with(new OLiJoinFunction());
 		
 		DataSet<Tuple3<Long, String, Double>> result = joined.groupBy(0, 1).aggregate(SUM, 2);
 		
 		
 		result.writeAsCsv(outputPath);
-		result.print();
-		
-		
 	}
 	
 	

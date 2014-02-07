@@ -14,17 +14,23 @@
  **********************************************************************************************************************/
 package eu.stratosphere.api.java.operators;
 
+import eu.stratosphere.api.common.InvalidProgramException;
 import eu.stratosphere.api.java.DataSet;
 import eu.stratosphere.api.java.functions.JoinFunction;
-import eu.stratosphere.api.java.tuple.Tuple;
+import eu.stratosphere.api.java.functions.KeyExtractor;
+import eu.stratosphere.api.java.tuple.Tuple2;
+import eu.stratosphere.api.java.typeutils.TupleTypeInfo;
 import eu.stratosphere.api.java.typeutils.TypeExtractor;
-import eu.stratosphere.configuration.Configuration;
+import eu.stratosphere.api.java.typeutils.TypeInformation;
 
 /**
  *
  */
-public class JoinOperator<I1, I2, OUT> extends TwoInputOperator<I1, I2, OUT> {
+public abstract class JoinOperator<I1, I2, OUT> extends TwoInputOperator<I1, I2, OUT> {
 	
+	/**
+	 * An enumeration of hints, optionally usable to tell the system how exactly execute the join.
+	 */
 	public static enum JoinHint {
 		/**
 		 * leave the choice how to do the join to the optimizer. If in doubt, the
@@ -68,67 +74,146 @@ public class JoinOperator<I1, I2, OUT> extends TwoInputOperator<I1, I2, OUT> {
 	};
 	
 	
-	private final JoinFunction<I1, I2, OUT> function;
+	private final Keys<I1> keys1;
+	private final Keys<I2> keys2;
 	
-	private final int[] keyFields1;
-	private final int[] keyFields2;
-	
-	private boolean preserve1;
-	private boolean preserve2;
+	private JoinHint joinHint;
 	
 	
-	public JoinOperator(DataSet<I1> input1, DataSet<I2> input2, 
-			int[] keyFields1, int[] keyFields2, JoinFunction<I1, I2, OUT> function)
+	protected JoinOperator(DataSet<I1> input1, DataSet<I2> input2, 
+			Keys<I1> keys1, Keys<I2> keys2,
+			TypeInformation<OUT> returnType, JoinHint hint)
 	{
-		super(input1, input2, TypeExtractor.getJoinReturnTypes(function));
+		super(input1, input2, returnType);
 		
-		if (keyFields1 == null || keyFields2 == null || keyFields1.length == 0 || keyFields2.length == 0)
-			throw new IllegalArgumentException("Equi-Join requires key fields.");
+		if (keys1 == null || keys2 == null)
+			throw new NullPointerException();
 		
-		if (keyFields1.length != keyFields2.length)
-			throw new IllegalArgumentException("The number of key fields is not the same for both inputs.");
+		this.keys1 = keys1;
+		this.keys2 = keys2;
+		this.joinHint = hint;
+	}
+	
+	protected Keys<I1> getKeys1() {
+		return this.keys1;
+	}
+	
+	protected Keys<I2> getKeys2() {
+		return this.keys2;
+	}
+	
+	protected JoinHint getJoinHint() {
+		return this.joinHint;
+	}
+	
+	// --------------------------------------------------------------------------------------------
+	// special join types
+	// --------------------------------------------------------------------------------------------
+	
+	public static class EquiJoin<I1, I2, OUT> extends JoinOperator<I1, I2, OUT> {
 		
-		if (function == null)
-			throw new NullPointerException("Map function must not be null.");
+		private final JoinFunction<I1, I2, OUT> function;
 		
-		// range checks
-		for (int field : keyFields1) {
-			if (field < 0 || field >= input1.getType().getArity())
-				throw new IllegalArgumentException("Tuple field is out of range.");
+		private boolean preserve1;
+		private boolean preserve2;
+		
+		protected EquiJoin(DataSet<I1> input1, DataSet<I2> input2, 
+				Keys<I1> keys1, Keys<I2> keys2, JoinFunction<I1, I2, OUT> function,
+				TypeInformation<OUT> returnType, JoinHint hint)
+		{
+			super(input1, input2, keys1, keys2, returnType, hint);
+			
+			if (function == null)
+				throw new NullPointerException();
+			
+			this.function = function;
 		}
 		
-		for (int field : keyFields2) {
-			if (field < 0 || field >= input2.getType().getArity())
-				throw new IllegalArgumentException("Tuple field is out of range.");
+		
+		public EquiJoin<I1, I2, OUT> leftOuter() {
+			this.preserve1 = true;
+			return this;
+		}
+
+		public EquiJoin<I1, I2, OUT> rightOuter() {
+			this.preserve2 = true;
+			return this;
 		}
 		
-		this.function = function;
-		this.keyFields1 = keyFields1;
-		this.keyFields2 = keyFields2;
+		public EquiJoin<I1, I2, OUT> fullOuter() {
+			this.preserve1 = true;
+			this.preserve2 = true;
+			return this;
+		}
 	}
 	
-	
-	public void setPreserveFirstInput(boolean preserve) {
-		this.preserve1 = preserve;
+	public static final class DefaultJoin<I1, I2> extends EquiJoin<I1, I2, Tuple2<I1, I2>> {
+
+		protected DefaultJoin(DataSet<I1> input1, DataSet<I2> input2, 
+				Keys<I1> keys1, Keys<I2> keys2, JoinHint hint)
+		{
+			super(input1, input2, keys1, keys2,
+				(JoinFunction<I1, I2, Tuple2<I1, I2>>) new DefaultJoinFunction<I1, I2>(),
+				new TupleTypeInfo<Tuple2<I1, I2>>(input1.getType(), input2.getType()), hint);
+		}
+		
+		
+		public <R> EquiJoin<I1, I2, R> with(JoinFunction<I1, I2, R> function) {
+			TypeInformation<R> returnType = TypeExtractor.getJoinReturnTypes(function);
+			return new EquiJoin<I1, I2, R>(getInput1(), getInput2(), getKeys1(), getKeys2(), function, returnType, getJoinHint());
+		}
+		
+		public JoinOperator<I1, I2, I1> leftSemiJoin() {
+			return new LeftSemiJoin<I1, I2>(getInput1(), getInput2(), getKeys1(), getKeys2(), getJoinHint());
+		}
+		
+		public JoinOperator<I1, I2, I2> rightSemiJoin() {
+			return new RightSemiJoin<I1, I2>(getInput1(), getInput2(), getKeys1(), getKeys2(), getJoinHint());
+		}
+		
+		public JoinOperator<I1, I2, I1> leftAntiJoin() {
+			return new LeftAntiJoin<I1, I2>(getInput1(), getInput2(), getKeys1(), getKeys2(), getJoinHint());
+		}
+		
+		public JoinOperator<I1, I2, I2> rightAntiJoin() {
+			return new RightAntiJoin<I1, I2>(getInput1(), getInput2(), getKeys1(), getKeys2(), getJoinHint());
+		}
 	}
 	
-	public void setPreserveSecondInput(boolean preserve) {
-		this.preserve2 = preserve;
+
+	
+
+	private static final class LeftAntiJoin<I1, I2> extends JoinOperator<I1, I2, I1> {
+		
+		protected LeftAntiJoin(DataSet<I1> input1, DataSet<I2> input2, Keys<I1> keys1, Keys<I2> keys2, JoinHint hint) {
+			super(input1, input2, keys1, keys2, input1.getType(), hint);
+		}
 	}
 	
-	public boolean isPreservingFirstInput() {
-		return this.preserve1;
+	private static final class RightAntiJoin<I1, I2> extends JoinOperator<I1, I2, I2> {
+		
+		protected RightAntiJoin(DataSet<I1> input1, DataSet<I2> input2, Keys<I1> keys1, Keys<I2> keys2, JoinHint hint) {
+			super(input1, input2, keys1, keys2, input2.getType(), hint);
+		}
 	}
 	
-	public boolean isPreservingSecondInput() {
-		return this.preserve2;
+	private static final class LeftSemiJoin<I1, I2> extends JoinOperator<I1, I2, I1> {
+		
+		protected LeftSemiJoin(DataSet<I1> input1, DataSet<I2> input2, Keys<I1> keys1, Keys<I2> keys2, JoinHint hint) {
+			super(input1, input2, keys1, keys2, input1.getType(), hint);
+		}
 	}
 	
-	public JoinOperator<I1, I2, OUT> withParameters(Configuration parameters) {
-		setParameters(parameters);
-		return this;
+	private static final class RightSemiJoin<I1, I2> extends JoinOperator<I1, I2, I2> {
+		
+		protected RightSemiJoin(DataSet<I1> input1, DataSet<I2> input2, Keys<I1> keys1, Keys<I2> keys2, JoinHint hint) {
+			super(input1, input2, keys1, keys2, input2.getType(), hint);
+		}
 	}
 	
+	// --------------------------------------------------------------------------------------------
+	// Builder classes for incremental construction
+	// --------------------------------------------------------------------------------------------
 	
 	public static final class JoinOperatorSets<I1, I2> {
 		
@@ -138,85 +223,89 @@ public class JoinOperator<I1, I2, OUT> extends TwoInputOperator<I1, I2, OUT> {
 		private final JoinHint joinHint;
 		
 		public JoinOperatorSets(DataSet<I1> input1, DataSet<I2> input2) {
+			this(input1, input2, JoinHint.OPTIMIZER_CHOOSES);
+		}
+		
+		public JoinOperatorSets(DataSet<I1> input1, DataSet<I2> input2, JoinHint hint) {
 			if (input1 == null || input2 == null)
 				throw new NullPointerException();
 			
 			this.input1 = input1;
 			this.input2 = input2;
+			this.joinHint = hint;
 		}
 		
-		public JoinOperatorSetsPredicate1 where(int... fields) {
-			return new JoinOperatorSetsPredicate1(fields);
+		
+		public JoinOperatorSetsPredicate where(int... fields) {
+			return new JoinOperatorSetsPredicate(new Keys.FieldPositionKeys<I1>(fields, input1.getType()));
+		}
+		
+		public <K> JoinOperatorSetsPredicate where(KeyExtractor<I1, K> keyExtractor) {
+			return new JoinOperatorSetsPredicate(new Keys.SelectorFunctionKeys<I1, K>(keyExtractor, input1.getType()));
+		}
+		
+		public JoinOperatorSetsPredicate where(String keyExpression) {
+			return new JoinOperatorSetsPredicate(new Keys.ExpressionKeys<I1>(keyExpression, input1.getType()));
 		}
 	
-		public final class JoinOperatorSetsPredicate1 {
+		// ----------------------------------------------------------------------------------------
+		
+		public final class JoinOperatorSetsPredicate {
 			
-			private final int[] fields1;
+			private final Keys<I1> keys1;
 			
-			private JoinOperatorSetsPredicate1(int[] fields1) {
-				if (fields1 == null || fields1.length == 0)
-					throw new IllegalArgumentException("Equi-Join requires key fields.");
+			private JoinOperatorSetsPredicate(Keys<I1> keys1) {
+				if (keys1 == null)
+					throw new NullPointerException();
 				
-				int maxField = input1.getType().getArity();
-				for (int field : fields1) {
-					if (field < 0 || field > maxField)
-						throw new IllegalArgumentException("Tuple field is out of range.");
+				if (keys1.isEmpty()) {
+					throw new InvalidProgramException("The join keys must not be empty.");
 				}
 				
-				this.fields1 = fields1;
+				this.keys1 = keys1;
 			}
 			
 			
-			public JoinOperatorSetsPredicate2 equalTo(int... fields) {
-				return new JoinOperatorSetsPredicate2(fields);
+			public DefaultJoin<I1, I2> equalTo(int... fields) {
+				return createJoinOperator(new Keys.FieldPositionKeys<I2>(fields, input2.getType()));
+				
 			}
 			
+			public <K> DefaultJoin<I1, I2> equalTo(KeyExtractor<I2, K> keyExtractor) {
+				return createJoinOperator(new Keys.SelectorFunctionKeys<I2, K>(keyExtractor, input2.getType()));
+			}
+			
+			public DefaultJoin<I1, I2> equalTo(String keyExpression) {
+				return createJoinOperator(new Keys.ExpressionKeys<I2>(keyExpression, input2.getType()));
+			}
+			
+			
+			private DefaultJoin<I1, I2> createJoinOperator(Keys<I2> keys2) {
+				if (keys2 == null)
+					throw new NullPointerException();
+				
+				if (keys2.isEmpty()) {
+					throw new InvalidProgramException("The join keys must not be empty.");
+				}
+				
+				if (!keys1.areCompatibale(keys2)) {
+					throw new InvalidProgramException("The pair of join keys are not compatible with each other.");
+				}
+				
+				return new DefaultJoin<I1, I2>(input1, input2, keys1, keys2, joinHint);
+			}
+		}
+	}
 	
-			public final class JoinOperatorSetsPredicate2 {
-				
-				private final int[] fields2;
-				
-				private JoinOperatorSetsPredicate2(int[] fields2) {
-					if (fields2 == null || fields2.length == 0)
-						throw new IllegalArgumentException("Equi-Join requires key fields.");
-					
-					int maxField = input2.getType().getArity();
-					for (int field : fields2) {
-						if (field < 0 || field > maxField)
-							throw new IllegalArgumentException("Tuple field is out of range.");
-					}
-					
-					this.fields2 = fields2;
-				}
-				
-				
-				public <R extends Tuple> JoinOperator<I1, I2, R> with(JoinFunction<I1, I2, R> function) {
-					JoinOperator<I1, I2, R> op = new JoinOperator<I1, I2, R>(input1, input2, fields1, fields2, function);
-					op.setPreserveFirstInput(preserve1);
-					op.setPreserveSecondInput(preserve2);
-					return op;
-				}
-				
-				public JoinOperator<I1, I2, I1> leftSemiJoin() {
-					return null;
-				}
-				
-				public JoinOperator<I1, I2, I2> rightSemiJoin() {
-					return null;
-				}
-				
-				public JoinOperator<I1, I2, I1> leftAntiJoin() {
-					return null;
-				}
-				
-				public JoinOperator<I1, I2, I2> rightAntiJoin() {
-					return null;
-				}
-				
-				public <OUT extends Tuple> JoinOperator<I1, I2, OUT> join(JoinFunction<I1, I2, OUT> function) {
-					return null;
-				}
-			}
+	// --------------------------------------------------------------------------------------------
+	//  default join function
+	// --------------------------------------------------------------------------------------------
+	
+	public static final class DefaultJoinFunction<T1, T2> extends JoinFunction<T1, T2, Tuple2<T1, T2>> {
+
+		@Override
+		public Tuple2<T1, T2> join(T1 first, T2 second) throws Exception {
+			return new Tuple2<T1, T2>(first, second);
 		}
 	}
 }

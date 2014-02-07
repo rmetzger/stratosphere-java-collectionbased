@@ -14,18 +14,27 @@
  **********************************************************************************************************************/
 package eu.stratosphere.api.java.operators;
 
+import java.util.Map;
 
 import eu.stratosphere.api.java.DataSet;
-import eu.stratosphere.api.java.ExecutionEnvironment;
-import eu.stratosphere.api.java.typeutils.TypeInformation;
+import eu.stratosphere.configuration.Configuration;
 
 
-/**
- * @param <OUT> The type of the data set produced by this operator.
- */
-public abstract class Operator<OUT> extends DataSet<OUT> {
+public interface UdfOperator {
 	
-	protected Operator(ExecutionEnvironment context, TypeInformation<OUT> resultType) {
-		super(context, resultType);
-	}
+	// --------------------------------------------------------------------------------------------
+	// Accessors
+	// --------------------------------------------------------------------------------------------
+	
+	Configuration getParameters();
+	
+	Map<String, DataSet<?>> getBroadcastSets();
+	
+	// --------------------------------------------------------------------------------------------
+	// Fluent API methods
+	// --------------------------------------------------------------------------------------------
+	
+	UdfOperator withParameters(Configuration parameters);
+	 
+	UdfOperator withBroadcastSet(DataSet<?> data, String name);
 }

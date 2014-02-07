@@ -66,7 +66,7 @@ public class AggregateOperator<IN> extends SingleInputOperator<IN, IN> {
 		}
 	}
 	
-	public AggregateOperator(GroupedDataSet<IN> input, Aggregations function, int field) {
+	public AggregateOperator(Grouping<IN> input, Aggregations function, int field) {
 		super(input.getDataSet(), input.getDataSet().getType());
 		
 		if (input == null || function == null)

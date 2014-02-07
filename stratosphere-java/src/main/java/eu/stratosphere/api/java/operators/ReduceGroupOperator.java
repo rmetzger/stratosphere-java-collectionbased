@@ -17,17 +17,19 @@ package eu.stratosphere.api.java.operators;
 import eu.stratosphere.api.java.DataSet;
 import eu.stratosphere.api.java.functions.GroupReduceFunction;
 import eu.stratosphere.api.java.typeutils.TypeExtractor;
-import eu.stratosphere.configuration.Configuration;
 
 /**
  *
- * @param <T> The type of the data set created by the operator.
+ * @param <IN> The type of the data set consumed by the operator.
+ * @param <OUT> The type of the data set created by the operator.
  */
 public class ReduceGroupOperator<IN, OUT> extends SingleInputOperator<IN, OUT> {
 	
+	@SuppressWarnings("unused")
 	private final GroupReduceFunction<IN, OUT> function;
 	
-	private final int[] groupingFields;
+	@SuppressWarnings("unused")
+	private final Grouping<IN> grouper;
 	
 	private boolean combinable;
 	
@@ -39,35 +41,18 @@ public class ReduceGroupOperator<IN, OUT> extends SingleInputOperator<IN, OUT> {
 			throw new NullPointerException("GroupReduce function must not be null.");
 		
 		this.function = function;
-		this.groupingFields = OperatorUtil.EMPTY_INTS;
+		this.grouper = null;
 	}
 	
-	public ReduceGroupOperator(GroupedDataSet<IN> input, GroupReduceFunction<IN, OUT> function) {
+	public ReduceGroupOperator(Grouping<IN> input, GroupReduceFunction<IN, OUT> function) {
 		super(input != null ? input.getDataSet() : null, TypeExtractor.getGroupReduceReturnTypes(function));
 		
 		if (function == null)
 			throw new NullPointerException("GroupReduce function must not be null.");
 		
 		this.function = function;
-		this.groupingFields = input.getGroupingFields();
+		this.grouper = input;
 	}
-	
-	
-	
-	// --------------------------------------------------------------------------------------------
-	//  Fluent API methods
-	// --------------------------------------------------------------------------------------------
-	
-	public ReduceGroupOperator<IN, OUT> withParameters(Configuration parameters) {
-		setParameters(parameters);
-		return this;
-	}
-	
-	public ReduceGroupOperator<IN, OUT> combinable() {
-		this.combinable = true;
-		return this;
-	}
-	
 	
 	// --------------------------------------------------------------------------------------------
 	//  Properties

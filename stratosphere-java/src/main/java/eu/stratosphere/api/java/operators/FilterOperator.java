@@ -16,13 +16,12 @@ package eu.stratosphere.api.java.operators;
 
 import eu.stratosphere.api.java.DataSet;
 import eu.stratosphere.api.java.functions.FilterFunction;
-import eu.stratosphere.configuration.Configuration;
 
 /**
  *
  * @param <IN> The type of the data set filtered by the operator.
  */
-public class FilterOperator<IN> extends SingleInputOperator<IN, IN> {
+public class FilterOperator<IN> extends SingleInputUdfOperator<IN, IN, FilterOperator<IN>> {
 	
 	protected final FilterFunction<IN> function;
 	
@@ -34,11 +33,5 @@ public class FilterOperator<IN> extends SingleInputOperator<IN, IN> {
 			throw new NullPointerException("Filter function must not be null.");
 		
 		this.function = function;
-	}
-	
-	
-	public FilterOperator<IN> withParameters(Configuration parameters) {
-		setParameters(parameters);
-		return this;
 	}
 }

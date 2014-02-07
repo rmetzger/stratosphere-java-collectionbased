@@ -14,55 +14,73 @@
  **********************************************************************************************************************/
 package eu.stratosphere.api.java.operators;
 
-import eu.stratosphere.api.java.DataSet;
-import eu.stratosphere.api.java.aggregation.Aggregations;
+import eu.stratosphere.api.common.InvalidProgramException;
+import eu.stratosphere.api.java.functions.KeyExtractor;
+import eu.stratosphere.api.java.typeutils.TupleTypeInfo;
+import eu.stratosphere.api.java.typeutils.TypeInformation;
 
-public class GroupedDataSet<T> {
+
+public abstract class Keys<T> {
+
+
+	public int getNumberOfKeyFields() {
+		return 1;
+	}
 	
-	private final DataSet<T> dataSet;
-
-	private final int[] groupingFields;
+	public boolean isEmpty() {
+		return getNumberOfKeyFields() == 0;
+	}
 	
-
-	public GroupedDataSet(DataSet<T> set, int[] groupingFields) {
-		if (set == null)
-			throw new NullPointerException();
-
-		this.dataSet = set;
-		this.groupingFields = makeFields(groupingFields, set);
+	public boolean areCompatibale(Keys<?> other) {
+		return true;
 	}
 	
 	
-	public DataSet<T> getDataSet() {
-		return this.dataSet;
-	}
+	// --------------------------------------------------------------------------------------------
+	//  Specializations for field indexed / expression-based / extractor-based grouping
+	// --------------------------------------------------------------------------------------------
 	
-	public int[] getGroupingFields() {
-		return this.groupingFields;
+	public static class FieldPositionKeys<T> extends Keys<T> {
+		
+		public FieldPositionKeys(int[] groupingFields, TypeInformation<T> type) {
+		
+			if (groupingFields == null) {
+				groupingFields = new int[0];
+			}
+			
+			if (!type.isTupleType()) {
+				throw new InvalidProgramException("Specifying keys via field positions is only valid for tuple data types");
+			}
+	
+			groupingFields = makeFields(groupingFields, (TupleTypeInfo<?>) type);
+		}
+	
 	}
 	
 	// --------------------------------------------------------------------------------------------
-	//  Operations / Transformations
-	// --------------------------------------------------------------------------------------------
 	
-	public AggregateOperator<T> aggregate(Aggregations agg, int field) {
-		return new AggregateOperator<T>(this, agg, field);
+	public static class SelectorFunctionKeys<T, K> extends Keys<T> {
+		
+		public SelectorFunctionKeys(KeyExtractor<T, K> keyExtractor, TypeInformation<T> type) {
+			
+		}
 	}
 	
-//	public ReduceOperator<T> reduce(ReduceFunction<T> reducer) {
-//		return new ReduceOperator<T>(this, reducer);
-//	}
-//	
-//	public <R extends Tuple> ReduceGroupOperator<T, R> reduceGroup(GroupReduceFunction<T, R> reducer) {
-//		return new ReduceGroupOperator<T, R>(this, reducer);
-//	}
+	// --------------------------------------------------------------------------------------------
+	
+	public static class ExpressionKeys<T> extends Keys<T> {
+
+		public ExpressionKeys(String expression, TypeInformation<T> type) {
+		}
+	}
+	
 	
 	// --------------------------------------------------------------------------------------------
 	//  Utilities
 	// --------------------------------------------------------------------------------------------
 	
-	private static int[] makeFields(int[] fields, DataSet<?> dataSet) {
-		int inLength = dataSet.getType().getArity();
+	private static int[] makeFields(int[] fields, TupleTypeInfo<?> type) {
+		int inLength = type.getArity();
 		
 		// null parameter means all fields are considered
 		if (fields == null || fields.length == 0) {

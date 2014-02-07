@@ -12,20 +12,17 @@
  * specific language governing permissions and limitations under the License.
  *
  **********************************************************************************************************************/
-package eu.stratosphere.api.java.operators;
+package eu.stratosphere.api.java;
 
 
-import eu.stratosphere.api.java.DataSet;
-import eu.stratosphere.api.java.ExecutionEnvironment;
-import eu.stratosphere.api.java.typeutils.TypeInformation;
+public class InvalidProgramExcaption extends RuntimeException {
+	private static final long serialVersionUID = 1L;
 
+	public InvalidProgramExcaption() {
+		super();
+	}
 
-/**
- * @param <OUT> The type of the data set produced by this operator.
- */
-public abstract class Operator<OUT> extends DataSet<OUT> {
-	
-	protected Operator(ExecutionEnvironment context, TypeInformation<OUT> resultType) {
-		super(context, resultType);
+	public InvalidProgramExcaption(String message) {
+		super(message);
 	}
 }
