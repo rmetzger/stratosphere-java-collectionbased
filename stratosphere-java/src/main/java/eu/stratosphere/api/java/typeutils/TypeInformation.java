@@ -27,4 +27,4 @@ public interface TypeInformation<T> {
 	public int getArity();
 	
 	public Class<T> getType();
-	}
+}

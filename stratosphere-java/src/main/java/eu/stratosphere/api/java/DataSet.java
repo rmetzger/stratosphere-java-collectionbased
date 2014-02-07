@@ -36,7 +36,6 @@ import eu.stratosphere.api.java.operators.Keys;
 import eu.stratosphere.api.java.operators.MapOperator;
 import eu.stratosphere.api.java.operators.ReduceGroupOperator;
 import eu.stratosphere.api.java.operators.ReduceOperator;
-import eu.stratosphere.api.java.tuple.Tuple;
 import eu.stratosphere.api.java.typeutils.TypeInformation;
 import eu.stratosphere.core.fs.Path;
 
@@ -234,17 +233,5 @@ public abstract class DataSet<T> {
 	protected static void checkSameExecutionContext(DataSet<?> set1, DataSet<?> set2) {
 		if (set1.context != set2.context)
 			throw new IllegalArgumentException("The two inputs have different execution contexts.");
-	}
-	
-	
-	
-	
-	
-	public static class TupleDataSet<T extends Tuple> extends DataSet<T> {
-
-		protected TupleDataSet(ExecutionEnvironment context, TypeInformation<T> type) {
-			super(context, type);
-		}
-		
 	}
 }

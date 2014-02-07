@@ -24,6 +24,7 @@ import eu.stratosphere.api.java.functions.GroupReduceFunction;
 import eu.stratosphere.api.java.functions.InvalidTypesException;
 import eu.stratosphere.api.java.functions.JoinFunction;
 import eu.stratosphere.api.java.functions.MapFunction;
+import eu.stratosphere.api.java.tuple.Tuple;
 
 
 public class TypeExtractor {
@@ -34,7 +35,8 @@ public class TypeExtractor {
 	}
 	
 	public static <X> TypeInformation<X> getFlatMapReturnTypes(FlatMapFunction<?, X> flatMapFunction) {
-		return null;
+		Type returnType = getTemplateTypes (flatMapFunction.getClass(), 1);
+		return createTypeInfo(returnType);
 	}
 	
 	public static <X> TypeInformation<X> getGroupReduceReturnTypes(GroupReduceFunction<?, X> groupReduceFunction) {
@@ -62,6 +64,39 @@ public class TypeExtractor {
 	// --------------------------------------------------------------------------------------------
 	//  Generic utility methods
 	// --------------------------------------------------------------------------------------------
+	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public static <X> TypeInformation<X> createTypeInfo(Type t) {
+		
+		if (t instanceof ParameterizedType) {
+			ParameterizedType pt = (ParameterizedType) t;
+			
+			Type raw = pt.getRawType();
+			if (raw instanceof Class) {
+				
+				if (Tuple.class.isAssignableFrom((Class<?>) raw)) {
+					Type[] subtypes = pt.getActualTypeArguments();
+					
+					TypeInformation<?>[] tupleSubTypes = new TypeInformation<?>[subtypes.length];
+					for (int i = 0; i < subtypes.length; i++) {
+						tupleSubTypes[i] = createTypeInfo(subtypes[i]);
+					}
+					
+					return new TupleTypeInfo(tupleSubTypes);
+				}
+			}
+			
+		} else if (t instanceof Class) {
+			// basic or arbitrary
+			TypeInformation<?> basic = BasicTypeInfo.getInfoFor((Class) t);
+			if (basic != null) {
+				return (TypeInformation<X>) basic;
+			}
+		}
+		
+		return null;
+	}
+	
 	
 	public static ParameterizedType getTemplateTypesChecked(Class<?> clazz, int pos) {
 		Type t = getTemplateTypes(clazz, pos);

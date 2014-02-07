@@ -74,7 +74,7 @@ public abstract class ExecutionEnvironment {
 	}
 	
 	public DataSet<String> readTextFile(Path filePath) {
-		return new DataSource<String>(this, new TextInputFormat(filePath), BasicTypeInfo.getStringInfo() );
+		return new DataSource<String>(this, new TextInputFormat(filePath), BasicTypeInfo.STRING_TYPE_INFO );
 	}
 	
 	public DataSet<String> readTextFile(String filePath, String charsetName, boolean skipInvalidLines) {
@@ -85,7 +85,7 @@ public abstract class ExecutionEnvironment {
 		TextInputFormat format = new TextInputFormat(filePath);
 		format.setCharsetName(charsetName);
 		format.setSkipInvalidLines(skipInvalidLines);
-		return new DataSource<String>(this, format, BasicTypeInfo.getStringInfo() );
+		return new DataSource<String>(this, format, BasicTypeInfo.STRING_TYPE_INFO );
 	}
 	
 	// -------------------------- Text Input Format With String Value------------------------------

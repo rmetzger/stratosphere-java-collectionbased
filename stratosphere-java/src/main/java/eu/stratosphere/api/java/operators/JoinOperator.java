@@ -26,7 +26,7 @@ import eu.stratosphere.api.java.typeutils.TypeInformation;
 /**
  *
  */
-public abstract class JoinOperator<I1, I2, OUT> extends TwoInputOperator<I1, I2, OUT> {
+public abstract class JoinOperator<I1, I2, OUT> extends TwoInputUdfOperator<I1, I2, OUT, JoinOperator<I1, I2, OUT>> {
 	
 	/**
 	 * An enumeration of hints, optionally usable to tell the system how exactly execute the join.

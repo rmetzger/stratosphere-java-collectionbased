@@ -73,7 +73,7 @@ public class TextInputFormat extends DelimitedInputFormat<String> {
 	// --------------------------------------------------------------------------------------------
 
 	@Override
-	public String readRecord(String target, byte[] bytes, int offset, int numBytes) {
+	public String readRecord(String reusable, byte[] bytes, int offset, int numBytes) {
 		return new String(bytes, offset, numBytes, this.charset);
 	}
 	

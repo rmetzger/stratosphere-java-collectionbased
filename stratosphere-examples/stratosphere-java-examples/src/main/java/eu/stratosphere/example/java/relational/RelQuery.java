@@ -54,8 +54,6 @@ public class RelQuery {
 		
 		// filter
 		DataSet<Tuple5<Long, String, String, String, String>> filtered = orders.filter(
-			
-			
 			new FilterFunction<Tuple5<Long, String, String, String, String>>() {
 				@Override
 				public boolean filter(Tuple5<Long, String, String, String, String> value) throws Exception {
@@ -66,13 +64,10 @@ public class RelQuery {
 							Integer.parseInt(orderDate.substring(0, 4)) > yearFilter;
 				}
 		});
-		 
-		
 		
 		DataSet<Tuple3<Long, String, Double>> joined = filtered.join(lineitem).where(0).equalTo(0).with(new OLiJoinFunction());
 		
 		DataSet<Tuple3<Long, String, Double>> result = joined.groupBy(0, 1).aggregate(SUM, 2);
-		
 		
 		result.writeAsCsv(outputPath);
 	}

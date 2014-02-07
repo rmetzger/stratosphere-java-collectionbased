@@ -24,7 +24,7 @@ public class ContextEnvironment {
 		if (systemContext != null)
 			return systemContext;
 		else
-			throw new IllegalStateException("System context has not been initialized.");
+			return LocalEnvironment.createLocalEnvironment();
 	}
 	
 	public static void initializeContextEnvironment(ExecutionEnvironment ctx) {
