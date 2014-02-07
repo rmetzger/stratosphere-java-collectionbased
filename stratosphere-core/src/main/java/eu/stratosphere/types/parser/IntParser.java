@@ -13,22 +13,22 @@
 
 package eu.stratosphere.types.parser;
 
-import eu.stratosphere.types.ByteValue;
-
 /**
- * Parses a decimal text field into a {@link ByteValue}.
+ * Parses a decimal text field into a IntValue.
  * Only characters '1' to '0' and '-' are allowed.
+ * The parser does not check for the maximum value.
  */
-public class DecimalTextByteParser extends FieldParser<ByteValue> {
+public class IntParser extends FieldParser<Integer> {
 	
-	private ByteValue result;
+	private static final long OVERFLOW_BOUND = 0x7fffffffL;
+	private static final long UNDERFLOW_BOUND = 0x80000000L;
+
+	private int result;
 	
 	@Override
-	public int parseField(byte[] bytes, int startPos, int limit, char delimiter, ByteValue reusable) {
-		int val = 0;
+	public int parseField(byte[] bytes, int startPos, int limit, char delimiter, Integer reusable) {
+		long val = 0;
 		boolean neg = false;
-		
-		this.result = reusable;
 		
 		if (bytes[startPos] == '-') {
 			neg = true;
@@ -43,7 +43,7 @@ public class DecimalTextByteParser extends FieldParser<ByteValue> {
 		
 		for (int i = startPos; i < limit; i++) {
 			if (bytes[i] == delimiter) {
-				reusable.setValue((byte) (neg ? -val : val));
+				this.result = (int) (neg ? -val : val);
 				return i+1;
 			}
 			if (bytes[i] < 48 || bytes[i] > 57) {
@@ -53,23 +53,23 @@ public class DecimalTextByteParser extends FieldParser<ByteValue> {
 			val *= 10;
 			val += bytes[i] - 48;
 			
-			if (val > Byte.MAX_VALUE && (!neg || val > -Byte.MIN_VALUE)) {
+			if (val > OVERFLOW_BOUND && (!neg || val > UNDERFLOW_BOUND)) {
 				setErrorState(ParseErrorState.NUMERIC_VALUE_OVERFLOW_UNDERFLOW);
 				return -1;
 			}
 		}
 		
-		reusable.setValue((byte) (neg ? -val : val));
+		this.result = (int) (neg ? -val : val);
 		return limit;
 	}
 	
 	@Override
-	public ByteValue createValue() {
-		return new ByteValue();
+	public Integer createValue() {
+		return Integer.MIN_VALUE;
 	}
 
 	@Override
-	public ByteValue getLastResult() {
-		return this.result;
+	public Integer getLastResult() {
+		return Integer.valueOf(this.result);
 	}
 }

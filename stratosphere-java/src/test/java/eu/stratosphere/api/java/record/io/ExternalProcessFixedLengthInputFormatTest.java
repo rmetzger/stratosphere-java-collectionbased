@@ -171,7 +171,7 @@ private ExternalProcessFixedLengthInputFormat<ExternalProcessInputSplit> format;
 			format.configure(config);
 			format.open(split);
 			while(!format.reachedEnd()) {
-				if (format.nextRecord(record)) {
+				if (format.nextRecord(record) != null) {
 					cnt++;
 				}
 			}
@@ -199,7 +199,7 @@ private ExternalProcessFixedLengthInputFormat<ExternalProcessInputSplit> format;
 			format.configure(config);
 			format.open(split);
 			while(!format.reachedEnd()) {
-				if (format.nextRecord(record)) {
+				if (format.nextRecord(record) != null) {
 					cnt++;
 				}
 			}
@@ -272,6 +272,5 @@ private ExternalProcessFixedLengthInputFormat<ExternalProcessInputSplit> format;
 		public BaseStatistics getStatistics(BaseStatistics cachedStatistics) {
 			return null;
 		}
-
 	}
 }

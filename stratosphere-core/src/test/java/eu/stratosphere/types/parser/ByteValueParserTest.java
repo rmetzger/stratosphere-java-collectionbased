@@ -13,44 +13,41 @@
 
 package eu.stratosphere.types.parser;
 
-import eu.stratosphere.types.DoubleValue;
+import eu.stratosphere.types.ByteValue;
 
-/**
- * Parses a text field into a DoubleValue.
- */
-public class DecimalTextDoubleParser extends FieldParser<DoubleValue> {
-	
-	private DoubleValue result;
-	
+
+public class ByteValueParserTest extends ParserTestBase<ByteValue> {
+
 	@Override
-	public int parseField(byte[] bytes, int startPos, int limit, char delim, DoubleValue reusable) {
-		
-		int i = startPos;
-		final byte delByte = (byte) delim;
-		
-		while (i < limit && bytes[i] != delByte) {
-			i++;
-		}
-		
-		String str = new String(bytes, startPos, i-startPos);
-		try {
-			double value = Double.parseDouble(str);
-			reusable.setValue(value);
-			this.result = reusable;
-			return (i == limit) ? limit : i+1;
-		}
-		catch (NumberFormatException e) {
-			return -1;
-		}
+	public String[] getValidTestValues() {
+		return new String[] {
+			"0", "1", "76", "-66", String.valueOf(Byte.MAX_VALUE), String.valueOf(Byte.MIN_VALUE)
+		};
 	}
 	
 	@Override
-	public DoubleValue createValue() {
-		return new DoubleValue();
+	public ByteValue[] getValidTestResults() {
+		return new ByteValue[] {
+			new ByteValue((byte) 0), new ByteValue((byte) 1), new ByteValue((byte) 76), new ByteValue((byte) -66),
+			new ByteValue(Byte.MAX_VALUE), new ByteValue(Byte.MIN_VALUE)
+		};
 	}
 
 	@Override
-	public DoubleValue getLastResult() {
-		return this.result;
+	public String[] getInvalidTestValues() {
+		return new String[] {
+			"a", "9a", "-57-6", "7-88", String.valueOf(Byte.MAX_VALUE) + "0", String.valueOf(Short.MIN_VALUE),
+			String.valueOf(Byte.MAX_VALUE + 1), String.valueOf(Byte.MIN_VALUE - 1)
+		};
+	}
+
+	@Override
+	public FieldParser<ByteValue> getParser() {
+		return new DecimalTextByteParser();
+	}
+
+	@Override
+	public Class<ByteValue> getTypeClass() {
+		return ByteValue.class;
 	}
 }

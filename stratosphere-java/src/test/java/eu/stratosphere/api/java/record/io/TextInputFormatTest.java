@@ -72,13 +72,13 @@ public class TextInputFormatTest {
 			inputFormat.open(splits[0]);
 			
 			Record r = new Record();
-			assertTrue("Expecting first record here", inputFormat.nextRecord(r));
+			assertNotNull("Expecting first record here", inputFormat.nextRecord(r));
 			assertEquals(FIRST, r.getField(0, StringValue.class).getValue());
 			
-			assertTrue("Expecting second record here",inputFormat.nextRecord(r ));
+			assertNotNull("Expecting second record here",inputFormat.nextRecord(r ));
 			assertEquals(SECOND, r.getField(0, StringValue.class).getValue());
 			
-			assertFalse("The input file is over", inputFormat.nextRecord(r));
+			assertNull("The input file is over", inputFormat.nextRecord(r));
 		}
 		catch (Throwable t) {
 			System.err.println("test failed with exception: " + t.getMessage());

@@ -111,7 +111,7 @@ public class AvroInputFormatTest {
 		Assert.assertEquals(splits.length, 1);
 		format.open(splits[0]);
 		Record record = new Record();
-		Assert.assertTrue(format.nextRecord(record));
+		Assert.assertNotNull(format.nextRecord(record));
 		StringValue name = record.getField(0, StringValue.class);
 		Assert.assertNotNull("empty record", name);
 		Assert.assertEquals("name not equal",name.getValue(), TEST_NAME);
@@ -136,9 +136,9 @@ public class AvroInputFormatTest {
 		
 		
 		Assert.assertFalse("expecting second element", format.reachedEnd());
-		Assert.assertTrue("expecting second element", format.nextRecord(record));
+		Assert.assertNotNull("expecting second element", format.nextRecord(record));
 		
-		Assert.assertFalse(format.nextRecord(record));
+		Assert.assertNull(format.nextRecord(record));
 		Assert.assertTrue(format.reachedEnd());
 		
 		format.close();

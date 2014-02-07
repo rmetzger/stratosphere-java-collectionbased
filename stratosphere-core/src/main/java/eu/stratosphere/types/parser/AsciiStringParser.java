@@ -13,28 +13,27 @@
 
 package eu.stratosphere.types.parser;
 
-import eu.stratosphere.types.StringValue;
+import java.nio.charset.Charset;
 
 /**
- * Converts a variable length field of a byte array into a {@link StringValue}. The byte contents between
+ * Converts a variable length field of a byte array into a {@link String}. The byte contents between
  * delimiters is interpreted as an ASCII string. The string may be quoted in double quotes. For quoted
  * strings, whitespaces (space and tab) leading and trailing before and after the quotes are removed.
- * 
- * @see StringValue
  */
-public class VarLengthStringParser extends FieldParser<StringValue> {
+public class AsciiStringParser extends FieldParser<String> {
 
+	// the default (ascii style) charset. should be available really everywhere.
+	private static final Charset CHARSET = Charset.forName("ISO-8859-1");
+	
 	private static final byte WHITESPACE_SPACE = (byte) ' ';
 	private static final byte WHITESPACE_TAB = (byte) '\t';
 	
 	private static final byte QUOTE_DOUBLE = (byte) '"';
 	
-	private StringValue result;
+	private String result;
 	
 	@Override
-	public int parseField(byte[] bytes, int startPos, int length, char delim, StringValue reusable) {
-		
-		this.result = reusable;
+	public int parseField(byte[] bytes, int startPos, int limit, char delim, String reusable) {
 		
 		int i = startPos;
 		
@@ -42,29 +41,29 @@ public class VarLengthStringParser extends FieldParser<StringValue> {
 		byte current;
 		
 		// count initial whitespace lines
-		while (i < length && ((current = bytes[i]) == WHITESPACE_SPACE || current == WHITESPACE_TAB)) {
+		while (i < limit && ((current = bytes[i]) == WHITESPACE_SPACE || current == WHITESPACE_TAB)) {
 			i++;
 		}
 		
 		// first none whitespace character
-		if (i < length && bytes[i] == QUOTE_DOUBLE) {
+		if (i < limit && bytes[i] == QUOTE_DOUBLE) {
 			// quoted string
 			i++; // the quote
 			
 			// we count only from after the quote
 			int quoteStart = i;
-			while (i < length && bytes[i] != QUOTE_DOUBLE) {
+			while (i < limit && bytes[i] != QUOTE_DOUBLE) {
 				i++;
 			}
 			
-			if (i < length) {
+			if (i < limit) {
 				// end of the string
-				reusable.setValueAscii(bytes, quoteStart, i-quoteStart);
+				this.result = new String(bytes, quoteStart, i-quoteStart, CHARSET);
 				
 				i++; // the quote
 				
 				// skip trailing whitespace characters 
-				while (i < length && (current = bytes[i]) != delByte) {
+				while (i < limit && (current = bytes[i]) != delByte) {
 					if (current == WHITESPACE_SPACE || current == WHITESPACE_TAB) {
 						i++;
 					}
@@ -74,7 +73,7 @@ public class VarLengthStringParser extends FieldParser<StringValue> {
 					}
 				}
 				
-				return (i == length ? length : i+1);
+				return (i == limit ? limit : i+1);
 			} else {
 				// exited due to line end without quote termination
 				setErrorState(ParseErrorState.UNTERMINATED_QUOTED_STRING);
@@ -83,23 +82,23 @@ public class VarLengthStringParser extends FieldParser<StringValue> {
 		}
 		else {
 			// unquoted string
-			while (i < length && bytes[i] != delByte) {
+			while (i < limit && bytes[i] != delByte) {
 				i++;
 			}
 			
 			// set from the beginning. unquoted strings include the leading whitespaces
-			reusable.setValueAscii(bytes, startPos, i-startPos);
-			return (i == length ? length : i+1);
+			this.result = new String(bytes, startPos, i-startPos, CHARSET);
+			return (i == limit ? limit : i+1);
 		}
 	}
 	
 	@Override
-	public StringValue createValue() {
-		return new StringValue();
+	public String createValue() {
+		return "";
 	}
 
 	@Override
-	public StringValue getLastResult() {
+	public String getLastResult() {
 		return this.result;
 	}
 }

@@ -13,22 +13,15 @@
 
 package eu.stratosphere.types.parser;
 
-import eu.stratosphere.types.ByteValue;
 
-/**
- * Parses a decimal text field into a {@link ByteValue}.
- * Only characters '1' to '0' and '-' are allowed.
- */
-public class DecimalTextByteParser extends FieldParser<ByteValue> {
+public class ByteParser extends FieldParser<Byte> {
 	
-	private ByteValue result;
+	private byte result;
 	
 	@Override
-	public int parseField(byte[] bytes, int startPos, int limit, char delimiter, ByteValue reusable) {
+	public int parseField(byte[] bytes, int startPos, int limit, char delimiter, Byte reusable) {
 		int val = 0;
 		boolean neg = false;
-		
-		this.result = reusable;
 		
 		if (bytes[startPos] == '-') {
 			neg = true;
@@ -43,7 +36,7 @@ public class DecimalTextByteParser extends FieldParser<ByteValue> {
 		
 		for (int i = startPos; i < limit; i++) {
 			if (bytes[i] == delimiter) {
-				reusable.setValue((byte) (neg ? -val : val));
+				this.result = (byte) (neg ? -val : val);
 				return i+1;
 			}
 			if (bytes[i] < 48 || bytes[i] > 57) {
@@ -59,17 +52,17 @@ public class DecimalTextByteParser extends FieldParser<ByteValue> {
 			}
 		}
 		
-		reusable.setValue((byte) (neg ? -val : val));
+		this.result = (byte) (neg ? -val : val);
 		return limit;
 	}
 	
 	@Override
-	public ByteValue createValue() {
-		return new ByteValue();
+	public Byte createValue() {
+		return Byte.MIN_VALUE;
 	}
 
 	@Override
-	public ByteValue getLastResult() {
-		return this.result;
+	public Byte getLastResult() {
+		return Byte.valueOf(this.result);
 	}
 }

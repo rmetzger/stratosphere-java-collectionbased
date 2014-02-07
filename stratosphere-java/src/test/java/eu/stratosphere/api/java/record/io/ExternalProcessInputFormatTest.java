@@ -164,7 +164,7 @@ public class ExternalProcessInputFormatTest {
 			format.configure(config);
 			format.open(split);
 			while(!format.reachedEnd()) {
-				if (format.nextRecord(record)) {
+				if (format.nextRecord(record) != null) {
 					cnt++;
 				}
 			}
@@ -202,8 +202,7 @@ public class ExternalProcessInputFormatTest {
 		}
 		
 		@Override
-		public ExternalProcessInputSplit[] createInputSplits(int minNumSplits)
-				throws IOException {
+		public ExternalProcessInputSplit[] createInputSplits(int minNumSplits) {
 			return null;
 		}
 
@@ -218,7 +217,7 @@ public class ExternalProcessInputFormatTest {
 		}
 
 		@Override
-		public boolean nextRecord(Record record) throws IOException {
+		public Record nextRecord(Record reuse) throws IOException {
 			
 			if(cnt > failCnt) {
 				throw new RuntimeException("This is a test exception!");
@@ -231,7 +230,7 @@ public class ExternalProcessInputFormatTest {
 				
 				if(readCnt == -1) {
 					this.end = true;
-					return false;
+					return null;
 				} else {
 					totalReadCnt += readCnt;
 				}
@@ -250,12 +249,12 @@ public class ExternalProcessInputFormatTest {
 			v2 = (v2 << 8) | (0xFF & buf[6]);
 			v2 = (v2 << 8) | (0xFF & buf[7]);
 			
-			record.setField(0,new IntValue(v1));
-			record.setField(1,new IntValue(v2));
+			reuse.setField(0,new IntValue(v1));
+			reuse.setField(1,new IntValue(v2));
 			
 			this.cnt++;
 			
-			return true;
+			return reuse;
 		}
 
 		@Override

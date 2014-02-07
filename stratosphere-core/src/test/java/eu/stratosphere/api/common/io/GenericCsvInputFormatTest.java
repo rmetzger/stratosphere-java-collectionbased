@@ -410,7 +410,7 @@ public class GenericCsvInputFormatTest {
 		private static final long serialVersionUID = 2653609265252951059L;
 
 		@Override
-		public boolean readRecord(Value[] target, byte[] bytes, int offset, int numBytes) {
+		public Value[] readRecord(Value[] target, byte[] bytes, int offset, int numBytes) {
 			return parseRecord(target, bytes, offset, numBytes);
 		}
 	}

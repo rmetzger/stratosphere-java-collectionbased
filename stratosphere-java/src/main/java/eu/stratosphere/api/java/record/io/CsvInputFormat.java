@@ -14,6 +14,10 @@
 package eu.stratosphere.api.java.record.io;
 
 import java.io.IOException;
+import java.util.ArrayList;
+
+import com.google.common.base.Preconditions;
+import com.google.common.primitives.Ints;
 
 import eu.stratosphere.api.common.operators.CompilerHints;
 import eu.stratosphere.api.common.operators.FileDataSource;
@@ -65,15 +69,84 @@ public class CsvInputFormat extends GenericCsvInputFormat<Record> {
 	}
 	
 	public CsvInputFormat(char fieldDelimiter) {
-		super(fieldDelimiter);
+		super();
+		setFieldDelim(fieldDelimiter);
 	}
 	
 	public CsvInputFormat(Class<? extends Value> ... fields) {
-		super(fields);
+		super();
+		setFieldTypes(fields);
 	}
 	
 	public CsvInputFormat(char fieldDelimiter, Class<? extends Value> ... fields) {
-		super(fieldDelimiter, fields);
+		super();
+		setFieldDelim(fieldDelimiter);
+		setFieldTypes(fields);
+	}
+	
+	// --------------------------------------------------------------------------------------------
+	
+	public void setFieldTypesArray(Class<? extends Value>[] fieldTypes) {
+		setFieldTypes(fieldTypes);
+	}
+
+	public void setFieldTypes(Class<? extends Value> ... fieldTypes) {
+		if (fieldTypes == null)
+			throw new IllegalArgumentException("Field types must not be null.");
+		
+		this.fieldIncluded = new boolean[fieldTypes.length];
+		ArrayList<Class<? extends Value>> types = new ArrayList<Class<? extends Value>>();
+		
+		// check if we support parsers for these types
+		for (int i = 0; i < fieldTypes.length; i++) {
+			Class<? extends Value> type = fieldTypes[i];
+			
+			if (type != null) {
+				if (FieldParser.getParserForType(type) == null) {
+					throw new IllegalArgumentException("The type '" + type.getName() + "' is not supported for the CSV input format.");
+				}
+				types.add(type);
+				fieldIncluded[i] = true;
+			}
+		}
+		
+		@SuppressWarnings("unchecked")
+		Class<? extends Value>[] denseTypeArray = (Class<? extends Value>[]) types.toArray(new Class[types.size()]);
+		this.fieldTypes = denseTypeArray;
+	}
+
+	public void setFields(int[] sourceFieldIndices, Class<? extends Value>[] fieldTypes) {
+		Preconditions.checkNotNull(fieldTypes);
+		Preconditions.checkArgument(sourceFieldIndices.length == fieldTypes.length,
+			"Number of field indices and field types must match.");
+
+		for (int i : sourceFieldIndices) {
+			if (i < 0) {
+				throw new IllegalArgumentException("Field indices must not be smaller than zero.");
+			}
+		}
+
+		int largestFieldIndex = Ints.max(sourceFieldIndices);
+		this.fieldIncluded = new boolean[largestFieldIndex + 1];
+		ArrayList<Class<? extends Value>> types = new ArrayList<Class<? extends Value>>();
+
+		// check if we support parsers for these types
+		for (int i = 0; i < fieldTypes.length; i++) {
+			Class<? extends Value> type = fieldTypes[i];
+
+			if (type != null) {
+				if (FieldParser.getParserForType(type) == null) {
+					throw new IllegalArgumentException("The type '" + type.getName()
+						+ "' is not supported for the CSV input format.");
+				}
+				types.add(type);
+				fieldIncluded[sourceFieldIndices[i]] = true;
+			}
+		}
+
+		@SuppressWarnings("unchecked")
+		Class<? extends Value>[] denseTypeArray = (Class<? extends Value>[]) types.toArray(new Class[types.size()]);
+		this.fieldTypes = denseTypeArray;
 	}
 	
 	// --------------------------------------------------------------------------------------------

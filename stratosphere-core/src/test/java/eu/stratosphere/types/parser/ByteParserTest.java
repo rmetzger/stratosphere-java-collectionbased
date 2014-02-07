@@ -1,5 +1,4 @@
 /***********************************************************************************************************************
- *
  * Copyright (C) 2010-2013 by the Stratosphere project (http://stratosphere.eu)
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
@@ -10,45 +9,42 @@
  * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
- *
  **********************************************************************************************************************/
-package eu.stratosphere.api.java.typeutils;
 
-import eu.stratosphere.types.Value;
+package eu.stratosphere.types.parser;
 
 
-/**
- *
- */
-public class ValueTypeInfo<T extends Value> implements TypeInformation<T> {
+public class ByteParserTest extends ParserTestBase<Byte> {
 
-	private final Class<T> type;
-
-	
-	public ValueTypeInfo(Class<T> type) {
-		this.type = type;
+	@Override
+	public String[] getValidTestValues() {
+		return new String[] {
+			"0", "1", "76", "-66", String.valueOf(Byte.MAX_VALUE), String.valueOf(Byte.MIN_VALUE)
+		};
 	}
 	
-	
 	@Override
-	public int getArity() {
-		return 1;
-	}
-
-
-	@Override
-	public Class<T> getType() {
-		return this.type;
-	}
-
-
-	@Override
-	public boolean isBasicType() {
-		return false;
+	public Byte[] getValidTestResults() {
+		return new Byte[] {
+			(byte) 0, (byte)1, (byte)76, (byte) -66, Byte.MAX_VALUE, Byte.MIN_VALUE
+		};
 	}
 
 	@Override
-	public boolean isTupleType() {
-		return false;
+	public String[] getInvalidTestValues() {
+		return new String[] {
+			"a", "9a", "-57-6", "7-88", String.valueOf(Byte.MAX_VALUE) + "0", String.valueOf(Short.MIN_VALUE),
+			String.valueOf(Byte.MAX_VALUE + 1), String.valueOf(Byte.MIN_VALUE - 1)
+		};
+	}
+
+	@Override
+	public FieldParser<Byte> getParser() {
+		return new ByteParser();
+	}
+
+	@Override
+	public Class<Byte> getTypeClass() {
+		return Byte.class;
 	}
 }

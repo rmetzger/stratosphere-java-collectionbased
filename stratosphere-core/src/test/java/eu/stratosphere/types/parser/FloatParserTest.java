@@ -13,44 +13,45 @@
 
 package eu.stratosphere.types.parser;
 
-import eu.stratosphere.types.DoubleValue;
 
-/**
- * Parses a text field into a DoubleValue.
- */
-public class DecimalTextDoubleParser extends FieldParser<DoubleValue> {
-	
-	private DoubleValue result;
-	
+public class FloatParserTest extends ParserTestBase<Float> {
+
 	@Override
-	public int parseField(byte[] bytes, int startPos, int limit, char delim, DoubleValue reusable) {
-		
-		int i = startPos;
-		final byte delByte = (byte) delim;
-		
-		while (i < limit && bytes[i] != delByte) {
-			i++;
-		}
-		
-		String str = new String(bytes, startPos, i-startPos);
-		try {
-			double value = Double.parseDouble(str);
-			reusable.setValue(value);
-			this.result = reusable;
-			return (i == limit) ? limit : i+1;
-		}
-		catch (NumberFormatException e) {
-			return -1;
-		}
+	public String[] getValidTestValues() {
+		return new String[] {
+			"0", "0.0", "123.4", "0.124", ".623", "1234", "-12.34", 
+			String.valueOf(Float.MAX_VALUE), String.valueOf(Float.MIN_VALUE),
+			String.valueOf(Float.NEGATIVE_INFINITY), String.valueOf(Float.POSITIVE_INFINITY),
+			String.valueOf(Float.NaN),
+			"1.234E2", "1.234e3", "1.234E-2"
+		};
 	}
 	
 	@Override
-	public DoubleValue createValue() {
-		return new DoubleValue();
+	public Float[] getValidTestResults() {
+		return new Float[] {
+			0f, 0.0f, 123.4f, 0.124f, .623f, 1234f, -12.34f, 
+			Float.MAX_VALUE, Float.MIN_VALUE,
+			Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY,
+			Float.NaN,
+			1.234E2f, 1.234e3f, 1.234E-2f
+		};
 	}
 
 	@Override
-	public DoubleValue getLastResult() {
-		return this.result;
+	public String[] getInvalidTestValues() {
+		return new String[] {
+			"a", "123abc4", "-57-6", "7-877678"
+		};
+	}
+
+	@Override
+	public FieldParser<Float> getParser() {
+		return new FloatParser();
+	}
+
+	@Override
+	public Class<Float> getTypeClass() {
+		return Float.class;
 	}
 }

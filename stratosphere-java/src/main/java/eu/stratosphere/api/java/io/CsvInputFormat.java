@@ -24,12 +24,15 @@ public class CsvInputFormat<OUT extends Tuple> extends GenericCsvInputFormat<OUT
 
 	private static final long serialVersionUID = 1L;
 
+	private transient Value
 	
 	public CsvInputFormat(Path filePath, String lineDelimiter, char fieldDelimiter, Class<?> ... types) {
 		super(filePath);
 		
 		setDelimiter(lineDelimiter);
 		setFieldDelim(fieldDelimiter);
+		
+		setFieldTypes(types);
 	}
 	
 

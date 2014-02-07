@@ -13,22 +13,18 @@
 
 package eu.stratosphere.types.parser;
 
-import eu.stratosphere.types.LongValue;
-
 /**
  * Parses a decimal text field into a LongValue.
  * Only characters '1' to '0' and '-' are allowed.
  */
-public class DecimalTextLongParser extends FieldParser<LongValue> {
+public class LongParser extends FieldParser<Long> {
 	
-	private LongValue result;
+	private long result;
 	
 	@Override
-	public int parseField(byte[] bytes, int startPos, int limit, char delimiter, LongValue reusable) {
+	public int parseField(byte[] bytes, int startPos, int limit, char delimiter, Long reusable) {
 		long val = 0;
 		boolean neg = false;
-		
-		this.result = reusable;
 		
 		if (bytes[startPos] == '-') {
 			neg = true;
@@ -43,7 +39,7 @@ public class DecimalTextLongParser extends FieldParser<LongValue> {
 		
 		for (int i = startPos; i < limit; i++) {
 			if (bytes[i] == delimiter) {
-				reusable.setValue(neg ? -val : val);
+				this.result = neg ? -val : val;
 				return i+1;
 			}
 			if (bytes[i] < 48 || bytes[i] > 57) {
@@ -57,7 +53,7 @@ public class DecimalTextLongParser extends FieldParser<LongValue> {
 			if (val < 0) {
 				// this is an overflow/underflow, unless we hit exactly the Long.MIN_VALUE
 				if (neg && val == Long.MIN_VALUE) {
-					reusable.setValue(Long.MIN_VALUE);
+					this.result = Long.MIN_VALUE;
 					
 					if (i+1 >= limit) {
 						return limit; 
@@ -75,20 +71,19 @@ public class DecimalTextLongParser extends FieldParser<LongValue> {
 			}
 		}
 		
-		reusable.setValue(neg ? -val : val);
+		this.result = neg ? -val : val;
 		return limit;
 	}
 	
 	@Override
-	public LongValue createValue() {
-		return new LongValue();
+	public Long createValue() {
+		return Long.MIN_VALUE;
 	}
 	
 	@Override
-	public LongValue getLastResult() {
-		return this.result;
+	public Long getLastResult() {
+		return Long.valueOf(this.result);
 	}
-	
 	
 	
 	public static final long parseField(byte[] bytes, int startPos, int length, char delim) {

@@ -66,9 +66,9 @@ public class AvroInputFormat extends FileInputFormat {
 	}
 
 	@Override
-	public boolean nextRecord(Record record) throws IOException {
+	public Record nextRecord(Record record) throws IOException {
 		if (!dataFileReader.hasNext()) {
-			return false;
+			return null;
 		}
 		if (record == null) {
 			throw new IllegalArgumentException("Empty PactRecord given");
@@ -81,7 +81,7 @@ public class AvroInputFormat extends FileInputFormat {
 			record.updateBinaryRepresenation();
 		}
 
-		return true;
+		return record;
 	}
 
 

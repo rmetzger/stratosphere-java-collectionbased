@@ -13,22 +13,24 @@
 
 package eu.stratosphere.types.parser;
 
-import eu.stratosphere.types.ByteValue;
+import eu.stratosphere.types.ShortValue;
 
 /**
- * Parses a decimal text field into a {@link ByteValue}.
+ * Parses a decimal text field into a {@link ShortValue}.
  * Only characters '1' to '0' and '-' are allowed.
+ * The parser does not check for the maximum value.
  */
-public class DecimalTextByteParser extends FieldParser<ByteValue> {
+public class ShortParser extends FieldParser<Short> {
 	
-	private ByteValue result;
+	private static final int OVERFLOW_BOUND = 0x7fff;
+	private static final int UNDERFLOW_BOUND = 0x8000;
 	
+	private short result;
+
 	@Override
-	public int parseField(byte[] bytes, int startPos, int limit, char delimiter, ByteValue reusable) {
+	public int parseField(byte[] bytes, int startPos, int limit, char delimiter, Short reusable) {
 		int val = 0;
 		boolean neg = false;
-		
-		this.result = reusable;
 		
 		if (bytes[startPos] == '-') {
 			neg = true;
@@ -43,7 +45,7 @@ public class DecimalTextByteParser extends FieldParser<ByteValue> {
 		
 		for (int i = startPos; i < limit; i++) {
 			if (bytes[i] == delimiter) {
-				reusable.setValue((byte) (neg ? -val : val));
+				this.result = (short) (neg ? -val : val);
 				return i+1;
 			}
 			if (bytes[i] < 48 || bytes[i] > 57) {
@@ -53,23 +55,23 @@ public class DecimalTextByteParser extends FieldParser<ByteValue> {
 			val *= 10;
 			val += bytes[i] - 48;
 			
-			if (val > Byte.MAX_VALUE && (!neg || val > -Byte.MIN_VALUE)) {
+			if (val > OVERFLOW_BOUND && (!neg || val > UNDERFLOW_BOUND)) {
 				setErrorState(ParseErrorState.NUMERIC_VALUE_OVERFLOW_UNDERFLOW);
 				return -1;
 			}
 		}
 		
-		reusable.setValue((byte) (neg ? -val : val));
+		this.result = (short) (neg ? -val : val);
 		return limit;
 	}
 	
 	@Override
-	public ByteValue createValue() {
-		return new ByteValue();
+	public Short createValue() {
+		return Short.MIN_VALUE;
 	}
 
 	@Override
-	public ByteValue getLastResult() {
-		return this.result;
+	public Short getLastResult() {
+		return Short.valueOf(this.result);
 	}
 }
