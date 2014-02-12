@@ -21,7 +21,7 @@ import eu.stratosphere.api.java.functions.ReduceFunction;
  *
  * @param <IN> The type of the data set reduced by the operator.
  */
-public class ReduceOperator<IN> extends SingleInputOperator<IN, IN> {
+public class ReduceOperator<IN> extends SingleInputUdfOperator<IN, IN, ReduceOperator<IN>> {
 	
 	@SuppressWarnings("unused")
 	private final ReduceFunction<IN> function;
