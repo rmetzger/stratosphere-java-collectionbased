@@ -28,7 +28,7 @@ import eu.stratosphere.configuration.Configuration;
  * @param <OUT> The data type of the returned data set.
  */
 public abstract class SingleInputUdfOperator<IN, OUT, O extends SingleInputUdfOperator<IN, OUT, O>>
-	extends SingleInputOperator<IN, OUT> implements UdfOperator
+	extends SingleInputOperator<IN, OUT, O> implements UdfOperator
 {
 	private Configuration parameters;
 	

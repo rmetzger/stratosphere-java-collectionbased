@@ -23,7 +23,7 @@ import eu.stratosphere.api.java.typeutils.TypeInformation;
  * @param <IN2> The data type of the second input data set.
  * @param <OUT> The data type of the returned data set.
  */
-public abstract class TwoInputOperator<IN1, IN2, OUT> extends Operator<OUT> {
+public abstract class TwoInputOperator<IN1, IN2, OUT, O extends TwoInputOperator<IN1, IN2, OUT, O>> extends Operator<OUT, O> {
 	
 	private final DataSet<IN1> input1;
 	private final DataSet<IN2> input2;

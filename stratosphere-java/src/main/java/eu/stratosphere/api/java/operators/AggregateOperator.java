@@ -20,7 +20,7 @@ import eu.stratosphere.api.java.aggregation.Aggregations;
 /**
  * @param <IN> The type of the data set aggregated by the operator.
  */
-public class AggregateOperator<IN> extends SingleInputOperator<IN, IN> {
+public class AggregateOperator<IN> extends SingleInputOperator<IN, IN, AggregateOperator<IN>> {
 	
 	private final Aggregations[] aggregationFunctions;
 	
@@ -80,6 +80,6 @@ public class AggregateOperator<IN> extends SingleInputOperator<IN, IN> {
 		this.fields = new int[] { field };
 		
 		// get the grouping fields
-		this.groupingFields = input.getGroupingFields();
+//		this.groupingFields = input.getGroupingFields();
 	}
 }

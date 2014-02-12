@@ -22,7 +22,7 @@ import eu.stratosphere.api.java.typeutils.TypeInformation;
  * @param <IN> The data type of the input data set.
  * @param <OUT> The data type of the returned data set.
  */
-public abstract class SingleInputOperator<IN, OUT> extends Operator<OUT> {
+public abstract class SingleInputOperator<IN, OUT, O extends SingleInputOperator<IN, OUT, O>> extends Operator<OUT, O> {
 	
 	private final DataSet<IN> input;
 	

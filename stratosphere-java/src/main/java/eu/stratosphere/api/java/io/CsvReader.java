@@ -73,6 +73,11 @@ public class CsvReader {
 		this.includedMask = fields;
 		return this;
 	}
+
+	public CsvReader includeFields(int ... fields) {
+		// TODO: implement this
+		return this;
+	}
 	
 	public CsvReader includeFields(String mask) {
 		this.includedMask = new boolean[mask.length()];
