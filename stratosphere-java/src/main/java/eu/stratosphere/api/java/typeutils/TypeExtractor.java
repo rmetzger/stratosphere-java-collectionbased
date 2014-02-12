@@ -21,11 +21,7 @@ import java.util.Map;
 
 import com.google.common.collect.Maps;
 import eu.stratosphere.api.common.io.InputFormat;
-import eu.stratosphere.api.java.functions.FlatMapFunction;
-import eu.stratosphere.api.java.functions.GroupReduceFunction;
-import eu.stratosphere.api.java.functions.InvalidTypesException;
-import eu.stratosphere.api.java.functions.JoinFunction;
-import eu.stratosphere.api.java.functions.MapFunction;
+import eu.stratosphere.api.java.functions.*;
 import eu.stratosphere.api.java.tuple.Tuple;
 
 
@@ -48,8 +44,14 @@ public class TypeExtractor {
 	public static <X> TypeInformation<X> getJoinReturnTypes(JoinFunction<?, ?, X> joinFunction) {
 		return null;
 	}
-	
-	
+
+	public static <X> TypeInformation<X> getCoGroupReturnTypes(CoGroupFunction<?, ?, X> coGroupFunction) {
+		return null;
+	}
+
+	public static <X> TypeInformation<X> getCrossReturnTypes(CrossFunction<?, ?, X> crossFunction) {
+		return null;
+	}
 
 	
 	public static <X> TypeInformation<X> extractInputFormatTypes(InputFormat<X, ?> format) {

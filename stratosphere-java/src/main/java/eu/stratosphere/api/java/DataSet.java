@@ -24,19 +24,11 @@ import eu.stratosphere.api.java.functions.KeyExtractor;
 import eu.stratosphere.api.java.functions.MapFunction;
 import eu.stratosphere.api.java.functions.ReduceFunction;
 import eu.stratosphere.api.java.io.PrintingOutputFormat;
-import eu.stratosphere.api.java.operators.AggregateOperator;
-import eu.stratosphere.api.java.operators.DataSink;
-import eu.stratosphere.api.java.operators.DistinctOperator;
-import eu.stratosphere.api.java.operators.FilterOperator;
-import eu.stratosphere.api.java.operators.FlatMapOperator;
-import eu.stratosphere.api.java.operators.Grouping;
+import eu.stratosphere.api.java.operators.*;
 import eu.stratosphere.api.java.operators.JoinOperator.JoinHint;
 import eu.stratosphere.api.java.operators.JoinOperator.JoinOperatorSets;
-import eu.stratosphere.api.java.operators.Keys;
-import eu.stratosphere.api.java.operators.MapOperator;
-import eu.stratosphere.api.java.operators.ReduceGroupOperator;
-import eu.stratosphere.api.java.operators.ReduceOperator;
 import eu.stratosphere.api.java.typeutils.TypeInformation;
+import eu.stratosphere.api.java.typeutils.UnionDataSet;
 import eu.stratosphere.core.fs.Path;
 
 /**
@@ -151,14 +143,24 @@ public abstract class DataSet<T> {
 	//  Co-Grouping
 	// --------------------------------------------------------------------------------------------
 
+	public <R> CoGroupOperator.CoGroupOperatorSets<T, R> coGroup(DataSet<R> other) {
+		return new CoGroupOperator.CoGroupOperatorSets<T, R>(this, other);
+	}
+
 	// --------------------------------------------------------------------------------------------
 	//  Cross
 	// --------------------------------------------------------------------------------------------
-	
-	
+
+	public <R> CrossOperator.CrossOperatorSets<T, R> cross(DataSet<R> other) {
+		return new CrossOperator.CrossOperatorSets<T, R>(this, other);
+	}
+
 	// --------------------------------------------------------------------------------------------
 	//  Union
 	// --------------------------------------------------------------------------------------------
+	public UnionDataSet<T> union(DataSet<T> other) {
+		return new UnionDataSet<T>(this, other);
+	}
 
 	// --------------------------------------------------------------------------------------------
 	//  Top-K
