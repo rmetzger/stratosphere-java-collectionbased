@@ -15,14 +15,14 @@
 package eu.stratosphere.api.java;
 
 
-public class InvalidProgramExcaption extends RuntimeException {
+public class InvalidProgramException extends RuntimeException {
 	private static final long serialVersionUID = 1L;
 
-	public InvalidProgramExcaption() {
+	public InvalidProgramException() {
 		super();
 	}
 
-	public InvalidProgramExcaption(String message) {
+	public InvalidProgramException(String message) {
 		super(message);
 	}
 }
