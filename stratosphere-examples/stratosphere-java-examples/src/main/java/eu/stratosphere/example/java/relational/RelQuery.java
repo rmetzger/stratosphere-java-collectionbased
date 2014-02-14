@@ -28,6 +28,7 @@ import static eu.stratosphere.api.java.aggregation.Aggregations.*;
 
 public class RelQuery {
 	
+	@SuppressWarnings("serial")
 	public static void main(String[] args) {
 		if (args.length < 3) {
 			System.out.println("Usage: <input orders> <input lineitem> <output path>");
@@ -74,6 +75,8 @@ public class RelQuery {
 	
 	
 	public static class OLiJoinFunction extends JoinFunction<Tuple5<Long, String, String, String, String>, Tuple2<Long, Double>, Tuple3<Long, String, Double>> {
+
+		private static final long serialVersionUID = 1L;
 
 		@Override
 		public Tuple3<Long, String, Double> join(Tuple5<Long, String, String, String, String> first,

@@ -20,8 +20,6 @@ import eu.stratosphere.api.common.io.FileInputFormat;
  */
 public class FileDataSource extends GenericDataSource<FileInputFormat<?>> {
 	
-	private static String DEFAULT_NAME = "<Unnamed File Data Source>";
-	
 	protected final String filePath;
 
 	// --------------------------------------------------------------------------------------------
@@ -46,7 +44,7 @@ public class FileDataSource extends GenericDataSource<FileInputFormat<?>> {
 	 * @param filePath The file location. The file path must be a fully qualified URI, including the address schema.
 	 */
 	public FileDataSource(FileInputFormat<?> f, String filePath) {
-		this(f, filePath, DEFAULT_NAME);
+		this(f, filePath, "File " + filePath);
 	}
 	
 	/**
@@ -69,7 +67,7 @@ public class FileDataSource extends GenericDataSource<FileInputFormat<?>> {
 	 * @param filePath The file location. The file path must be a fully qualified URI, including the address schema.
 	 */
 	public FileDataSource(Class<? extends FileInputFormat<?>> f, String filePath) {
-		this(f, filePath, DEFAULT_NAME);
+		this(f, filePath, "File " + filePath);
 	}
 
 	// --------------------------------------------------------------------------------------------

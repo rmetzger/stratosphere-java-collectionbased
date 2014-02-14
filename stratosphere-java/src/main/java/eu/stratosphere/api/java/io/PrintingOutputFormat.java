@@ -14,7 +14,6 @@
  **********************************************************************************************************************/
 package eu.stratosphere.api.java.io;
 
-import java.io.IOException;
 import java.io.PrintStream;
 
 import eu.stratosphere.api.common.io.OutputFormat;
@@ -66,7 +65,7 @@ public class PrintingOutputFormat<T> implements OutputFormat<T> {
 
 
 	@Override
-	public void open(int taskNumber, int numTasks) throws IOException {
+	public void open(int taskNumber, int numTasks) {
 		// get the target stream
 		this.stream = this.target == STD_OUT ? System.out : System.err;
 		
@@ -75,7 +74,7 @@ public class PrintingOutputFormat<T> implements OutputFormat<T> {
 	}
 
 	@Override
-	public void writeRecord(T record) throws IOException {
+	public void writeRecord(T record) {
 		if (this.prefix != null) {
 			this.stream.println(this.prefix + record.toString());
 		}
@@ -85,7 +84,7 @@ public class PrintingOutputFormat<T> implements OutputFormat<T> {
 	}
 
 	@Override
-	public void close() throws IOException {
+	public void close() {
 		this.stream = null;
 		this.prefix = null;
 	}

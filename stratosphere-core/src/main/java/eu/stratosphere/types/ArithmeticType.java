@@ -12,26 +12,16 @@
  * specific language governing permissions and limitations under the License.
  *
  **********************************************************************************************************************/
-package eu.stratosphere.api.java;
-
-import eu.stratosphere.api.common.JobExecutionResult;
-import eu.stratosphere.api.common.Plan;
-import eu.stratosphere.api.common.PlanExecutor;
+package eu.stratosphere.types;
 
 
-public class LocalEnvironment extends ExecutionEnvironment {
+public interface ArithmeticType<T> {
+
+	T add (T other);
 	
-	@Override
-	public JobExecutionResult execute() throws Exception {
-		Plan p = createPlan();
-//		p.setDefaultParallelism(getDegreeOfParallelism());
-		
-		PlanExecutor executor = PlanExecutor.createLocalExecutor();
-		return executor.executePlan(p);
-	}
+	T subtract(T other);
 	
-	@Override
-	public String toString() {
-		return "Local Context (DOP = " + getDegreeOfParallelism() + ") : " + getIdString();
-	}
+	T scalarMultiply(int factor);
+	
+	T scalarDivide(int div);
 }

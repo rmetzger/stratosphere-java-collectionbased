@@ -17,14 +17,12 @@ package eu.stratosphere.example.java.wordcount;
 import eu.stratosphere.api.java.DataSet;
 import eu.stratosphere.api.java.ExecutionEnvironment;
 import eu.stratosphere.api.java.functions.FlatMapFunction;
+import eu.stratosphere.api.java.functions.ReduceFunction;
 import eu.stratosphere.api.java.tuple.*;
-import eu.stratosphere.core.fs.Path;
 import eu.stratosphere.util.Collector;
 
-import static eu.stratosphere.api.java.aggregation.Aggregations.*;
 
-
-public class WordCount {
+public class WordCount1 {
 	
 	public static final class Tokenizer extends FlatMapFunction<String, Tuple2<String, Integer>> {
 		
@@ -39,21 +37,27 @@ public class WordCount {
 		}
 	}
 	
-	public static void main(String[] args) {
-		if (args.length < 2) {
-			System.out.println("Usage: <input path> <output path>");
-			return;
-		}
+	public static final class Counter extends ReduceFunction<Tuple2<String, Integer>> {
 		
-		final String inputPath = args[0];
-		final String outputPath = args[1];
+		private static final long serialVersionUID = 1L;
+
+		@Override
+		public Tuple2<String, Integer> reduce(Tuple2<String, Integer> val1, Tuple2<String, Integer> val2) {
+			return new Tuple2<String, Integer>(val1.T1(), val1.T2() + val2.T2());
+		}
+	}
+	
+	public static void main(String[] args) throws Exception {
 		
 		final ExecutionEnvironment context = ExecutionEnvironment.getExecutionEnvironment();
+		context.setDegreeOfParallelism(4);
 		
-		DataSet<String> text = context.readTextFile(inputPath);
+		DataSet<String> text = context.fromElements("To be", "or not to be", "or to be still", "and certainly not to be not at all", "is that the question?");
 		
-		DataSet<Tuple2<String, Integer>> result = text.flatMap(new Tokenizer()).groupBy(0).aggregate(SUM, 1);
+		DataSet<Tuple2<String, Integer>> result = text.flatMap(new Tokenizer()).groupBy(0).reduce(new Counter());
 		
-		result.writeAsText(new Path(outputPath));
+		result.print();
+		
+		context.execute();
 	}
 }

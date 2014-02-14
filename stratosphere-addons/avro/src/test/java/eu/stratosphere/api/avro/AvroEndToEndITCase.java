@@ -123,13 +123,13 @@ public class AvroEndToEndITCase extends TestBase2 {
 		}
 
 		@Override
-		public boolean nextRecord(Record record) throws IOException {
+		public Record nextRecord(Record record) throws IOException {
 			num--;
 			
 			User u = randomUser();
 			record.setField(0, new SUser(u));
 			
-			return true;
+			return record;
 		}
 		
 		private User randomUser() {

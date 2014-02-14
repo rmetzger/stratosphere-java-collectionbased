@@ -12,25 +12,40 @@
  * specific language governing permissions and limitations under the License.
  *
  **********************************************************************************************************************/
-package eu.stratosphere.api.java;
 
+package eu.stratosphere.api.java.io;
 
-public class ContextEnvironment {
+import java.io.Serializable;
+import java.util.Iterator;
+
+import eu.stratosphere.api.common.io.GenericInputFormat;
+import eu.stratosphere.api.common.io.UnsplittableInput;
+
+/**
+ * An input format that returns objects from an iterator.
+ */
+public class IteratorInputFormat<T> extends GenericInputFormat<T> implements UnsplittableInput {
+
+	private static final long serialVersionUID = 1L;
+
+	private Iterator<T> iterator; // input data as serializable iterator
 	
-	private static ExecutionEnvironment systemContext;
 	
-	
-	public static ExecutionEnvironment getContextEnvironment() {
-		if (systemContext != null)
-			return systemContext;
-		else
-			return LocalEnvironment.createLocalEnvironment();
-	}
-	
-	public static void initializeContextEnvironment(ExecutionEnvironment ctx) {
-		if (systemContext != null)
-			throw new IllegalStateException("System context has already been initialized.");
+	public IteratorInputFormat(Iterator<T> iterator) {
+		if (!(iterator instanceof Serializable)) {
+			throw new IllegalArgumentException("The data source iterator must be serializable.");
+		}
 		
-		systemContext = ctx;
+		this.iterator = iterator;
+	}
+
+	@Override
+	public boolean reachedEnd() {
+		return !this.iterator.hasNext();
+	}
+
+	@Override
+	public T nextRecord(T record) {
+		return this.iterator.next();
 	}
 }

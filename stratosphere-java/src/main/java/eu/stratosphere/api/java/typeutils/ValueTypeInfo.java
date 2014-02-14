@@ -20,7 +20,7 @@ import eu.stratosphere.types.Value;
 /**
  *
  */
-public class ValueTypeInfo<T extends Value> implements TypeInformation<T> {
+public class ValueTypeInfo<T extends Value> extends TypeInformation<T> {
 
 	private final Class<T> type;
 
@@ -37,7 +37,7 @@ public class ValueTypeInfo<T extends Value> implements TypeInformation<T> {
 
 
 	@Override
-	public Class<T> getType() {
+	public Class<T> getTypeClass() {
 		return this.type;
 	}
 
@@ -50,5 +50,21 @@ public class ValueTypeInfo<T extends Value> implements TypeInformation<T> {
 	@Override
 	public boolean isTupleType() {
 		return false;
+	}
+	
+	
+	@Override
+	public String toString() {
+		return "ValueType<" + type.getName() + ">";
+	}
+	
+	
+	static final <X extends Value> TypeInformation<X> getValueTypeInfo(Class<X> typeClass) {
+		if (Value.class.isAssignableFrom(typeClass)) {
+			return new ValueTypeInfo<X>(typeClass);
+		}
+		else {
+			throw new IllegalArgumentException("The giveb class is no subclass of " + Value.class.getName());
+		}
 	}
 }

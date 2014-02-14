@@ -18,7 +18,6 @@ import org.apache.commons.logging.LogFactory;
 
 import eu.stratosphere.api.common.functions.GenericReducer;
 import eu.stratosphere.api.common.typeutils.TypeSerializer;
-import eu.stratosphere.api.java.record.functions.ReduceFunction;
 import eu.stratosphere.pact.runtime.task.util.TaskConfig;
 import eu.stratosphere.pact.runtime.util.MutableToRegularIteratorWrapper;
 import eu.stratosphere.util.Collector;
@@ -32,7 +31,7 @@ import eu.stratosphere.util.MutableObjectIterator;
  * The ReduceTask creates a iterator over all records from its input. The iterator returns all records grouped by their
  * key. The iterator is handed to the <code>reduce()</code> method of the ReduceFunction.
  * 
- * @see ReduceFunction
+ * @see GenericReducer
  */
 public class AllReduceDriver<IT, OT> implements PactDriver<GenericReducer<IT, OT>, OT> {
 	
@@ -97,10 +96,8 @@ public class AllReduceDriver<IT, OT> implements PactDriver<GenericReducer<IT, OT
 	}
 
 	@Override
-	public void cleanup() throws Exception {
-	}
+	public void cleanup() {}
 
 	@Override
-	public void cancel() {
-	}
+	public void cancel() {}
 }

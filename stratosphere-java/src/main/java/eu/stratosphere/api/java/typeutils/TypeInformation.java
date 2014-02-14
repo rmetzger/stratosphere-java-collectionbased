@@ -14,17 +14,47 @@
  **********************************************************************************************************************/
 package eu.stratosphere.api.java.typeutils;
 
+import eu.stratosphere.types.Value;
+
 
 /**
  *
  */
-public interface TypeInformation<T> {
+public abstract class TypeInformation<T> {
 	
-	boolean isBasicType();
+	public abstract boolean isBasicType();
 
-	boolean isTupleType();
+	public abstract boolean isTupleType();
 	
-	public int getArity();
+	public abstract int getArity();
 	
-	public Class<T> getType();
+	public abstract Class<T> getTypeClass();
+	
+	
+	@SuppressWarnings("unchecked")
+	public static <X> TypeInformation<X> getForClass(Class<X> clazz) {
+		// check for basic types
+		{
+			TypeInformation<X> basicTypeInfo = BasicTypeInfo.getInfoFor(clazz);
+			if (basicTypeInfo != null) {
+				return basicTypeInfo;
+			}
+		}
+		// check for arrays
+		{
+			TypeInformation<X> arrayInfo = ArrayTypeInfo.getInfoFor(clazz);
+			if (arrayInfo != null) {
+				return arrayInfo;
+			}
+		}
+		
+		// check for subclasses of Value
+		if (Value.class.isAssignableFrom(clazz)) {
+			Class<? extends Value> valueClass = clazz.asSubclass(Value.class);
+			return (TypeInformation<X>) ValueTypeInfo.getValueTypeInfo(valueClass);
+		}
+		
+		// return a generic type
+		return new GenericTypeInfo<X>(clazz);
+	}
 }

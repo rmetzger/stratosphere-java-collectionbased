@@ -19,7 +19,7 @@ import eu.stratosphere.api.java.tuple.*;
 /**
  *
  */
-public class TupleTypeInfo<T extends Tuple> implements TypeInformation<T> {
+public class TupleTypeInfo<T extends Tuple> extends TypeInformation<T> {
 	
 	private final TypeInformation<?>[] types;
 	
@@ -49,7 +49,7 @@ public class TupleTypeInfo<T extends Tuple> implements TypeInformation<T> {
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public Class<T> getType() {
+	public Class<T> getTypeClass() {
 		return (Class<T>) CLASSES[getArity() - 1];
 	}
 
@@ -59,6 +59,20 @@ public class TupleTypeInfo<T extends Tuple> implements TypeInformation<T> {
 			throw new IndexOutOfBoundsException();
 		
 		return (TypeInformation<X>) this.types[pos];
+	}
+	
+	@Override
+	public String toString() {
+		StringBuilder bld = new StringBuilder("Tuple");
+		bld.append(types.length).append('<');
+		bld.append(types[0]);
+		
+		for (int i = 1; i < types.length; i++) {
+			bld.append(", ").append(types[i]);
+		}
+		
+		bld.append('>');
+		return bld.toString();
 	}
 	
 	// --------------------------------------------------------------------------------------------

@@ -14,30 +14,46 @@
  **********************************************************************************************************************/
 package eu.stratosphere.api.java.io;
 
+import java.io.IOException;
+import java.util.Iterator;
 
-import eu.stratosphere.api.common.io.GenericCsvInputFormat;
-import eu.stratosphere.api.java.tuple.Tuple;
-import eu.stratosphere.core.fs.Path;
+import eu.stratosphere.api.common.io.GenericInputFormat;
+import eu.stratosphere.core.io.GenericInputSplit;
+import eu.stratosphere.util.SplittableIterator;
 
 
-public class CsvInputFormat<OUT extends Tuple> extends GenericCsvInputFormat<OUT> {
+/**
+ * An input format that generates data in parallel through a {@link SplittableIterator}.
+ */
+public class ParallelIteratorInputFormat<T> extends GenericInputFormat<T> {
 
 	private static final long serialVersionUID = 1L;
-
-//	private transient Value
 	
-	public CsvInputFormat(Path filePath, String lineDelimiter, char fieldDelimiter, Class<?> ... types) {
-		super(filePath);
-		
-		setDelimiter(lineDelimiter);
-		setFieldDelim(fieldDelimiter);
-		
-//		setFieldTypes(types);
+	
+	private final SplittableIterator<T> source;
+	
+	private transient Iterator<T> splitIterator;
+	
+	
+	
+	public ParallelIteratorInputFormat(SplittableIterator<T> iterator) {
+		this.source = iterator;
 	}
 	
+	@Override
+	public void open(GenericInputSplit split) throws IOException {
+		super.open(split);
+		
+		this.splitIterator = this.source.getSplit(split.getSplitNumber(), split.getTotalNumberOfSplits());
+	}
+	
+	@Override
+	public boolean reachedEnd() {
+		return !this.splitIterator.hasNext();
+	}
 
 	@Override
-	public OUT readRecord(OUT reuse, byte[] bytes, int offset, int numBytes) {
-		return null;
+	public T nextRecord(T reuse) {
+		return this.splitIterator.next();
 	}
 }

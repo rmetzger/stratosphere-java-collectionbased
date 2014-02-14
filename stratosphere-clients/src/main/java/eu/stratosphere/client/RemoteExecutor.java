@@ -20,14 +20,15 @@ import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.List;
 
+import eu.stratosphere.api.common.JobExecutionResult;
 import eu.stratosphere.api.common.Plan;
+import eu.stratosphere.api.common.PlanExecutor;
 import eu.stratosphere.client.program.Client;
 import eu.stratosphere.client.program.JobWithJars;
 import eu.stratosphere.client.program.PackagedProgram;
 import eu.stratosphere.configuration.Configuration;
-import eu.stratosphere.nephele.client.JobExecutionResult;
 
-public class RemoteExecutor implements PlanExecutor {
+public class RemoteExecutor extends PlanExecutor {
 
 	private Client client;
 

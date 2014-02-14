@@ -40,7 +40,7 @@ import eu.stratosphere.example.java.record.connectedcomponents.WorksetConnectedC
 /**
  *
  */
-public class WorksetConnectedComponentsWithCoGroup implements Program {
+public class ConnectedComponentsWithCoGroup implements Program {
 	
 	private static final long serialVersionUID = 1L;
 

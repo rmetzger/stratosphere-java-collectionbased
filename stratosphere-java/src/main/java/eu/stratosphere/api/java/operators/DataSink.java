@@ -30,7 +30,7 @@ public class DataSink<T> {
 	
 	public DataSink(ExecutionEnvironment context, OutputFormat<T> format, TypeInformation<T> type) {
 		if (format == null)
-			throw new IllegalArgumentException("Teh output format must not be null.");
+			throw new IllegalArgumentException("The output format must not be null.");
 		if (type == null)
 			throw new IllegalArgumentException("The input type information must not be null.");
 		if (context == null)
@@ -54,5 +54,11 @@ public class DataSink<T> {
 	public TypeInformation<T> getType() {
 		return type;
 	}
+	
+	// --------------------------------------------------------------------------------------------
+	
+	
+	
+	// --------------------------------------------------------------------------------------------
 
 }

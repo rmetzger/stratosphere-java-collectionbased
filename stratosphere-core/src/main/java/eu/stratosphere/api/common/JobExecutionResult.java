@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  **********************************************************************************************************************/
 
-package eu.stratosphere.nephele.client;
+package eu.stratosphere.api.common;
 
 import java.util.Map;
 

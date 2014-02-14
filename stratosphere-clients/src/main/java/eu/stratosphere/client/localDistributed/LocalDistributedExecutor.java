@@ -17,8 +17,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import eu.stratosphere.api.common.JobExecutionResult;
 import eu.stratosphere.api.common.Plan;
-import eu.stratosphere.client.PlanExecutor;
+import eu.stratosphere.api.common.PlanExecutor;
 import eu.stratosphere.client.minicluster.NepheleMiniCluster;
 import eu.stratosphere.compiler.DataStatistics;
 import eu.stratosphere.compiler.PactCompiler;
@@ -28,7 +29,6 @@ import eu.stratosphere.configuration.ConfigConstants;
 import eu.stratosphere.configuration.Configuration;
 import eu.stratosphere.configuration.GlobalConfiguration;
 import eu.stratosphere.nephele.client.JobClient;
-import eu.stratosphere.nephele.client.JobExecutionResult;
 import eu.stratosphere.nephele.instance.local.LocalTaskManagerThread;
 import eu.stratosphere.nephele.jobgraph.JobGraph;
 import eu.stratosphere.nephele.jobmanager.JobManager;
@@ -41,7 +41,7 @@ import eu.stratosphere.nephele.jobmanager.JobManager.ExecutionMode;
  * executed. This is the main difference to {@link eu.stratosphere.client.LocalExecutor}, where tasks communicate via
  * memory channels and don't go through the network stack.
  */
-public class LocalDistributedExecutor implements PlanExecutor {
+public class LocalDistributedExecutor extends PlanExecutor {
 	
 	private static final int JOB_MANAGER_RPC_PORT = 6498;
 

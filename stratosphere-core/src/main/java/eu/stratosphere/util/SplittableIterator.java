@@ -12,26 +12,17 @@
  * specific language governing permissions and limitations under the License.
  *
  **********************************************************************************************************************/
-package eu.stratosphere.api.java;
+package eu.stratosphere.util;
 
-import eu.stratosphere.api.common.JobExecutionResult;
-import eu.stratosphere.api.common.Plan;
-import eu.stratosphere.api.common.PlanExecutor;
+import java.io.Serializable;
+import java.util.Iterator;
 
 
-public class LocalEnvironment extends ExecutionEnvironment {
+public interface SplittableIterator<T> extends Iterator<T>, Serializable {
+
+	Iterator<T>[] split(int numPartitions);
 	
-	@Override
-	public JobExecutionResult execute() throws Exception {
-		Plan p = createPlan();
-//		p.setDefaultParallelism(getDegreeOfParallelism());
-		
-		PlanExecutor executor = PlanExecutor.createLocalExecutor();
-		return executor.executePlan(p);
-	}
+	Iterator<T> getSplit(int num, int numPartitions);
 	
-	@Override
-	public String toString() {
-		return "Local Context (DOP = " + getDegreeOfParallelism() + ") : " + getIdString();
-	}
+	int getMaximumNumberOfSplits();
 }

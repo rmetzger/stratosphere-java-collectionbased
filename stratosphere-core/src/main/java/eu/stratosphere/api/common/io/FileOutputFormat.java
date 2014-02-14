@@ -86,7 +86,6 @@ public abstract class FileOutputFormat<IT> implements OutputFormat<IT> {
 	
 	// --------------------------------------------------------------------------------------------
 	
-	
 	/**
 	 * The path of the file to be written.
 	 */
@@ -112,6 +111,14 @@ public abstract class FileOutputFormat<IT> implements OutputFormat<IT> {
 	 */
 	protected transient FSDataOutputStream stream;
 
+	// --------------------------------------------------------------------------------------------
+	
+	public FileOutputFormat() {}
+	
+	public FileOutputFormat(Path outputPath) {
+		this.outputFilePath = outputPath;
+	}
+	
 	// --------------------------------------------------------------------------------------------
 	
 	public void setFilePath(Path filePath) {

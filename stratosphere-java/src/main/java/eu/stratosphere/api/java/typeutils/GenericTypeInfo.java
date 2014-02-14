@@ -12,26 +12,38 @@
  * specific language governing permissions and limitations under the License.
  *
  **********************************************************************************************************************/
-package eu.stratosphere.api.java;
-
-import eu.stratosphere.api.common.JobExecutionResult;
-import eu.stratosphere.api.common.Plan;
-import eu.stratosphere.api.common.PlanExecutor;
+package eu.stratosphere.api.java.typeutils;
 
 
-public class LocalEnvironment extends ExecutionEnvironment {
+/**
+ *
+ */
+public class GenericTypeInfo<T> extends TypeInformation<T> {
+
+	private final Class<T> typeClass;
 	
-	@Override
-	public JobExecutionResult execute() throws Exception {
-		Plan p = createPlan();
-//		p.setDefaultParallelism(getDegreeOfParallelism());
-		
-		PlanExecutor executor = PlanExecutor.createLocalExecutor();
-		return executor.executePlan(p);
+	public GenericTypeInfo(Class<T> typeClass) {
+		this.typeClass = typeClass;
 	}
 	
 	@Override
-	public String toString() {
-		return "Local Context (DOP = " + getDegreeOfParallelism() + ") : " + getIdString();
+	public boolean isBasicType() {
+		return false;
+	}
+
+
+	@Override
+	public boolean isTupleType() {
+		return false;
+	}
+
+	@Override
+	public int getArity() {
+		return 1;
+	}
+
+	@Override
+	public Class<T> getTypeClass() {
+		return typeClass;
 	}
 }

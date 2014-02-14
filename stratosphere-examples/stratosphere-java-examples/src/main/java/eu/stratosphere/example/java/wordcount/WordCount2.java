@@ -43,6 +43,7 @@ public class WordCount2 {
 		}
 	}
 	
+	@SuppressWarnings("serial")
 	public static final class Tokenizer extends FlatMapFunction<String, WC> {
 		
 		@Override
@@ -54,6 +55,7 @@ public class WordCount2 {
 		}
 	}
 	
+	@SuppressWarnings("serial")
 	public static void main(String[] args) {
 		if (args.length < 2) {
 			System.out.println("Usage: <input path> <output path>");
@@ -65,7 +67,7 @@ public class WordCount2 {
 		
 		final ExecutionEnvironment context = ExecutionEnvironment.getExecutionEnvironment();
 		
-		DataSet<String> text = context.readTextFile(new Path(inputPath));
+		DataSet<String> text = context.readTextFile(inputPath);
 		
 		DataSet<WC> tokenized = text.flatMap(new Tokenizer());
 		

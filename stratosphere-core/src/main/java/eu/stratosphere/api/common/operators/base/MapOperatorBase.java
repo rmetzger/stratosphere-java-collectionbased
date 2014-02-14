@@ -30,8 +30,8 @@ import eu.stratosphere.api.common.operators.util.UserCodeWrapper;
  * 
  * @see GenericMapper
  */
-public class MapOperatorBase<T extends GenericMapper<?, ?>> extends SingleInputOperator<T>
-{
+public class MapOperatorBase<T extends GenericMapper<?, ?>> extends SingleInputOperator<T> {
+	
 	public MapOperatorBase(UserCodeWrapper<T> udf, String name) {
 		super(udf, name);
 	}

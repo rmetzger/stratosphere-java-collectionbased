@@ -17,9 +17,7 @@ package eu.stratosphere.api.java.typeutils;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.Map;
 
-import com.google.common.collect.Maps;
 import eu.stratosphere.api.common.io.InputFormat;
 import eu.stratosphere.api.java.functions.FlatMapFunction;
 import eu.stratosphere.api.java.functions.GroupReduceFunction;
@@ -38,6 +36,7 @@ public class TypeExtractor {
 	
 	public static <X> TypeInformation<X> getFlatMapReturnTypes(FlatMapFunction<?, X> flatMapFunction) {
 		Type returnType = getTemplateTypes (FlatMapFunction.class, flatMapFunction.getClass(), 1);
+		
 		return createTypeInfo(returnType);
 	}
 	

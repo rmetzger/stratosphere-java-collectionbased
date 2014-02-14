@@ -24,6 +24,7 @@ import eu.stratosphere.api.java.functions.KeyExtractor;
 import eu.stratosphere.api.java.functions.MapFunction;
 import eu.stratosphere.api.java.functions.ReduceFunction;
 import eu.stratosphere.api.java.io.PrintingOutputFormat;
+import eu.stratosphere.api.java.io.TextOutputFormat;
 import eu.stratosphere.api.java.operators.AggregateOperator;
 import eu.stratosphere.api.java.operators.DataSink;
 import eu.stratosphere.api.java.operators.DistinctOperator;
@@ -173,7 +174,7 @@ public abstract class DataSet<T> {
 	}
 	
 	public void writeAsText(Path filePath) {
-		
+		output(new TextOutputFormat<T>(filePath));
 	}
 	
 	

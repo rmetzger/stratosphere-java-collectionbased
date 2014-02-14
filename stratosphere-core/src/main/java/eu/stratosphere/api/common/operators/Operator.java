@@ -30,11 +30,11 @@ public abstract class Operator implements Visitable<Operator> {
 	
 	protected final Configuration parameters;			// the parameters to parameterize the UDF
 	
-	protected CompilerHints compilerHints;				// hints to the pact compiler
+	protected CompilerHints compilerHints;				// hints to the compiler
 	
 	protected String name;								// the name of the contract instance. optional.
 	
-	protected List<Class<? extends Annotation>> ocs;	// the output contract classes
+	protected List<Class<? extends Annotation>> ocs;	// the semantical annotations
 	
 	private int degreeOfParallelism = -1;				// the number of parallel instances to use. -1, if unknown
 

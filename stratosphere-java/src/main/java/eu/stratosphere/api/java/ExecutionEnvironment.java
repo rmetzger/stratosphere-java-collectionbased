@@ -14,24 +14,45 @@
  **********************************************************************************************************************/
 package eu.stratosphere.api.java;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
 import java.util.UUID;
 
+import eu.stratosphere.api.common.JobExecutionResult;
+import eu.stratosphere.api.common.Plan;
 import eu.stratosphere.api.common.io.InputFormat;
+import eu.stratosphere.api.java.io.CollectionInputFormat;
 import eu.stratosphere.api.java.io.CsvReader;
+import eu.stratosphere.api.java.io.IteratorInputFormat;
+import eu.stratosphere.api.java.io.ParallelIteratorInputFormat;
 import eu.stratosphere.api.java.io.TextInputFormat;
 import eu.stratosphere.api.java.io.TextValueInputFormat;
 import eu.stratosphere.api.java.operators.DataSink;
 import eu.stratosphere.api.java.operators.DataSource;
+import eu.stratosphere.api.java.operators.OperatorTranslation;
 import eu.stratosphere.api.java.typeutils.BasicTypeInfo;
 import eu.stratosphere.api.java.typeutils.TypeExtractor;
+import eu.stratosphere.api.java.typeutils.TypeInformation;
 import eu.stratosphere.api.java.typeutils.ValueTypeInfo;
 import eu.stratosphere.core.fs.Path;
 import eu.stratosphere.types.StringValue;
+import eu.stratosphere.util.NumberSequenceIterator;
+import eu.stratosphere.util.SplittableIterator;
 
 
 public abstract class ExecutionEnvironment {
 	
+	private static ExecutionEnvironment systemContext;
+	
+	// --------------------------------------------------------------------------------------------
+	
 	private final UUID executionId;
+	
+	private final List<DataSink<?>> sinks = new ArrayList<DataSink<?>>();
 	
 	private int degreeOfParallelism = 1;
 	
@@ -70,19 +91,17 @@ public abstract class ExecutionEnvironment {
 	// ---------------------------------- Text Input Format ---------------------------------------
 	
 	public DataSet<String> readTextFile(String filePath) {
-		return readTextFile(new Path(filePath));
-	}
-	
-	public DataSet<String> readTextFile(Path filePath) {
-		return new DataSource<String>(this, new TextInputFormat(filePath), BasicTypeInfo.STRING_TYPE_INFO );
+		if (filePath == null)
+			throw new IllegalArgumentException("The file path may not be null.");
+		
+		return new DataSource<String>(this, new TextInputFormat(new Path(filePath)), BasicTypeInfo.STRING_TYPE_INFO );
 	}
 	
 	public DataSet<String> readTextFile(String filePath, String charsetName, boolean skipInvalidLines) {
-		return readTextFile(new Path(filePath), charsetName, skipInvalidLines);
-	}
-	
-	public DataSet<String> readTextFile(Path filePath, String charsetName, boolean skipInvalidLines) {
-		TextInputFormat format = new TextInputFormat(filePath);
+		if (filePath == null)
+			throw new IllegalArgumentException("The file path may not be null.");
+
+		TextInputFormat format = new TextInputFormat(new Path(filePath));
 		format.setCharsetName(charsetName);
 		format.setSkipInvalidLines(skipInvalidLines);
 		return new DataSource<String>(this, format, BasicTypeInfo.STRING_TYPE_INFO );
@@ -91,19 +110,17 @@ public abstract class ExecutionEnvironment {
 	// -------------------------- Text Input Format With String Value------------------------------
 	
 	public DataSet<StringValue> readTextFileWithValue(String filePath) {
-		return readTextFileWithValue(new Path(filePath));
-	}
-	
-	public DataSet<StringValue> readTextFileWithValue(Path filePath) {
-		return new DataSource<StringValue>(this, new TextValueInputFormat(filePath), new ValueTypeInfo<StringValue>(StringValue.class) );
+		if (filePath == null)
+			throw new IllegalArgumentException("The file path may not be null.");
+		
+		return new DataSource<StringValue>(this, new TextValueInputFormat(new Path(filePath)), new ValueTypeInfo<StringValue>(StringValue.class) );
 	}
 	
 	public DataSet<StringValue> readTextFileWithValue(String filePath, String charsetName, boolean skipInvalidLines) {
-		return readTextFileWithValue(new Path(filePath), charsetName, skipInvalidLines);
-	}
-	
-	public DataSet<StringValue> readTextFileWithValue(Path filePath, String charsetName, boolean skipInvalidLines) {
-		TextValueInputFormat format = new TextValueInputFormat(filePath);
+		if (filePath == null)
+			throw new IllegalArgumentException("The file path may not be null.");
+		
+		TextValueInputFormat format = new TextValueInputFormat(new Path(filePath));
 		format.setCharsetName(charsetName);
 		format.setSkipInvalidLines(skipInvalidLines);
 		return new DataSource<StringValue>(this, format, new ValueTypeInfo<StringValue>(StringValue.class) );
@@ -125,19 +142,106 @@ public abstract class ExecutionEnvironment {
 		if (inputFormat == null)
 			throw new IllegalArgumentException("InputFormat must not be null.");
 		
-		return new DataSource<X>(this, inputFormat, TypeExtractor.extractInputFormatTypes(inputFormat));
+		return createInput(inputFormat, TypeExtractor.extractInputFormatTypes(inputFormat));
 	}
 	
+	public <X> DataSet<X> createInput(InputFormat<X, ?> inputFormat, TypeInformation<X> producedType) {
+		if (inputFormat == null)
+			throw new IllegalArgumentException("InputFormat must not be null.");
+		
+		if (producedType == null)
+			throw new IllegalArgumentException("Produced type information must not be null.");
+		
+		return new DataSource<X>(this, inputFormat, producedType);
+	}
+	
+	// ----------------------------------- Collection ---------------------------------------
+	
+	public <X> DataSet<X> fromCollection(Collection<X> data) {
+		if (data == null)
+			throw new IllegalArgumentException("The data must not be null.");
+		
+		if (data.size() == 0)
+			throw new IllegalArgumentException("The size of the collection must not be empty.");
+		
+		@SuppressWarnings("unchecked")
+		Class<X> clazz = (Class<X>) data.iterator().next().getClass();
+		
+		return fromCollection(data, TypeInformation.getForClass(clazz));
+	}
+	
+	
+	public <X> DataSet<X> fromCollection(Collection<X> data, TypeInformation<X> type) {
+		CollectionInputFormat.checkCollection(data, type.getTypeClass());
+		
+		return new DataSource<X>(this, new CollectionInputFormat<X>(data), type);
+	}
+	
+	public <X> DataSet<X> fromCollection(Iterator<X> data, Class<X> type) {
+		return fromCollection(data, TypeInformation.getForClass(type));
+	}
+	
+	public <X> DataSet<X> fromCollection(Iterator<X> data, TypeInformation<X> type) {
+		if (!(data instanceof Serializable))
+			throw new IllegalArgumentException("The iterator must be serializable.");
+		
+		return new DataSource<X>(this, new IteratorInputFormat<X>(data), type);
+	}
+	
+	
+	/**
+	 * Creates a new data set that contains the given elements. The elements must all be of the same type,
+	 * for example, all of the Strings or integers.
+	 * The created data set will represent these l
+	 * 
+	 * @param data The elements to make up the data set.
+	 * @return A data 
+	 */
+	public <X> DataSet<X> fromElements(X... data) {
+		if (data == null) {
+			throw new IllegalArgumentException("The data must not be null.");
+		}
+		
+		@SuppressWarnings("unchecked")
+		Class<X> componentClass = (Class<X>) data.getClass().getComponentType();
+		return fromCollection(Arrays.asList(data), TypeInformation.getForClass(componentClass));
+	}
+	
+	
+	public <X> DataSet<X> fromParallelCollection(SplittableIterator<X> iterator, Class<X> type) {
+		return fromParallelCollection(iterator, TypeInformation.getForClass(type));
+	}
+	
+	
+	public <X> DataSet<X> fromParallelCollection(SplittableIterator<X> iterator, TypeInformation<X> type) {
+		return new DataSource<X>(this, new ParallelIteratorInputFormat<X>(iterator), type);
+	}
+	
+	
+	public DataSet<Long> generateSequence(long from, long to) {
+		return fromParallelCollection(new NumberSequenceIterator(from, to), BasicTypeInfo.LONG_TYPE_INFO);
+	}	
+	
 	// --------------------------------------------------------------------------------------------
-	//  Results
+	//  Executing
 	// --------------------------------------------------------------------------------------------
 	
-	public void execute() {
-		// go do the magic
-	}
+	public abstract JobExecutionResult execute() throws Exception;
+	
 	
 	void registerDataSink(DataSink<?> sink) {
+		this.sinks.add(sink);
+	}
+	
+	protected Plan createPlan() {
+		if (this.sinks.isEmpty()) {
+			throw new RuntimeException("No data sinks have been created yet.");
+		}
 		
+		OperatorTranslation translator = new OperatorTranslation();
+		translator.translateToPlan(this.sinks);
+		
+		return translator.getPlan();
 	}
 	
 	
@@ -146,7 +250,7 @@ public abstract class ExecutionEnvironment {
 	// --------------------------------------------------------------------------------------------
 	
 	public static ExecutionEnvironment getExecutionEnvironment() {
-		return ContextEnvironment.getContextEnvironment();
+		return systemContext == null ? createLocalEnvironment() : systemContext;
 	}
 	
 	public static ExecutionEnvironment createLocalEnvironment() {
@@ -159,13 +263,20 @@ public abstract class ExecutionEnvironment {
 		return lee;
 	}
 	
-	public static ExecutionEnvironment createRemoteEnvironment(String host, int port) {
-		return new RemoteEnvironment(host, port);
+	public static ExecutionEnvironment createRemoteEnvironment(String host, int port, String... jarFiles) {
+		return new RemoteEnvironment(host, port, jarFiles);
 	}
 	
-	public static ExecutionEnvironment createRemoteEnvironment(String host, int port, int degreeOfParallelism) {
-		RemoteEnvironment rec = new RemoteEnvironment(host, port);
+	public static ExecutionEnvironment createRemoteEnvironment(String host, int port, int degreeOfParallelism, String... jarFiles) {
+		RemoteEnvironment rec = new RemoteEnvironment(host, port, jarFiles);
 		rec.setDegreeOfParallelism(degreeOfParallelism);
 		return rec;
+	}
+	
+	public static void initializeContextEnvironment(ExecutionEnvironment ctx) {
+		if (systemContext != null)
+			throw new IllegalStateException("System context has already been initialized.");
+		
+		systemContext = ctx;
 	}
 }

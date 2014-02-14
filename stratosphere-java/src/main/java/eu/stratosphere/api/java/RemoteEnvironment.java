@@ -14,6 +14,10 @@
  **********************************************************************************************************************/
 package eu.stratosphere.api.java;
 
+import eu.stratosphere.api.common.JobExecutionResult;
+import eu.stratosphere.api.common.Plan;
+import eu.stratosphere.api.common.PlanExecutor;
+
 
 public class RemoteEnvironment extends ExecutionEnvironment {
 	
@@ -21,9 +25,10 @@ public class RemoteEnvironment extends ExecutionEnvironment {
 	
 	private final int port;
 	
+	private final String[] jarFiles;
 	
 	
-	public RemoteEnvironment(String host, int port) {
+	public RemoteEnvironment(String host, int port, String... jarFiles) {
 		super();
 		
 		if (host == null)
@@ -34,6 +39,17 @@ public class RemoteEnvironment extends ExecutionEnvironment {
 		
 		this.host = host;
 		this.port = port;
+		this.jarFiles = jarFiles;
+	}
+	
+	
+	@Override
+	public JobExecutionResult execute() throws Exception {
+		Plan p = createPlan();
+		p.setDefaultParallelism(getDegreeOfParallelism());
+		
+		PlanExecutor executor = PlanExecutor.createRemoteExecutor(host, port, jarFiles);
+		return executor.executePlan(p);
 	}
 
 	@Override

@@ -21,7 +21,7 @@ import java.util.Map;
 /**
  *
  */
-public class BasicTypeInfo<T> implements TypeInformation<T> {
+public class BasicTypeInfo<T> extends TypeInformation<T> {
 
 	public static final BasicTypeInfo<String> STRING_TYPE_INFO = new BasicTypeInfo<String>(String.class);
 	public static final BasicTypeInfo<Boolean> BOOLEAN_TYPE_INFO = new BasicTypeInfo<Boolean>(Boolean.class);
@@ -60,8 +60,13 @@ public class BasicTypeInfo<T> implements TypeInformation<T> {
 	}
 
 	@Override
-	public Class<T> getType() {
+	public Class<T> getTypeClass() {
 		return this.clazz;
+	}
+
+	@Override
+	public String toString() {
+		return clazz.getSimpleName();
 	}
 	
 	// --------------------------------------------------------------------------------------------
@@ -80,12 +85,20 @@ public class BasicTypeInfo<T> implements TypeInformation<T> {
 	static {
 		TYPES.put(String.class, STRING_TYPE_INFO);
 		TYPES.put(Boolean.class, BOOLEAN_TYPE_INFO);
+		TYPES.put(boolean.class, BOOLEAN_TYPE_INFO);
 		TYPES.put(Byte.class, BYTE_TYPE_INFO);
+		TYPES.put(byte.class, BYTE_TYPE_INFO);
 		TYPES.put(Short.class, SHORT_TYPE_INFO);
+		TYPES.put(short.class, SHORT_TYPE_INFO);
 		TYPES.put(Integer.class, INT_TYPE_INFO);
+		TYPES.put(int.class, INT_TYPE_INFO);
 		TYPES.put(Long.class, LONG_TYPE_INFO);
+		TYPES.put(long.class, LONG_TYPE_INFO);
 		TYPES.put(Float.class, FLOAT_TYPE_INFO);
+		TYPES.put(float.class, FLOAT_TYPE_INFO);
 		TYPES.put(Double.class, DOUBLE_TYPE_INFO);
+		TYPES.put(double.class, DOUBLE_TYPE_INFO);
 		TYPES.put(Character.class, CHAR_TYPE_INFO);
+		TYPES.put(char.class, CHAR_TYPE_INFO);
 	}
 }

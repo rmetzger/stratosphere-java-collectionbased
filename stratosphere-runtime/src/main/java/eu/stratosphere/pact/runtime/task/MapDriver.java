@@ -14,7 +14,6 @@
 package eu.stratosphere.pact.runtime.task;
 
 import eu.stratosphere.api.common.functions.GenericMapper;
-import eu.stratosphere.api.java.record.functions.MapFunction;
 import eu.stratosphere.util.Collector;
 import eu.stratosphere.util.MutableObjectIterator;
 
@@ -26,7 +25,6 @@ import eu.stratosphere.util.MutableObjectIterator;
  * The MapTask creates an iterator over all key-value pairs of its input and hands that to the <code>map()</code> method
  * of the MapFunction.
  * 
- * @see MapFunction
  * @see GenericMapper
  * 
  * @param <IT> The mapper's input data type.
