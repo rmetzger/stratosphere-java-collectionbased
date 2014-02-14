@@ -13,33 +13,40 @@
 
 package eu.stratosphere.test.exampleScalaPrograms;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-
-import eu.stratosphere.api.common.Plan;
-import eu.stratosphere.configuration.Configuration;
-import eu.stratosphere.examples.scala.datamining.KMeans;
-
 import java.util.Locale;
 
-@RunWith(Parameterized.class)
-public class IterativeKMeansITCase extends eu.stratosphere.test.iterative.IterativeKMeansITCase {
+import eu.stratosphere.api.common.Plan;
+import eu.stratosphere.examples.scala.datamining.KMeans;
+import eu.stratosphere.test.testdata.KMeansData;
+import eu.stratosphere.test.util.TestBase2;
 
-	public IterativeKMeansITCase(Configuration config) {
-		super(config);
+public class IterativeKMeansITCase extends TestBase2 {
+
+	static {
 		Locale.setDefault(Locale.US);
 	}
+	
+	protected String pointsPath;
+	protected String clusterPath;
+	protected String resultPath;
+	
+	
+	@Override
+	protected void preSubmit() throws Exception {
+		pointsPath = createTempFile("datapoints.txt", KMeansData.DATAPOINTS);
+		clusterPath = createTempFile("initial_centers.txt", KMeansData.INITIAL_CENTERS);
+		resultPath = getTempDirPath("resulting_centers");
+	}
+	
+	@Override
+	protected void postSubmit() throws Exception {
+		compareResultsByLinesInMemory(KMeansData.CENTERS_AFTER_20_ITERATIONS_SINGLE_DIGIT, resultPath);
+	}
+	
 
 	@Override
 	protected Plan getTestJob() {
-
 		KMeans kmi = new KMeans();
-
-		return kmi.getScalaPlan(
-				config.getInteger("IterativeKMeansITCase#NoSubtasks", 1),
-				dataPath,
-				clusterPath,
-				resultPath,
-				Integer.parseInt(config.getString("IterativeKMeansITCase#NumIterations", "1")));
+		return kmi.getScalaPlan(4, pointsPath, clusterPath, resultPath, 20);
 	}
 }

@@ -12,28 +12,21 @@
  **********************************************************************************************************************/
 package eu.stratosphere.test.exampleRecordPrograms;
 
-import java.util.Collection;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
-
 import eu.stratosphere.api.common.Plan;
-import eu.stratosphere.api.common.Program;
-import eu.stratosphere.api.common.ProgramDescription;
 import eu.stratosphere.api.common.operators.FileDataSink;
 import eu.stratosphere.api.common.operators.FileDataSource;
 import eu.stratosphere.api.java.record.io.CsvOutputFormat;
 import eu.stratosphere.api.java.record.io.TextInputFormat;
 import eu.stratosphere.api.java.record.operators.MapOperator;
 import eu.stratosphere.api.java.record.operators.ReduceOperator;
-import eu.stratosphere.configuration.Configuration;
 import eu.stratosphere.example.java.record.wordcount.WordCount.CountWords;
 import eu.stratosphere.example.java.record.wordcount.WordCount.TokenizeLine;
 import eu.stratosphere.nephele.io.MutableUnionRecordReader;
 import eu.stratosphere.nephele.io.UnionRecordReader;
+import eu.stratosphere.test.testdata.WordCountData;
 import eu.stratosphere.test.util.TestBase2;
 import eu.stratosphere.types.IntValue;
 import eu.stratosphere.types.StringValue;
@@ -49,41 +42,21 @@ import eu.stratosphere.types.StringValue;
  * @see {@link UnionRecordReader}
  * @see {@link MutableUnionRecordReader}
  */
-@RunWith(Parameterized.class)
 public class WordCountUnionReduceITCase extends TestBase2 {
 
-	private final String INPUT = WordCountITCase.TEXT;
-
-	private final String EXPECTED_COUNTS = WordCountITCase.COUNTS;
-
+	private static final int MULTIPLY = 1000;
+	
 	private String inputPath;
-
-	private String secondInputPath;
 
 	private String outputPath;
 
-	public WordCountUnionReduceITCase(Configuration config) {
-		super(config);
-	}
-
-	@Parameters
-	public static Collection<Object[]> getConfigurations() {
-		Configuration config = new Configuration();
-
-		// with just a single subtask the test didn't deadlock before the fix
-		config.setInteger("WordCountUnionReduce#NumSubtasks", 4);
-
-		// the fixed input is repeated this many times and the expected counts
-		// are multiplied by this factor, because the problem only occurs with
-		// inputs of a certain size
-		config.setInteger("WordCountUnionReduce#InputSizeFactor", 6144);
-
-		return toParameterList(config);
-	}
 
 	@Override
 	protected void preSubmit() throws Exception {
-		String input = repeatString(INPUT, this.config.getInteger("WordCountUnionReduce#InputSizeFactor", 1));
+		// the fixed input is repeated this many times and the expected counts
+		// are multiplied by this factor, because the problem only occurs with
+		// inputs of a certain size
+		String input = repeatString(WordCountData.TEXT, MULTIPLY);
 
 		this.inputPath = createTempFile("input.txt", input);
 		this.outputPath = getTempDirPath("output");
@@ -92,16 +65,15 @@ public class WordCountUnionReduceITCase extends TestBase2 {
 	@Override
 	protected Plan getTestJob() {
 		WordCountUnionReduce wc = new WordCountUnionReduce();
-		return wc.getPlan(this.inputPath, this.secondInputPath, this.outputPath,
-			this.config.getString("WordCountUnionReduce#NumSubtasks", "1"));
+		return wc.getPlan(this.inputPath, this.outputPath, 4);
 	}
 
 	@Override
 	protected void postSubmit() throws Exception {
 		String expectedCounts =
-			multiplyIntegersInString(EXPECTED_COUNTS,
+			multiplyIntegersInString(WordCountData.COUNTS,
 				// adjust counts to string repetition (InputSizeFactor) and two mappers (*2)
-				this.config.getInteger("WordCountUnionReduce#InputSizeFactor", 1) * 2);
+				MULTIPLY * 2);
 		compareResultsByLinesInMemory(expectedCounts, this.outputPath);
 	}
 
@@ -110,12 +82,7 @@ public class WordCountUnionReduceITCase extends TestBase2 {
 	 * 
 	 * @see {@link https://github.com/stratosphere/stratosphere/issues/192}
 	 */
-	private class WordCountUnionReduce implements Program, ProgramDescription {
-
-		@Override
-		public String getDescription() {
-			return "Usage: [input path] [output path] [num subtasks]";
-		}
+	private class WordCountUnionReduce {
 
 		/**
 		 * <pre>
@@ -128,11 +95,7 @@ public class WordCountUnionReduceITCase extends TestBase2 {
 		 *                   +-------------+
 		 * </pre>
 		 */
-		@Override
-		public Plan getPlan(String... args) {
-			String inputPath = args.length >= 1 ? args[0] : "";
-			String outputPath = args.length >= 3 ? args[2] : "";
-			int numSubtasks = args.length >= 4 ? Integer.parseInt(args[3]) : 1;
+		public Plan getPlan(String inputPath, String outputPath, int numSubtasks) {
 
 			FileDataSource source = new FileDataSource(TextInputFormat.class, inputPath, "First Input");
 

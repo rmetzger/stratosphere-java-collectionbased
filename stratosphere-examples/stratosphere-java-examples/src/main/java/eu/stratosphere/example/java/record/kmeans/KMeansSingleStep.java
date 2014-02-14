@@ -19,27 +19,20 @@ import eu.stratosphere.api.common.Program;
 import eu.stratosphere.api.common.ProgramDescription;
 import eu.stratosphere.api.common.operators.FileDataSink;
 import eu.stratosphere.api.common.operators.FileDataSource;
-import eu.stratosphere.api.java.record.operators.CrossOperator;
+import eu.stratosphere.api.java.record.io.CsvInputFormat;
+import eu.stratosphere.api.java.record.operators.MapOperator;
 import eu.stratosphere.api.java.record.operators.ReduceOperator;
-import eu.stratosphere.example.java.record.kmeans.udfs.ComputeDistance;
-import eu.stratosphere.example.java.record.kmeans.udfs.FindNearestCenter;
-import eu.stratosphere.example.java.record.kmeans.udfs.PointInFormat;
-import eu.stratosphere.example.java.record.kmeans.udfs.PointOutFormat;
-import eu.stratosphere.example.java.record.kmeans.udfs.RecomputeClusterCenter;
+import eu.stratosphere.example.java.record.kmeans.KMeans.PointBuilder;
+import eu.stratosphere.example.java.record.kmeans.KMeans.PointOutFormat;
+import eu.stratosphere.example.java.record.kmeans.KMeans.RecomputeClusterCenter;
+import eu.stratosphere.example.java.record.kmeans.KMeans.SelectNearestCenter;
+import eu.stratosphere.types.DoubleValue;
 import eu.stratosphere.types.IntValue;
 
-/**
- * The K-Means cluster algorithm is well-known (see
- * http://en.wikipedia.org/wiki/K-means_clustering). KMeansIteration is a PACT
- * program that computes a single iteration of the k-means algorithm. The job
- * has two inputs, a set of data points and a set of cluster centers. A Cross
- * PACT is used to compute all distances from all centers to all points. A
- * following Reduce PACT assigns each data point to the cluster center that is
- * next to it. Finally, a second Reduce PACT compute the new locations of all
- * cluster centers.
- */
+
 public class KMeansSingleStep implements Program, ProgramDescription {
 	
+	private static final long serialVersionUID = 1L;
 
 	@Override
 	public Plan getPlan(String... args) {
@@ -50,28 +43,25 @@ public class KMeansSingleStep implements Program, ProgramDescription {
 		String output = (args.length > 3 ? args[3] : "");
 
 		// create DataSourceContract for data point input
-		FileDataSource dataPoints = new FileDataSource(new PointInFormat(), dataPointInput, "Data Points");
-		dataPoints.getCompilerHints().addUniqueField(0);
+		@SuppressWarnings("unchecked")
+		FileDataSource pointsSource = new FileDataSource(new CsvInputFormat('|', IntValue.class, DoubleValue.class, DoubleValue.class, DoubleValue.class), dataPointInput, "Data Points");
 
 		// create DataSourceContract for cluster center input
-		FileDataSource clusterPoints = new FileDataSource(new PointInFormat(), clusterInput, "Centers");
-		clusterPoints.setDegreeOfParallelism(1);
-		clusterPoints.getCompilerHints().addUniqueField(0);
+		@SuppressWarnings("unchecked")
+		FileDataSource clustersSource = new FileDataSource(new CsvInputFormat('|', IntValue.class, DoubleValue.class, DoubleValue.class, DoubleValue.class), clusterInput, "Centers");
+		
+		MapOperator dataPoints = MapOperator.builder(new PointBuilder()).name("Build data points").input(pointsSource).build();
+		
+		MapOperator clusterPoints = MapOperator.builder(new PointBuilder()).name("Build cluster points").input(clustersSource).build();
 
-		// create CrossOperator for distance computation
-		CrossOperator computeDistance = CrossOperator.builder(new ComputeDistance())
-			.input1(dataPoints)
-			.input2(clusterPoints)
-			.name("Compute Distances")
-			.build();
-
-		// create ReduceOperator for finding the nearest cluster centers
-		ReduceOperator findNearestClusterCenters = ReduceOperator.builder(new FindNearestCenter(), IntValue.class, 0)
-			.input(computeDistance)
+		// the mapper computes the distance to all points, which it draws from a broadcast variable
+		MapOperator findNearestClusterCenters = MapOperator.builder(new SelectNearestCenter())
+			.setBroadcastVariable("centers", clusterPoints)
+			.input(dataPoints)
 			.name("Find Nearest Centers")
 			.build();
 
-		// create ReduceOperator for computing new cluster positions
+		// create reducer recomputes the cluster centers as the  average of all associated data points
 		ReduceOperator recomputeClusterCenter = ReduceOperator.builder(new RecomputeClusterCenter(), IntValue.class, 0)
 			.input(findNearestClusterCenters)
 			.name("Recompute Center Positions")
@@ -80,7 +70,7 @@ public class KMeansSingleStep implements Program, ProgramDescription {
 		// create DataSinkContract for writing the new cluster positions
 		FileDataSink newClusterPoints = new FileDataSink(new PointOutFormat(), output, recomputeClusterCenter, "New Center Positions");
 
-		// return the PACT plan
+		// return the plan
 		Plan plan = new Plan(newClusterPoints, "KMeans Iteration");
 		plan.setDefaultParallelism(numSubTasks);
 		return plan;
@@ -88,6 +78,6 @@ public class KMeansSingleStep implements Program, ProgramDescription {
 
 	@Override
 	public String getDescription() {
-		return "Parameters: [numSubStasks] [dataPoints] [clusterCenters] [output]";
+		return "Parameters: <numSubStasks> <dataPoints> <clusterCenters> <output>";
 	}
 }

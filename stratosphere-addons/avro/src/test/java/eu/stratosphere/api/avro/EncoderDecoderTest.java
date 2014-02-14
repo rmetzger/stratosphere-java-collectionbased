@@ -19,6 +19,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +27,9 @@ import java.util.Map;
 import org.apache.avro.reflect.ReflectDatumReader;
 import org.apache.avro.reflect.ReflectDatumWriter;
 import org.junit.Test;
+
+import eu.stratosphere.api.java.record.io.avro.generated.Colors;
+import eu.stratosphere.api.java.record.io.avro.generated.User;
 
 import static org.junit.Assert.*;
 
@@ -122,9 +126,37 @@ public class EncoderDecoderTest {
 	}
 	
 	@Test
+	public void testEmptyArray() {
+		{
+			int[] array = new int[0];
+			testObjectSerialization(array);
+		}
+		{
+			long[] array = new long[0];
+			testObjectSerialization(array);
+		}
+		{
+			float[] array = new float[0];
+			testObjectSerialization(array);
+		}
+		{
+			double[] array = new double[0];
+			testObjectSerialization(array);
+		}
+		{
+			String[] array = new String[0];
+			testObjectSerialization(array);
+		}
+	}
+	
+	@Test
 	public void testObjects() {
-		testObjectSerialization(new Book(976243875L, "The Serialization Odysse", 42));
+		// simple object containing only primitives
+		{
+			testObjectSerialization(new Book(976243875L, "The Serialization Odysse", 42));
+		}
 		
+		// object with collection
 		{
 			ArrayList<String> list = new ArrayList<String>();
 			list.add("A");
@@ -135,11 +167,31 @@ public class EncoderDecoderTest {
 			
 			testObjectSerialization(new BookAuthor(976243875L, list, "Arno Nym"));
 		}
+		
+		// object with empty collection
+		{
+			ArrayList<String> list = new ArrayList<String>();
+			testObjectSerialization(new BookAuthor(987654321L, list, "The Saurus"));
+		}
 	}
 	
 	@Test
 	public void testNestedObjectsWithCollections() {
 		testObjectSerialization(new ComplexNestedObject2(true));
+	}
+	
+	@Test
+	public void testGeneratedObjectWithNullableFields() {
+		List<CharSequence> strings = Arrays.asList(new CharSequence[] { "These", "strings", "should", "be", "recognizable", "as", "a", "meaningful", "sequence" });
+		List<Boolean> bools = Arrays.asList(true, true, false, false, true, false, true, true);
+		Map<CharSequence, Long> map = new HashMap<CharSequence, Long>();
+		map.put("1", 1L);
+		map.put("2", 2L);
+		map.put("3", 3L);
+		
+		User user = new User("Freudenreich", 1337, "macintosh gray", 1234567890L, 3.1415926, null, true, strings, bools, null, Colors.GREEN, map);
+		
+		testObjectSerialization(user);
 	}
 	
 	@Test
