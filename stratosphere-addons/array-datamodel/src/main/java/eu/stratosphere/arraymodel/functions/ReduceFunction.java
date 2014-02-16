@@ -22,7 +22,9 @@ import eu.stratosphere.util.Collector;
 
 
 public abstract class ReduceFunction extends AbstractArrayModelFunction implements GenericReducer<Value[], Value[]> {
-	
+
+	private static final long serialVersionUID = 1L;
+
 	/**
 	 * The central function to be implemented for a reducer. The function receives per call one
 	 * key and all the values that belong to that key. Each key is guaranteed to be processed by exactly

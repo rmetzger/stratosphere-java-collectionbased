@@ -26,6 +26,8 @@ import eu.stratosphere.util.InstantiationUtil;
 
 public abstract class ReduceWithKeyFunction extends AbstractArrayModelFunction implements GenericReducer<Value[], Value[]> {
 	
+	private static final long serialVersionUID = 1L;
+
 	public abstract void reduce(Value key, Iterator<Value[]> records, Collector<Value[]> out);
 	
 	public void combine(Value key, Iterator<Value[]> records, Collector<Value[]> out) {

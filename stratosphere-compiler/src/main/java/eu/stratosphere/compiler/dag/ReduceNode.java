@@ -18,7 +18,6 @@ import java.util.List;
 
 import eu.stratosphere.api.common.operators.Ordering;
 import eu.stratosphere.api.common.operators.base.ReduceOperatorBase;
-import eu.stratosphere.api.java.record.operators.ReduceOperator;
 import eu.stratosphere.compiler.CompilerException;
 import eu.stratosphere.compiler.DataStatistics;
 import eu.stratosphere.compiler.PactCompiler;
@@ -107,8 +106,8 @@ public class ReduceNode extends SingleInputNode {
 		
 		// check if we can work with a grouping (simple reducer), or if we need ordering because of a group order
 		Ordering groupOrder = null;
-		if (getPactContract() instanceof ReduceOperator) {
-			groupOrder = ((ReduceOperator) getPactContract()).getGroupOrder();
+		if (getPactContract() instanceof ReduceOperatorBase) {
+			groupOrder = ((ReduceOperatorBase<?>) getPactContract()).getGroupOrder();
 			if (groupOrder != null && groupOrder.getNumberOfFields() == 0) {
 				groupOrder = null;
 			}

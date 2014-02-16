@@ -44,6 +44,9 @@ import eu.stratosphere.util.Collector;
  */
 public class WordCountArrayTuples implements Program, ProgramDescription {
 	
+	private static final long serialVersionUID = 1L;
+
+
 	/**
 	 * Converts a Record containing one string in to multiple string/integer pairs.
 	 * The string is tokenized by whitespaces. For each token a new record is emitted,
@@ -51,6 +54,9 @@ public class WordCountArrayTuples implements Program, ProgramDescription {
 	 */
 	
 	public static class TokenizeLine extends MapFunction {
+
+		private static final long serialVersionUID = 1L;
+
 		// initialize reusable mutable objects
 		private final StringValue word = new StringValue();
 		private final IntValue one = new IntValue(1);
@@ -86,6 +92,8 @@ public class WordCountArrayTuples implements Program, ProgramDescription {
 	@ConstantFields(0)
 	public static class CountWords extends ReduceFunction {
 		
+		private static final long serialVersionUID = 1L;
+
 		private final IntValue cnt = new IntValue();
 		private final Value[] result = new Value[] { null, cnt };
 		

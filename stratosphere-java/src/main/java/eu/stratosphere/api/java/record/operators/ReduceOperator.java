@@ -45,11 +45,6 @@ public class ReduceOperator extends ReduceOperatorBase<ReduceFunction> implement
 	 */
 	private final Class<? extends Key>[] keyTypes;
 	
-	/**
-	 * The ordering for the order inside a reduce group.
-	 */
-	private Ordering groupOrder;
-	
 	// --------------------------------------------------------------------------------------------
 	
 	/**
@@ -110,25 +105,6 @@ public class ReduceOperator extends ReduceOperatorBase<ReduceFunction> implement
 	@Override
 	public Class<? extends Key>[] getKeyClasses() {
 		return this.keyTypes;
-	}
-	
-	/**
-	 * Sets the order of the elements within a reduce group.
-	 * 
-	 * @param order The order for the elements in a reduce group.
-	 */
-	public void setGroupOrder(Ordering order) {
-		this.groupOrder = order;
-	}
-
-	/**
-	 * Gets the order of elements within a reduce group. If no such order has been
-	 * set, this method returns null.
-	 * 
-	 * @return The secondary order.
-	 */
-	public Ordering getGroupOrder() {
-		return this.groupOrder;
 	}
 	
 	// --------------------------------------------------------------------------------------------
