@@ -28,6 +28,7 @@ import eu.stratosphere.api.common.operators.base.ReduceOperatorBase;
 import eu.stratosphere.api.common.operators.util.UserCodeClassWrapper;
 import eu.stratosphere.api.common.operators.util.UserCodeObjectWrapper;
 import eu.stratosphere.api.common.operators.util.UserCodeWrapper;
+import eu.stratosphere.api.java.record.functions.FunctionAnnotation;
 import eu.stratosphere.api.java.record.functions.ReduceFunction;
 import eu.stratosphere.types.Key;
 
@@ -102,6 +103,7 @@ public class ReduceOperator extends ReduceOperatorBase<ReduceFunction> implement
 		setInputs(builder.inputs);
 		setGroupOrder(builder.secondaryOrder);
 		setBroadcastVariables(builder.broadcastInputs);
+		setSemanticProperties(FunctionAnnotation.readSingleConstantAnnotations(builder.udf));
 	}
 	
 	// --------------------------------------------------------------------------------------------
@@ -133,10 +135,9 @@ public class ReduceOperator extends ReduceOperatorBase<ReduceFunction> implement
 	
 	// --------------------------------------------------------------------------------------------
 	
-
 	@Override
 	public boolean isCombinable() {
-		return super.isCombinable() || getUserCodeAnnotation(Combinable.class) != null;
+		return super.isCombinable() || getUserCodeWrapper().getUserCodeAnnotation(Combinable.class) != null;
 	}
 	
 	/**
@@ -181,6 +182,7 @@ public class ReduceOperator extends ReduceOperatorBase<ReduceFunction> implement
 	
 	// --------------------------------------------------------------------------------------------
 	
+
 	/**
 	 * Builder pattern, straight from Joshua Bloch's Effective Java (2nd Edition).
 	 */
