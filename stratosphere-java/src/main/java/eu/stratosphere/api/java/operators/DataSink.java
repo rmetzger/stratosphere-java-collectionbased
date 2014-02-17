@@ -15,7 +15,8 @@
 package eu.stratosphere.api.java.operators;
 
 import eu.stratosphere.api.common.io.OutputFormat;
-import eu.stratosphere.api.java.ExecutionEnvironment;
+import eu.stratosphere.api.common.operators.GenericDataSink;
+import eu.stratosphere.api.java.DataSet;
 import eu.stratosphere.api.java.typeutils.TypeInformation;
 
 
@@ -23,22 +24,22 @@ public class DataSink<T> {
 	
 	private final OutputFormat<T> format;
 	
-	private final ExecutionEnvironment context;
-	
 	private final TypeInformation<T> type;
 	
+	private final DataSet<T> data;
 	
-	public DataSink(ExecutionEnvironment context, OutputFormat<T> format, TypeInformation<T> type) {
+	
+	public DataSink(DataSet<T> data, OutputFormat<T> format, TypeInformation<T> type) {
 		if (format == null)
 			throw new IllegalArgumentException("The output format must not be null.");
 		if (type == null)
 			throw new IllegalArgumentException("The input type information must not be null.");
-		if (context == null)
-			throw new IllegalArgumentException("The execution environment must not be null.");
+		if (data == null)
+			throw new IllegalArgumentException("The data set must not be null.");
 		
 		
 		this.format = format;
-		this.context = context;
+		this.data = data;
 		this.type = type;
 	}
 
@@ -47,17 +48,26 @@ public class DataSink<T> {
 		return format;
 	}
 	
-	public ExecutionEnvironment getContext() {
-		return context;
-	}
-	
 	public TypeInformation<T> getType() {
 		return type;
 	}
 	
+	
+	/**
+	 * Gets the data set consumed by this DataSink.
+	 *
+	 * @return The data set.
+	 */
+	public DataSet<T> getDataSet() {
+		return data;
+	}
+	
 	// --------------------------------------------------------------------------------------------
 	
-	
+	protected GenericDataSink translateToDataFlow() {
+		GenericDataSink sink = new GenericDataSink(format);
+		return sink;
+	}
 	
 	// --------------------------------------------------------------------------------------------
 

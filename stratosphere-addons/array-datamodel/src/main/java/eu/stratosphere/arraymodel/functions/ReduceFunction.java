@@ -16,12 +16,12 @@ package eu.stratosphere.arraymodel.functions;
 import java.lang.reflect.Method;
 import java.util.Iterator;
 
-import eu.stratosphere.api.common.functions.GenericReducer;
+import eu.stratosphere.api.common.functions.GenericGroupReduce;
 import eu.stratosphere.types.Value;
 import eu.stratosphere.util.Collector;
 
 
-public abstract class ReduceFunction extends AbstractArrayModelFunction implements GenericReducer<Value[], Value[]> {
+public abstract class ReduceFunction extends AbstractArrayModelFunction implements GenericGroupReduce<Value[], Value[]> {
 
 	private static final long serialVersionUID = 1L;
 

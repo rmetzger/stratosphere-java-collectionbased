@@ -12,27 +12,21 @@
  * specific language governing permissions and limitations under the License.
  *
  **********************************************************************************************************************/
-package eu.stratosphere.api.java.functions;
+package eu.stratosphere.api.java.operators.translation;
 
-import java.util.Iterator;
+import java.util.List;
 
-import eu.stratosphere.util.Collector;
-
-
-public abstract class FlatMapIterator<IN, OUT> extends FlatMapFunction<IN, OUT> {
-
-	private static final long serialVersionUID = 1L;
+import eu.stratosphere.api.common.Plan;
+import eu.stratosphere.api.common.operators.GenericDataSink;
 
 
-	public abstract Iterator<OUT> flatMap(IN value) throws Exception;
+public class JavaPlan extends Plan {
 
 	
-	// --------------------------------------------------------------------------------------------
-	
-	@Override
-	public final void flatMap(IN value, Collector<OUT> out) throws Exception {
-		for (Iterator<OUT> iter = flatMap(value); iter.hasNext(); ) {
-			out.collect(iter.next());
-		}
+	public JavaPlan(List<GenericDataSink> sinks) {
+		super(sinks);
 	}
+
+
+
 }

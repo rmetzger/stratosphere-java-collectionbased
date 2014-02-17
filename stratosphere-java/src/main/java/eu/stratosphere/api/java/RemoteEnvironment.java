@@ -44,8 +44,8 @@ public class RemoteEnvironment extends ExecutionEnvironment {
 	
 	
 	@Override
-	public JobExecutionResult execute() throws Exception {
-		Plan p = createPlan();
+	public JobExecutionResult execute(String jobName) throws Exception {
+		Plan p = createPlan(jobName);
 		p.setDefaultParallelism(getDegreeOfParallelism());
 		
 		PlanExecutor executor = PlanExecutor.createRemoteExecutor(host, port, jarFiles);
@@ -54,6 +54,7 @@ public class RemoteEnvironment extends ExecutionEnvironment {
 
 	@Override
 	public String toString() {
-		return "Remote Context (" + this.host + ":" + this.port + " - DOP = " + getDegreeOfParallelism() + ") : " + getIdString();
+		return "Remote Environment (" + this.host + ":" + this.port + " - DOP = " + 
+				(getDegreeOfParallelism() == -1 ? "default" : getDegreeOfParallelism()) + ") : " + getIdString();
 	}
 }

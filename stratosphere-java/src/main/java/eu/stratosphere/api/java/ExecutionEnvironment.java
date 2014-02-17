@@ -17,6 +17,7 @@ package eu.stratosphere.api.java;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -54,7 +55,7 @@ public abstract class ExecutionEnvironment {
 	
 	private final List<DataSink<?>> sinks = new ArrayList<DataSink<?>>();
 	
-	private int degreeOfParallelism = 1;
+	private int degreeOfParallelism = -1;
 	
 	
 	// --------------------------------------------------------------------------------------------
@@ -226,22 +227,28 @@ public abstract class ExecutionEnvironment {
 	//  Executing
 	// --------------------------------------------------------------------------------------------
 	
-	public abstract JobExecutionResult execute() throws Exception;
+	public JobExecutionResult execute() throws Exception {
+		return execute(null);
+	}
+	
+	public abstract JobExecutionResult execute(String jobName) throws Exception;
 	
 	
 	void registerDataSink(DataSink<?> sink) {
 		this.sinks.add(sink);
 	}
 	
-	protected Plan createPlan() {
+	protected Plan createPlan(String jobName) {
 		if (this.sinks.isEmpty()) {
 			throw new RuntimeException("No data sinks have been created yet.");
 		}
 		
-		OperatorTranslation translator = new OperatorTranslation();
-		translator.translateToPlan(this.sinks);
+		if (jobName == null) {
+			jobName = "Stratosphere Java Job at " + Calendar.getInstance().getTime();
+		}
 		
-		return translator.getPlan();
+		OperatorTranslation translator = new OperatorTranslation();
+		return translator.translateToPlan(this.sinks, jobName);
 	}
 	
 	

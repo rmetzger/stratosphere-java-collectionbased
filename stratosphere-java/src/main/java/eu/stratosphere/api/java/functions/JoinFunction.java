@@ -15,9 +15,20 @@
 package eu.stratosphere.api.java.functions;
 
 import eu.stratosphere.api.common.functions.AbstractFunction;
+import eu.stratosphere.api.common.functions.GenericJoiner;
+import eu.stratosphere.util.Collector;
 
 
-public abstract class JoinFunction<IN1, IN2, OUT> extends AbstractFunction {
+public abstract class JoinFunction<IN1, IN2, OUT> extends AbstractFunction implements GenericJoiner<IN1, IN2, OUT> {
+
+	private static final long serialVersionUID = 1L;
 
 	public abstract OUT join(IN1 first, IN2 second) throws Exception;
+	
+	
+	
+	@Override
+	public final void join(IN1 value1, IN2 value2, Collector<OUT> out) throws Exception {
+		out.collect(join(value1, value2));
+	}
 }

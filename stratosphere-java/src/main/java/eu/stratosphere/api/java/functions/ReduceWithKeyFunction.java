@@ -16,23 +16,13 @@ package eu.stratosphere.api.java.functions;
 
 import java.util.Iterator;
 
-import eu.stratosphere.util.Collector;
+import eu.stratosphere.api.common.functions.AbstractFunction;
 
 
-public abstract class FlatMapIterator<IN, OUT> extends FlatMapFunction<IN, OUT> {
-
+public abstract class ReduceWithKeyFunction<K, IN, OUT> extends AbstractFunction {
+	
 	private static final long serialVersionUID = 1L;
 
-
-	public abstract Iterator<OUT> flatMap(IN value) throws Exception;
-
+	public abstract OUT reduce(K Key, Iterator<IN> values) throws Exception;
 	
-	// --------------------------------------------------------------------------------------------
-	
-	@Override
-	public final void flatMap(IN value, Collector<OUT> out) throws Exception {
-		for (Iterator<OUT> iter = flatMap(value); iter.hasNext(); ) {
-			out.collect(iter.next());
-		}
-	}
 }

@@ -35,4 +35,9 @@ public abstract class SingleInputOperator<IN, OUT> extends Operator<OUT> {
 	public DataSet<IN> getInput() {
 		return this.input;
 	}
+	
+	
+	protected eu.stratosphere.api.common.operators.SingleInputOperator<?> translateToDataFlow() {
+		return null;
+	}
 }

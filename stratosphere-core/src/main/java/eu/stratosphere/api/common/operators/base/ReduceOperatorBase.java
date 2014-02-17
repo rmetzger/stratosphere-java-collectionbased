@@ -13,7 +13,7 @@
 
 package eu.stratosphere.api.common.operators.base;
 
-import eu.stratosphere.api.common.functions.GenericReducer;
+import eu.stratosphere.api.common.functions.GenericGroupReduce;
 import eu.stratosphere.api.common.operators.Ordering;
 import eu.stratosphere.api.common.operators.SingleInputOperator;
 import eu.stratosphere.api.common.operators.util.UserCodeClassWrapper;
@@ -26,12 +26,12 @@ import eu.stratosphere.api.common.operators.util.UserCodeWrapper;
  * InputContracts are second-order functions. They have one or multiple input sets of records and a first-order
  * user function (stub implementation).
  * <p> 
- * Reduce works on a single input and calls the first-order user function of a {@link GenericReducer} for each group of 
+ * Reduce works on a single input and calls the first-order user function of a {@link GenericGroupReduce} for each group of 
  * records that share the same key.
  * 
- * @see GenericReducer
+ * @see GenericGroupReduce
  */
-public class ReduceOperatorBase<T extends GenericReducer<?, ?>> extends SingleInputOperator<T> {
+public class ReduceOperatorBase<T extends GenericGroupReduce<?, ?>> extends SingleInputOperator<T> {
 	
 
 	/**

@@ -22,9 +22,9 @@ import eu.stratosphere.api.common.PlanExecutor;
 public class LocalEnvironment extends ExecutionEnvironment {
 	
 	@Override
-	public JobExecutionResult execute() throws Exception {
-		Plan p = createPlan();
-//		p.setDefaultParallelism(getDegreeOfParallelism());
+	public JobExecutionResult execute(String jobName) throws Exception {
+		Plan p = createPlan(jobName);
+		p.setDefaultParallelism(getDegreeOfParallelism());
 		
 		PlanExecutor executor = PlanExecutor.createLocalExecutor();
 		return executor.executePlan(p);
@@ -32,6 +32,6 @@ public class LocalEnvironment extends ExecutionEnvironment {
 	
 	@Override
 	public String toString() {
-		return "Local Context (DOP = " + getDegreeOfParallelism() + ") : " + getIdString();
+		return "Local Environment (DOP = " + (getDegreeOfParallelism() == -1 ? "default" : getDegreeOfParallelism()) + ") : " + getIdString();
 	}
 }

@@ -15,9 +15,13 @@
 package eu.stratosphere.api.java.functions;
 
 import eu.stratosphere.api.common.functions.AbstractFunction;
+import eu.stratosphere.api.common.functions.GenericFilter;
 
 
-public abstract class FilterFunction<T> extends AbstractFunction {
+public abstract class FilterFunction<T> extends AbstractFunction implements GenericFilter<T> {
 	
+	private static final long serialVersionUID = 1L;
+
+	@Override
 	public abstract boolean filter(T value) throws Exception;
 }

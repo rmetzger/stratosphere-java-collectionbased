@@ -14,6 +14,7 @@
  **********************************************************************************************************************/
 package eu.stratosphere.api.java.operators;
 
+import eu.stratosphere.api.common.operators.DualInputOperator;
 import eu.stratosphere.api.java.DataSet;
 import eu.stratosphere.api.java.typeutils.TypeInformation;
 
@@ -43,5 +44,10 @@ public abstract class TwoInputOperator<IN1, IN2, OUT> extends Operator<OUT> {
 	
 	public DataSet<IN2> getInput2() {
 		return this.input2;
+	}
+	
+	
+	protected DualInputOperator<?> translateToDataFlow() {
+		return null;
 	}
 }

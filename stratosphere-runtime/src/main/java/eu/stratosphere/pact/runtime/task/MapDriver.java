@@ -13,7 +13,7 @@
 
 package eu.stratosphere.pact.runtime.task;
 
-import eu.stratosphere.api.common.functions.GenericMapper;
+import eu.stratosphere.api.common.functions.GenericCollectorMap;
 import eu.stratosphere.util.Collector;
 import eu.stratosphere.util.MutableObjectIterator;
 
@@ -25,20 +25,20 @@ import eu.stratosphere.util.MutableObjectIterator;
  * The MapTask creates an iterator over all key-value pairs of its input and hands that to the <code>map()</code> method
  * of the MapFunction.
  * 
- * @see GenericMapper
+ * @see GenericCollectorMap
  * 
  * @param <IT> The mapper's input data type.
  * @param <OT> The mapper's output data type.
  */
-public class MapDriver<IT, OT> implements PactDriver<GenericMapper<IT, OT>, OT> {
+public class MapDriver<IT, OT> implements PactDriver<GenericCollectorMap<IT, OT>, OT> {
 	
-	private PactTaskContext<GenericMapper<IT, OT>, OT> taskContext;
+	private PactTaskContext<GenericCollectorMap<IT, OT>, OT> taskContext;
 	
 	private volatile boolean running;
 	
 	
 	@Override
-	public void setup(PactTaskContext<GenericMapper<IT, OT>, OT> context) {
+	public void setup(PactTaskContext<GenericCollectorMap<IT, OT>, OT> context) {
 		this.taskContext = context;
 		this.running = true;
 	}
@@ -49,9 +49,9 @@ public class MapDriver<IT, OT> implements PactDriver<GenericMapper<IT, OT>, OT> 
 	}
 
 	@Override
-	public Class<GenericMapper<IT, OT>> getStubType() {
+	public Class<GenericCollectorMap<IT, OT>> getStubType() {
 		@SuppressWarnings("unchecked")
-		final Class<GenericMapper<IT, OT>> clazz = (Class<GenericMapper<IT, OT>>) (Class<?>) GenericMapper.class;
+		final Class<GenericCollectorMap<IT, OT>> clazz = (Class<GenericCollectorMap<IT, OT>>) (Class<?>) GenericCollectorMap.class;
 		return clazz;
 	}
 
@@ -69,7 +69,7 @@ public class MapDriver<IT, OT> implements PactDriver<GenericMapper<IT, OT>, OT> 
 	public void run() throws Exception {
 		// cache references on the stack
 		final MutableObjectIterator<IT> input = this.taskContext.getInput(0);
-		final GenericMapper<IT, OT> stub = this.taskContext.getStub();
+		final GenericCollectorMap<IT, OT> stub = this.taskContext.getStub();
 		final Collector<OT> output = this.taskContext.getOutputCollector();
 
 		final IT record = this.taskContext.<IT>getInputSerializer(0).createInstance();

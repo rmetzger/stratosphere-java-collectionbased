@@ -14,23 +14,121 @@
  **********************************************************************************************************************/
 package eu.stratosphere.api.java.operators;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import eu.stratosphere.api.common.Plan;
+import eu.stratosphere.api.common.operators.AbstractUdfOperator;
+import eu.stratosphere.api.common.operators.GenericDataSink;
+import eu.stratosphere.api.common.operators.GenericDataSource;
+import eu.stratosphere.api.common.operators.Operator;
+import eu.stratosphere.api.java.DataSet;
 
 
 /**
- *
+ * 
  */
 public class OperatorTranslation {
 	
+	/** The already translated operations */
+	private Map<DataSet<?>, Operator> translated = new HashMap<DataSet<?>, Operator>();
 	
-	public void translateToPlan(List<DataSink<?>> sinks) {
+	
+	public Plan translateToPlan(List<DataSink<?>> sinks, String jobName) {
+		List<GenericDataSink> planSinks = new ArrayList<GenericDataSink>();
 		
+		for (DataSink<?> sink : sinks) {
+			planSinks.add(translate(sink));
+		}
+		
+		return new Plan(planSinks); 
 	}
 	
 	
-	public Plan getPlan() {
+	private GenericDataSink translate(DataSink<?> sink) {
+		// translate the sink itself
+		GenericDataSink translatedSink = sink.translateToDataFlow();
+		
+		// translate the input recursively
+		Operator input = translate(sink.getDataSet());
+		translatedSink.setInput(input);
+		
+		return translatedSink;
+	}
+	
+	
+	private Operator translate(DataSet<?> dataSet) {
+		// check if we have already translated that data set (operation or source)
+		Operator previous = this.translated.get(dataSet);
+		if (previous != null) {
+			return previous;
+		}
+		
+		Operator dataFlowOp;
+		
+		if (dataSet instanceof DataSource) {
+			dataFlowOp = translateSource((DataSource<?>) dataSet);
+		}
+		else if (dataSet instanceof SingleInputOperator) {
+			dataFlowOp =  translateSingleOp((SingleInputOperator<?, ?>) dataSet);
+		}
+		else if (dataSet instanceof TwoInputOperator) {
+			dataFlowOp =  translateBinaryOp((TwoInputOperator<?, ?, ?>) dataSet);
+		}
+		else {
+			throw new RuntimeException("Error while creating the data flow plan for the program: Unknown operator or data set type.");
+		}
+		
+		this.translated.put(dataSet, dataFlowOp);
+		
+		// take care of broadcast variables
+		translateBcVariables(dataSet, dataFlowOp);
+		
+		return dataFlowOp;
+	}
+	
+	private GenericDataSource<?> translateSource(DataSource<?> source) {
 		return null;
+	}
+	
+	private eu.stratosphere.api.common.operators.SingleInputOperator<?> translateSingleOp(SingleInputOperator<?, ?> op) {
+		// translate the operation itself
+		eu.stratosphere.api.common.operators.SingleInputOperator<?> dataFlowOp = op.translateToDataFlow();
+		// translate the input 
+		Operator input = translate(op.getInput());
+		dataFlowOp.setInput(input);
+		
+		return dataFlowOp;
+	}
+	
+	private eu.stratosphere.api.common.operators.DualInputOperator<?> translateBinaryOp(TwoInputOperator<?, ?, ?> op) {
+		eu.stratosphere.api.common.operators.DualInputOperator<?> dataFlowOp = op.translateToDataFlow();
+		
+		Operator input1 = translate(op.getInput1());
+		Operator input2 = translate(op.getInput2());
+		
+		dataFlowOp.setFirstInput(input1);
+		dataFlowOp.setSecondInput(input2);
+		
+		return dataFlowOp;
+	}
+	
+	private void translateBcVariables(DataSet<?> setOrOp, Operator dataFlowOp) {
+		// check if this is actually an operator that could have broadcast variables
+		if (setOrOp instanceof UdfOperator) {
+			if (!(dataFlowOp instanceof AbstractUdfOperator<?>)) {
+				throw new RuntimeException("Error while creating the data flow plan for the program: A UDF operation was not translated to a UDF operator.");
+			}
+			
+			UdfOperator udfOp = (UdfOperator) setOrOp;
+			AbstractUdfOperator<?> udfDataFlowOp = (AbstractUdfOperator<?>) dataFlowOp;
+		
+			for (Map.Entry<String, DataSet<?>> bcVariable : udfOp.getBroadcastSets().entrySet()) {
+				Operator bcInput = translate(bcVariable.getValue());
+				udfDataFlowOp.setBroadcastVariable(bcVariable.getKey(), bcInput);
+			}
+		}
 	}
 }

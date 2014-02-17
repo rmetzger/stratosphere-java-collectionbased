@@ -221,9 +221,10 @@ public abstract class DataSet<T> {
 		output(outputFormat);
 	}
 	
-	public void output(OutputFormat<T> outputFormat) {
-		DataSink<T> sink = new DataSink<T>(this.context, outputFormat, this.type);
+	public DataSink<T> output(OutputFormat<T> outputFormat) {
+		DataSink<T> sink = new DataSink<T>(this, outputFormat, this.type);
 		this.context.registerDataSink(sink);
+		return sink;
 	}
 	
 	

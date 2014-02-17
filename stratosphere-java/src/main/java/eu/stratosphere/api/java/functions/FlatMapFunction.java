@@ -15,10 +15,14 @@
 package eu.stratosphere.api.java.functions;
 
 import eu.stratosphere.api.common.functions.AbstractFunction;
+import eu.stratosphere.api.common.functions.GenericFlatMap;
 import eu.stratosphere.util.Collector;
 
 
-public abstract class FlatMapFunction<IN, OUT> extends AbstractFunction {
+public abstract class FlatMapFunction<IN, OUT> extends AbstractFunction implements GenericFlatMap<IN, OUT> {
 
+	private static final long serialVersionUID = 1L;
+
+	@Override
 	public abstract void flatMap(IN value, Collector<OUT> out) throws Exception;
 }

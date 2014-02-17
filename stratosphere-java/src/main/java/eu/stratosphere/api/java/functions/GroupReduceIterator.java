@@ -21,6 +21,9 @@ import eu.stratosphere.util.Collector;
 
 public abstract class GroupReduceIterator<IN, OUT> extends GroupReduceFunction<IN, OUT> {
 	
+	private static final long serialVersionUID = 1L;
+
+
 	public abstract Iterator<OUT> reduceGroup(Iterator<IN> values) throws Exception;
 	
 	

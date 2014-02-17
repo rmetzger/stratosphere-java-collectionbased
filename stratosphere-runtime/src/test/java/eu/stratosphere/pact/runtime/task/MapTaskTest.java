@@ -21,7 +21,7 @@ import org.apache.commons.logging.LogFactory;
 import org.junit.Test;
 import org.junit.Assert;
 
-import eu.stratosphere.api.common.functions.GenericMapper;
+import eu.stratosphere.api.common.functions.GenericCollectorMap;
 import eu.stratosphere.api.java.record.functions.MapFunction;
 import eu.stratosphere.pact.runtime.test.util.DiscardingOutputCollector;
 import eu.stratosphere.pact.runtime.test.util.DriverTestBase;
@@ -32,7 +32,7 @@ import eu.stratosphere.pact.runtime.test.util.UniformRecordGenerator;
 import eu.stratosphere.types.Record;
 import eu.stratosphere.util.Collector;
 
-public class MapTaskTest extends DriverTestBase<GenericMapper<Record, Record>> {
+public class MapTaskTest extends DriverTestBase<GenericCollectorMap<Record, Record>> {
 	
 	private static final Log LOG = LogFactory.getLog(MapTaskTest.class);
 	

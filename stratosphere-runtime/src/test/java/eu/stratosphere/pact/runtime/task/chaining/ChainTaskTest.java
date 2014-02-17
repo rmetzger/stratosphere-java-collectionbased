@@ -20,7 +20,7 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
 
-import eu.stratosphere.api.common.functions.GenericMapper;
+import eu.stratosphere.api.common.functions.GenericCollectorMap;
 import eu.stratosphere.api.common.operators.util.UserCodeClassWrapper;
 import eu.stratosphere.api.java.record.functions.ReduceFunction;
 import eu.stratosphere.configuration.Configuration;
@@ -85,8 +85,8 @@ public class ChainTaskTest extends TaskTestBase {
 			
 			// chained map+combine
 			{
-				RegularPactTask<GenericMapper<Record, Record>, Record> testTask = 
-											new RegularPactTask<GenericMapper<Record, Record>, Record>();
+				RegularPactTask<GenericCollectorMap<Record, Record>, Record> testTask = 
+											new RegularPactTask<GenericCollectorMap<Record, Record>, Record>();
 				registerTask(testTask, MapDriver.class, MockMapStub.class);
 				
 				try {
@@ -141,8 +141,8 @@ public class ChainTaskTest extends TaskTestBase {
 			
 			// chained map+combine
 			{
-				final RegularPactTask<GenericMapper<Record, Record>, Record> testTask = 
-											new RegularPactTask<GenericMapper<Record, Record>, Record>();
+				final RegularPactTask<GenericCollectorMap<Record, Record>, Record> testTask = 
+											new RegularPactTask<GenericCollectorMap<Record, Record>, Record>();
 				
 				super.registerTask(testTask, MapDriver.class, MockMapStub.class);
 	

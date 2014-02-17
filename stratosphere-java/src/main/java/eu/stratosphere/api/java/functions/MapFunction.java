@@ -15,9 +15,13 @@
 package eu.stratosphere.api.java.functions;
 
 import eu.stratosphere.api.common.functions.AbstractFunction;
+import eu.stratosphere.api.common.functions.GenericMap;
 
 
-public abstract class MapFunction<IN, OUT> extends AbstractFunction {
+public abstract class MapFunction<IN, OUT> extends AbstractFunction implements GenericMap<IN, OUT> {
 
+	private static final long serialVersionUID = 1L;
+
+	@Override
 	public abstract OUT map(IN value) throws Exception;
 }

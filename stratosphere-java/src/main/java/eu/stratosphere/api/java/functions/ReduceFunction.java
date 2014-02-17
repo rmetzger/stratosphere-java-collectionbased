@@ -15,9 +15,13 @@
 package eu.stratosphere.api.java.functions;
 
 import eu.stratosphere.api.common.functions.AbstractFunction;
+import eu.stratosphere.api.common.functions.GenericReduce;
 
 
-public abstract class ReduceFunction<T> extends AbstractFunction {
+public abstract class ReduceFunction<T> extends AbstractFunction implements GenericReduce<T> {
 	
+	private static final long serialVersionUID = 1L;
+
+	@Override
 	public abstract T reduce(T value1, T value2) throws Exception;
 }
