@@ -23,6 +23,7 @@ import eu.stratosphere.api.common.operators.base.MapOperatorBase;
 import eu.stratosphere.api.common.operators.util.UserCodeClassWrapper;
 import eu.stratosphere.api.common.operators.util.UserCodeObjectWrapper;
 import eu.stratosphere.api.common.operators.util.UserCodeWrapper;
+import eu.stratosphere.api.java.record.functions.FunctionAnnotation;
 import eu.stratosphere.api.java.record.functions.MapFunction;
 import eu.stratosphere.types.Key;
 
@@ -63,6 +64,7 @@ public class MapOperator extends MapOperatorBase<MapFunction> implements RecordO
 		super(builder.udf, builder.name);
 		setInputs(builder.inputs);
 		setBroadcastVariables(builder.broadcastInputs);
+		setSemanticProperties(FunctionAnnotation.readSingleConstantAnnotations(builder.udf));
 	}
 	
 

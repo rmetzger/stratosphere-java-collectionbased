@@ -29,6 +29,7 @@ import eu.stratosphere.api.common.operators.util.UserCodeClassWrapper;
 import eu.stratosphere.api.common.operators.util.UserCodeObjectWrapper;
 import eu.stratosphere.api.common.operators.util.UserCodeWrapper;
 import eu.stratosphere.api.java.record.functions.CoGroupFunction;
+import eu.stratosphere.api.java.record.functions.FunctionAnnotation;
 import eu.stratosphere.types.Key;
 
 /**
@@ -86,6 +87,7 @@ public class CoGroupOperator extends CoGroupOperatorBase<CoGroupFunction> implem
 		setBroadcastVariables(builder.broadcastInputs);
 		setGroupOrderForInputOne(builder.secondaryOrder1);
 		setGroupOrderForInputTwo(builder.secondaryOrder2);
+		setSemanticProperties(FunctionAnnotation.readDualConstantAnnotations(builder.udf));
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -99,12 +101,12 @@ public class CoGroupOperator extends CoGroupOperatorBase<CoGroupFunction> implem
 	
 	@Override
 	public boolean isCombinableFirst() {
-		return super.isCombinableFirst() || getUserCodeAnnotation(CombinableFirst.class) != null;
+		return super.isCombinableFirst() || getUserCodeWrapper().getUserCodeAnnotation(CombinableFirst.class) != null;
 	}
 	
 	@Override
 	public boolean isCombinableSecond() {
-		return super.isCombinableSecond() || getUserCodeAnnotation(CombinableSecond.class) != null;
+		return super.isCombinableSecond() || getUserCodeWrapper().getUserCodeAnnotation(CombinableSecond.class) != null;
 	}
 	
 	@Retention(RetentionPolicy.RUNTIME)
@@ -117,6 +119,7 @@ public class CoGroupOperator extends CoGroupOperatorBase<CoGroupFunction> implem
 	
 	// --------------------------------------------------------------------------------------------
 
+	
 	/**
 	 * Builder pattern, straight from Joshua Bloch's Effective Java (2nd Edition).
 	 */

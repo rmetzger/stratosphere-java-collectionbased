@@ -254,11 +254,6 @@ public abstract class OptimizerNode implements Visitable<OptimizerNode>, Estimat
 	public abstract boolean isMemoryConsumer();
 	
 	/**
-	 * Reads all constant stub annotations. Constant stub annotations are defined per input.
-	 */
-	protected abstract void readConstantAnnotation();
-	
-	/**
 	 * Checks whether a field is modified by the user code or whether it is kept unchanged.
 	 * 
 	 * @param input The input number.
@@ -676,7 +671,6 @@ public abstract class OptimizerNode implements Visitable<OptimizerNode>, Estimat
 	 * functions have, which fields remain unique.
 	 */
 	protected void readStubAnnotations() {
-		readConstantAnnotation();
 		readUniqueFieldsAnnotation();
 	}
 	

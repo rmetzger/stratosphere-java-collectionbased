@@ -13,11 +13,6 @@
 
 package eu.stratosphere.api.common.operators.base;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
 import eu.stratosphere.api.common.functions.GenericCoGrouper;
 import eu.stratosphere.api.common.operators.DualInputOperator;
 import eu.stratosphere.api.common.operators.Ordering;
@@ -48,9 +43,16 @@ public class CoGroupOperatorBase<T extends GenericCoGrouper<?, ?, ?>> extends Du
 	private Ordering groupOrder2;
 	
 	// --------------------------------------------------------------------------------------------
+
+	private boolean combinableFirst;
+
+	private boolean combinableSecond;
+
 	
 	public CoGroupOperatorBase(UserCodeWrapper<T> udf, int[] keyPositions1, int[] keyPositions2, String name) {
 		super(udf, keyPositions1, keyPositions2, name);
+		this.combinableFirst = false;
+		this.combinableSecond = false;
 	}
 	
 	public CoGroupOperatorBase(T udf, int[] keyPositions1, int[] keyPositions2, String name) {
@@ -135,18 +137,19 @@ public class CoGroupOperatorBase<T extends GenericCoGrouper<?, ?, ?>> extends Du
 	// --------------------------------------------------------------------------------------------
 
 	public boolean isCombinableFirst() {
-		return getUserCodeAnnotation(CombinableFirst.class) != null;
+		return this.combinableFirst;
+	}
+	
+	public void setCombinableFirst(boolean combinableFirst) {
+		this.combinableFirst = combinableFirst;
 	}
 	
 	public boolean isCombinableSecond() {
-		return getUserCodeAnnotation(CombinableSecond.class) != null;
+		return this.combinableSecond;
 	}
 
-	@Retention(RetentionPolicy.RUNTIME)
-	@Target(ElementType.TYPE)
-	public static @interface CombinableFirst {};
-	
-	@Retention(RetentionPolicy.RUNTIME)
-	@Target(ElementType.TYPE)
-	public static @interface CombinableSecond {};
+	public void setCombinableSecond(boolean combinableSecond) {
+		this.combinableSecond = combinableSecond;
+	}
+
 }
