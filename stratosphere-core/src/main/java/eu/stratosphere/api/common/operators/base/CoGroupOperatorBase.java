@@ -151,5 +151,4 @@ public class CoGroupOperatorBase<T extends GenericCoGrouper<?, ?, ?>> extends Du
 	public void setCombinableSecond(boolean combinableSecond) {
 		this.combinableSecond = combinableSecond;
 	}
-
 }

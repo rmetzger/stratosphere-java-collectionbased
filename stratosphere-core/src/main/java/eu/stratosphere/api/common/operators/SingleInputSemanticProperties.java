@@ -22,7 +22,8 @@ import eu.stratosphere.api.common.operators.util.FieldSet;
  * Container for the semantic properties associated to a single input operator.
  */
 public class SingleInputSemanticProperties extends SemanticProperties {
-		
+	private static final long serialVersionUID = 1L;
+	
 	/**
 	 * Mapping from fields in the source record(s) to fields in the destination
 	 * record(s).  

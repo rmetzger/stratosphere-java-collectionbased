@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 import eu.stratosphere.api.common.operators.Operator;
+import eu.stratosphere.api.common.operators.RecordOperator;
 import eu.stratosphere.api.common.operators.base.MapOperatorBase;
 import eu.stratosphere.api.common.operators.util.UserCodeClassWrapper;
 import eu.stratosphere.api.common.operators.util.UserCodeObjectWrapper;
@@ -41,7 +42,7 @@ public class MapOperator extends MapOperatorBase<MapFunction> implements RecordO
 	/**
 	 * Creates a Builder with the provided {@link MapFunction} implementation.
 	 * 
-	 * @param udf The {@link MapFunction} implementation for this Map contract.
+	 * @param udf The {@link MapFunction} implementation for this Map operator.
 	 */
 	public static Builder builder(MapFunction udf) {
 		return new Builder(new UserCodeObjectWrapper<MapFunction>(udf));
@@ -50,7 +51,7 @@ public class MapOperator extends MapOperatorBase<MapFunction> implements RecordO
 	/**
 	 * Creates a Builder with the provided {@link MapFunction} implementation.
 	 * 
-	 * @param udf The {@link MapFunction} implementation for this Map contract.
+	 * @param udf The {@link MapFunction} implementation for this Map operator.
 	 */
 	public static Builder builder(Class<? extends MapFunction> udf) {
 		return new Builder(new UserCodeClassWrapper<MapFunction>(udf));
@@ -91,7 +92,7 @@ public class MapOperator extends MapOperatorBase<MapFunction> implements RecordO
 		/**
 		 * Creates a Builder with the provided {@link MapFunction} implementation.
 		 * 
-		 * @param udf The {@link MapFunction} implementation for this Map contract.
+		 * @param udf The {@link MapFunction} implementation for this Map operator.
 		 */
 		private Builder(UserCodeWrapper<MapFunction> udf) {
 			this.udf = udf;
@@ -141,7 +142,7 @@ public class MapOperator extends MapOperatorBase<MapFunction> implements RecordO
 		}
 		
 		/**
-		 * Sets the name of this contract.
+		 * Sets the name of this operator.
 		 * 
 		 * @param name
 		 */
@@ -154,7 +155,7 @@ public class MapOperator extends MapOperatorBase<MapFunction> implements RecordO
 		 * Creates and returns a MapOperator from using the values given 
 		 * to the builder.
 		 * 
-		 * @return The created contract
+		 * @return The created operator
 		 */
 		public MapOperator build() {
 			return new MapOperator(this);

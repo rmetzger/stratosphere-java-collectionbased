@@ -24,6 +24,7 @@ import java.util.Map;
 
 import eu.stratosphere.api.common.operators.Operator;
 import eu.stratosphere.api.common.operators.Ordering;
+import eu.stratosphere.api.common.operators.RecordOperator;
 import eu.stratosphere.api.common.operators.base.ReduceOperatorBase;
 import eu.stratosphere.api.common.operators.util.UserCodeClassWrapper;
 import eu.stratosphere.api.common.operators.util.UserCodeObjectWrapper;
@@ -282,7 +283,7 @@ public class ReduceOperator extends ReduceOperatorBase<ReduceFunction> implement
 		}
 		
 		/**
-		 * Sets the name of this contract.
+		 * Sets the name of this operator.
 		 * 
 		 * @param name
 		 */
@@ -295,7 +296,7 @@ public class ReduceOperator extends ReduceOperatorBase<ReduceFunction> implement
 		 * Creates and returns a ReduceOperator from using the values given 
 		 * to the builder.
 		 * 
-		 * @return The created contract
+		 * @return The created operator
 		 */
 		public ReduceOperator build() {
 			return new ReduceOperator(this);

@@ -24,6 +24,7 @@ import java.util.Map;
 
 import eu.stratosphere.api.common.operators.Operator;
 import eu.stratosphere.api.common.operators.Ordering;
+import eu.stratosphere.api.common.operators.RecordOperator;
 import eu.stratosphere.api.common.operators.base.CoGroupOperatorBase;
 import eu.stratosphere.api.common.operators.util.UserCodeClassWrapper;
 import eu.stratosphere.api.common.operators.util.UserCodeObjectWrapper;
@@ -40,10 +41,10 @@ import eu.stratosphere.types.Key;
  */
 public class CoGroupOperator extends CoGroupOperatorBase<CoGroupFunction> implements RecordOperator {
 	
-	private static String DEFAULT_NAME = "<Unnamed CoGrouper>";		// the default name for contracts
+	private static String DEFAULT_NAME = "<Unnamed CoGrouper>";		// the default name for operators
 	
 	/**
-	 * The types of the keys that the contract operates on.
+	 * The types of the keys that the operator operates on.
 	 */
 	private final Class<? extends Key>[] keyTypes;
 	
@@ -52,20 +53,19 @@ public class CoGroupOperator extends CoGroupOperatorBase<CoGroupFunction> implem
 	/**
 	 * Creates a Builder with the provided {@link CoGroupFunction} implementation.
 	 * 
-	 * @param udf The {@link CoGroupFunction} implementation for this CoGroup contract.
+	 * @param udf The {@link CoGroupFunction} implementation for this CoGroup operator.
 	 * @param keyClass The class of the key data type.
 	 * @param keyColumn1 The position of the key in the first input's records.
 	 * @param keyColumn2 The position of the key in the second input's records.
 	 */
-	public static Builder builder(CoGroupFunction udf, Class<? extends Key> keyClass,
-			int keyColumn1, int keyColumn2) {
+	public static Builder builder(CoGroupFunction udf, Class<? extends Key> keyClass, int keyColumn1, int keyColumn2) {
 		return new Builder(new UserCodeObjectWrapper<CoGroupFunction>(udf), keyClass, keyColumn1, keyColumn2);
 	}
 	
 	/**
 	 * Creates a Builder with the provided {@link CoGroupFunction} implementation.
 	 * 
-	 * @param udf The {@link CoGroupFunction} implementation for this CoGroup contract.
+	 * @param udf The {@link CoGroupFunction} implementation for this CoGroup operator.
 	 * @param keyClass The class of the key data type.
 	 * @param keyColumn1 The position of the key in the first input's records.
 	 * @param keyColumn2 The position of the key in the second input's records.
@@ -142,7 +142,7 @@ public class CoGroupOperator extends CoGroupOperatorBase<CoGroupFunction> implem
 		/**
 		 * Creates a Builder with the provided {@link CoGroupFunction} implementation.
 		 * 
-		 * @param udf The {@link CoGroupFunction} implementation for this CoGroup contract.
+		 * @param udf The {@link CoGroupFunction} implementation for this CoGroup operator.
 		 * @param keyClass The class of the key data type.
 		 * @param keyColumn1 The position of the key in the first input's records.
 		 * @param keyColumn2 The position of the key in the second input's records.
@@ -166,7 +166,7 @@ public class CoGroupOperator extends CoGroupOperatorBase<CoGroupFunction> implem
 		 * Creates a Builder with the provided {@link JoinFunction} implementation. This method is intended 
 		 * for special case sub-types only.
 		 * 
-		 * @param udf The {@link CoGroupFunction} implementation for this CoGroup contract.
+		 * @param udf The {@link CoGroupFunction} implementation for this CoGroup operator.
 		 */
 		protected Builder(UserCodeWrapper<CoGroupFunction> udf) {
 			this.udf = udf;
@@ -297,7 +297,7 @@ public class CoGroupOperator extends CoGroupOperatorBase<CoGroupFunction> implem
 		}
 		
 		/**
-		 * Sets the name of this contract.
+		 * Sets the name of this operator.
 		 * 
 		 * @param name
 		 */
@@ -310,7 +310,7 @@ public class CoGroupOperator extends CoGroupOperatorBase<CoGroupFunction> implem
 		 * Creates and returns a CoGroupOperator from using the values given 
 		 * to the builder.
 		 * 
-		 * @return The created contract
+		 * @return The created operator
 		 */
 		public CoGroupOperator build() {
 			if (keyClasses.size() <= 0) {

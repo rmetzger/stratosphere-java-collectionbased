@@ -10,9 +10,20 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  **********************************************************************************************************************/
-package eu.stratosphere.compiler.util;
 
-import eu.stratosphere.api.common.functions.AbstractFunction;
+package eu.stratosphere.api.common.operators;
 
+import eu.stratosphere.types.Key;
 
-public class NoOpStub extends AbstractFunction {}
+/**
+ * Interface marking contract classes to be referring to the {@link Record} data model.
+ */
+public interface RecordOperator {
+	
+	/**
+	 * Gets the key classes that this record works on.
+	 * 
+	 * @return The key classes that this record works on.
+	 */
+	Class<? extends Key>[] getKeyClasses();
+}

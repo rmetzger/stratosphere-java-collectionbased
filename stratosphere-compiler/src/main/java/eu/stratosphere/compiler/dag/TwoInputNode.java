@@ -31,10 +31,6 @@ import eu.stratosphere.api.common.operators.DualInputSemanticProperties;
 import eu.stratosphere.api.common.operators.Operator;
 import eu.stratosphere.api.common.operators.util.FieldList;
 import eu.stratosphere.api.common.operators.util.FieldSet;
-import eu.stratosphere.api.java.record.functions.FunctionAnnotation.ConstantFieldsFirst;
-import eu.stratosphere.api.java.record.functions.FunctionAnnotation.ConstantFieldsFirstExcept;
-import eu.stratosphere.api.java.record.functions.FunctionAnnotation.ConstantFieldsSecond;
-import eu.stratosphere.api.java.record.functions.FunctionAnnotation.ConstantFieldsSecondExcept;
 import eu.stratosphere.compiler.CompilerException;
 import eu.stratosphere.compiler.PactCompiler;
 import eu.stratosphere.compiler.costs.CostEstimator;
@@ -673,30 +669,23 @@ public abstract class TwoInputNode extends OptimizerNode {
 	
 	@Override
 	public boolean isFieldConstant(int input, int fieldNumber) {
-		DualInputOperator<?> c = (DualInputOperator<?>)super.getPactContract();
-
+		DualInputOperator<?> c = getPactContract();
 		DualInputSemanticProperties semanticProperties = c.getSemanticProperties();
 		
 		switch(input) {
 		case 0:
-			if(semanticProperties != null) {
+			if (semanticProperties != null) {
 				FieldSet fs;
-				if((fs = semanticProperties.getForwardedField1(fieldNumber)) != null) {
+				if ((fs = semanticProperties.getForwardedField1(fieldNumber)) != null) {
 					return fs.contains(fieldNumber);
-				}
-				if((fs = semanticProperties.getWrittenFields()) != null) {
-					return !fs.contains(fieldNumber);
 				}
 			}
 			break;
 		case 1:
 			if(semanticProperties != null) {
 				FieldSet fs;
-				if((fs = semanticProperties.getForwardedField2(fieldNumber)) != null) {
+				if ((fs = semanticProperties.getForwardedField2(fieldNumber)) != null) {
 					return fs.contains(fieldNumber);
-				}
-				if((fs = semanticProperties.getWrittenFields()) != null) {
-					return !fs.contains(fieldNumber);
 				}
 			}
 			break;
@@ -717,11 +706,14 @@ public abstract class TwoInputNode extends OptimizerNode {
 		if (visitor.preVisit(this)) {
 			if (this.input1 == null || this.input2 == null)
 				throw new CompilerException();
+			
 			getFirstPredecessorNode().accept(visitor);
 			getSecondPredecessorNode().accept(visitor);
+			
 			for (PactConnection connection : getBroadcastConnections()) {
 				connection.getSource().accept(visitor);
 			}
+			
 			visitor.postVisit(this);
 		}
 	}

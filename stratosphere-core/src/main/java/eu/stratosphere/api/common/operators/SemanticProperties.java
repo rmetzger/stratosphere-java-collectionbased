@@ -13,13 +13,16 @@
 
 package eu.stratosphere.api.common.operators;
 
+import java.io.Serializable;
+
 import eu.stratosphere.api.common.operators.util.FieldSet;
 
 /**
  * Container for the semantic properties associated to an operator.
  */
-public abstract class SemanticProperties {
-		
+public abstract class SemanticProperties implements Serializable {
+	private static final long serialVersionUID = 1L;
+
 	/**
 	 * Set of fields that are written in the destination record(s).
 	 */
@@ -66,5 +69,4 @@ public abstract class SemanticProperties {
 	private void init() {
 		this.writtenFields = null;
 	}
-		
 }

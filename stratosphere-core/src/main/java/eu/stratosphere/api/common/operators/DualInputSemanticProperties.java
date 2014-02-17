@@ -22,6 +22,7 @@ import eu.stratosphere.api.common.operators.util.FieldSet;
  * Container for the semantic properties associated to a dual input operator.
  */
 public class DualInputSemanticProperties extends SemanticProperties {
+	private static final long serialVersionUID = 1L;
 	
 	/**
 	 * Mapping from fields in the source record(s) in the first input to fields

@@ -80,6 +80,6 @@ public class AggregateOperator<IN> extends SingleInputOperator<IN, IN> {
 		this.fields = new int[] { field };
 		
 		// get the grouping fields
-		this.groupingFields = input.getGroupingFields();
+		this.groupingFields = null; //input.getGroupingFields();
 	}
 }

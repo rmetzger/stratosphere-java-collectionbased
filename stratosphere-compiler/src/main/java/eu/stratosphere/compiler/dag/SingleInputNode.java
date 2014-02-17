@@ -139,17 +139,13 @@ public abstract class SingleInputNode extends OptimizerNode {
 			throw new IndexOutOfBoundsException();
 		}
 		
-		SingleInputOperator<?> c = (SingleInputOperator<?>)super.getPactContract();
-
+		SingleInputOperator<?> c = getPactContract();
 		SingleInputSemanticProperties semanticProperties = c.getSemanticProperties();
 		
 		if(semanticProperties != null) {
 			FieldSet fs;
 			if((fs = semanticProperties.getForwardedField(fieldNumber)) != null) {
 				return fs.contains(fieldNumber);
-			}
-			if((fs = semanticProperties.getWrittenFields()) != null) {
-				return !fs.contains(fieldNumber);
 			}
 		}
 		

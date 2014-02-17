@@ -49,7 +49,7 @@ public class ExternalProcessInputFormatTest {
 			return;
 		
 		Configuration config = new Configuration();
-		ExternalProcessInputSplit split = new ExternalProcessInputSplit(1, this.neverEndingCommand);
+		ExternalProcessInputSplit split = new ExternalProcessInputSplit(1, 1, this.neverEndingCommand);
 		
 		boolean processDestroyed = false;
 		try {
@@ -80,7 +80,7 @@ public class ExternalProcessInputFormatTest {
 	public void testCheckExitCode() {
 		
 		Configuration config = new Configuration();
-		ExternalProcessInputSplit split = new ExternalProcessInputSplit(1, failingCommand);
+		ExternalProcessInputSplit split = new ExternalProcessInputSplit(1, 1, failingCommand);
 		
 		format.configure(config);
 		boolean invalidExitCode = false;
@@ -124,7 +124,7 @@ public class ExternalProcessInputFormatTest {
 		
 		Configuration config = new Configuration();
 		config.setInteger(MyExternalProcessTestInputFormat.FAILCOUNT_PARAMETER_KEY, 100);
-		ExternalProcessInputSplit split = new ExternalProcessInputSplit(1, this.neverEndingCommand);
+		ExternalProcessInputSplit split = new ExternalProcessInputSplit(1, 1, this.neverEndingCommand);
 		Record record = new Record();
 	    	    
 		boolean userException = false;
@@ -156,7 +156,7 @@ public class ExternalProcessInputFormatTest {
 	public void testReadStream() {
 		
 		Configuration config = new Configuration();
-		ExternalProcessInputSplit split = new ExternalProcessInputSplit(1, this.thousandRecordsCommand);
+		ExternalProcessInputSplit split = new ExternalProcessInputSplit(1, 1, this.thousandRecordsCommand);
 		Record record = new Record();
 
 		int cnt = 0;
