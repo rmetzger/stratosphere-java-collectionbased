@@ -21,13 +21,6 @@ import eu.stratosphere.api.common.operators.util.UserCodeWrapper;
 
 
 /**
- * MapContract represents a Pact with a Map Input Operator.
- * InputContracts are second-order functions. They have one or multiple input sets of records and a first-order
- * user function (stub implementation).
- * <p> 
- * Map works on a single input and calls the first-order user function of a {@link GenericCollectorMap} 
- * for each record independently.
- * 
  * @see GenericCollectorMap
  */
 public class MapOperatorBase<T extends GenericCollectorMap<?, ?>> extends SingleInputOperator<T> {

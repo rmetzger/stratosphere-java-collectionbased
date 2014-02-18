@@ -17,7 +17,7 @@ import eu.stratosphere.api.common.operators.GenericDataSink;
 import eu.stratosphere.api.common.operators.Ordering;
 import eu.stratosphere.api.common.operators.SingleInputOperator;
 import eu.stratosphere.api.common.operators.base.CoGroupOperatorBase;
-import eu.stratosphere.api.common.operators.base.ReduceOperatorBase;
+import eu.stratosphere.api.common.operators.base.GroupReduceOperatorBase;
 import eu.stratosphere.api.common.operators.util.FieldList;
 import eu.stratosphere.api.common.typeutils.TypeSerializerFactory;
 import eu.stratosphere.api.common.operators.RecordOperator;
@@ -84,8 +84,8 @@ public class RecordModelPostPass extends GenericFlatTypePostPass<Class<? extends
 		}
 		
 		// this is a temporary fix, we should solve this more generic
-		if (contract instanceof ReduceOperatorBase) {
-			Ordering groupOrder = ((ReduceOperatorBase<?>) contract).getGroupOrder();
+		if (contract instanceof GroupReduceOperatorBase) {
+			Ordering groupOrder = ((GroupReduceOperatorBase<?>) contract).getGroupOrder();
 			if (groupOrder != null) {
 				addOrderingToSchema(groupOrder, schema);
 			}

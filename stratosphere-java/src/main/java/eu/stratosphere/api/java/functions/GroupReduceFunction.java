@@ -14,6 +14,10 @@
  **********************************************************************************************************************/
 package eu.stratosphere.api.java.functions;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.Iterator;
 
 import eu.stratosphere.api.common.functions.AbstractFunction;
@@ -27,4 +31,17 @@ public abstract class GroupReduceFunction<IN, OUT> extends AbstractFunction impl
 
 	@Override
 	public abstract void reduce(Iterator<IN> values, Collector<OUT> out) throws Exception;
+	
+	@Override
+	public void combine(Iterator<IN> values, Collector<IN> out) throws Exception {
+		@SuppressWarnings("unchecked")
+		Collector<OUT> c = (Collector<OUT>) out;
+		reduce(values, c);
+	}
+	
+	// --------------------------------------------------------------------------------------------
+	
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.TYPE)
+	public static @interface Combinable {};
 }

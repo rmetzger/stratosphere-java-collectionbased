@@ -23,7 +23,7 @@ import eu.stratosphere.api.java.typeutils.TypeExtractor;
  * @param <IN> The type of the data set consumed by the operator.
  * @param <OUT> The type of the data set created by the operator.
  */
-public class ReduceGroupOperator<IN, OUT> extends SingleInputOperator<IN, OUT> {
+public class ReduceGroupOperator<IN, OUT> extends SingleInputUdfOperator<IN, OUT, ReduceGroupOperator<IN, OUT>> {
 	
 	@SuppressWarnings("unused")
 	private final GroupReduceFunction<IN, OUT> function;

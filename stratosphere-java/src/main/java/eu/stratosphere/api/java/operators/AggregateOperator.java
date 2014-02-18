@@ -20,7 +20,7 @@ import eu.stratosphere.api.java.aggregation.Aggregations;
 /**
  * @param <IN> The type of the data set aggregated by the operator.
  */
-public class AggregateOperator<IN> extends SingleInputOperator<IN, IN> {
+public class AggregateOperator<IN> extends SingleInputOperator<IN, IN, AggregateOperator<IN>> {
 	
 	private final Aggregations[] aggregationFunctions;
 	
@@ -47,7 +47,7 @@ public class AggregateOperator<IN> extends SingleInputOperator<IN, IN> {
 			// this is the first aggregation operator after a regular data set (non grouped aggregation)
 			this.aggregationFunctions = new Aggregations[] { function };
 			this.fields = new int[] { field };
-			this.groupingFields = OperatorUtil.EMPTY_INTS;
+			this.groupingFields = new int[0];
 		} else {
 			// this aggregation operator succeeds another one, so merge them
 			AggregateOperator<IN> pred = (AggregateOperator<IN>) input;

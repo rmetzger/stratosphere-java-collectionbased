@@ -16,12 +16,13 @@ package eu.stratosphere.api.java.operators.translation;
 
 import eu.stratosphere.api.common.io.InputFormat;
 import eu.stratosphere.api.common.operators.GenericDataSource;
+import eu.stratosphere.api.java.typeutils.TypeInformation;
 
 
 public class PlanDataSource<T> extends GenericDataSource<InputFormat<T,?>> {
 
 
-	public PlanDataSource(InputFormat<T, ?> format, String name) {
+	public PlanDataSource(InputFormat<T, ?> format, String name, TypeInformation<T> producedType) {
 		super(format, name);
 	}
 }

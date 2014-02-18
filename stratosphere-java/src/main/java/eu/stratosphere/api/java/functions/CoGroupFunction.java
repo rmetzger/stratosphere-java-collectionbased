@@ -12,25 +12,14 @@
  * specific language governing permissions and limitations under the License.
  *
  **********************************************************************************************************************/
-package eu.stratosphere.api.java.operators.translation;
+package eu.stratosphere.api.java.functions;
 
-import java.util.List;
+import eu.stratosphere.api.common.functions.AbstractFunction;
 
-import eu.stratosphere.api.common.Plan;
-import eu.stratosphere.api.common.operators.GenericDataSink;
-
-
-public class JavaPlan extends Plan {
-
-	
-	public JavaPlan(List<GenericDataSink> sinks) {
-		super(sinks);
-	}
+import java.util.Iterator;
 
 
-	@Override
-	public String getPostPassClassName() {
-		return "eu.stratosphere.compiler.postpass.JavaApiPostPass";
-	}
+public abstract class CoGroupFunction<IN1, IN2, OUT> extends AbstractFunction {
 
+	public abstract OUT coGroup(Iterator<IN1> first, Iterator<IN2> second) throws Exception;
 }

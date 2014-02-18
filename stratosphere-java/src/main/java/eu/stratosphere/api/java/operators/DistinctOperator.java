@@ -19,7 +19,7 @@ import eu.stratosphere.api.java.DataSet;
 /**
  * @param <IN> The type of the data set made distinct by the operator.
  */
-public class DistinctOperator<IN> extends SingleInputOperator<IN, IN> {
+public class DistinctOperator<IN> extends SingleInputOperator<IN, IN, DistinctOperator<IN>> {
 	
 	private final Keys<IN> keys;
 	

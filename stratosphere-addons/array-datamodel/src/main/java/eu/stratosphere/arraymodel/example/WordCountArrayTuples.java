@@ -21,7 +21,7 @@ import eu.stratosphere.api.common.ProgramDescription;
 import eu.stratosphere.api.common.operators.FileDataSink;
 import eu.stratosphere.api.common.operators.FileDataSource;
 import eu.stratosphere.api.common.operators.base.MapOperatorBase;
-import eu.stratosphere.api.common.operators.base.ReduceOperatorBase;
+import eu.stratosphere.api.common.operators.base.GroupReduceOperatorBase;
 import eu.stratosphere.api.java.record.functions.FunctionAnnotation.ConstantFields;
 import eu.stratosphere.api.java.record.io.TextInputFormat;
 import eu.stratosphere.arraymodel.ArrayModelPlan;
@@ -124,7 +124,7 @@ public class WordCountArrayTuples implements Program, ProgramDescription {
 		MapOperatorBase<TokenizeLine> mapper = new MapOperatorBase<TokenizeLine>(TokenizeLine.class, "Tokenize Lines");
 		mapper.setInput(source);
 		
-		ReduceOperatorBase<CountWords> reducer = new ReduceOperatorBase<CountWords>(CountWords.class, new int[] {0}, "Count Words");
+		GroupReduceOperatorBase<CountWords> reducer = new GroupReduceOperatorBase<CountWords>(CountWords.class, new int[] {0}, "Count Words");
 		reducer.setCombinable(true);
 		reducer.setInput(mapper);
 		

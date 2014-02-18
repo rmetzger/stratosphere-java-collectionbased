@@ -88,4 +88,11 @@ public class PrintingOutputFormat<T> implements OutputFormat<T> {
 		this.stream = null;
 		this.prefix = null;
 	}
+	
+	// --------------------------------------------------------------------------------------------
+	
+	@Override
+	public String toString() {
+		return "Print to " + (target == STD_OUT ? "System.out" : "System.err");
+	}
 }

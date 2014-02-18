@@ -51,6 +51,11 @@ public class RemoteEnvironment extends ExecutionEnvironment {
 		PlanExecutor executor = PlanExecutor.createRemoteExecutor(host, port, jarFiles);
 		return executor.executePlan(p);
 	}
+	
+	@Override
+	public String getExecutionPlan() throws Exception {
+		throw new UnsupportedOperationException("Execution plan can currently not be fetched from remote/cluster execution context.");
+	}
 
 	@Override
 	public String toString() {

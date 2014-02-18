@@ -14,49 +14,46 @@
  **********************************************************************************************************************/
 package eu.stratosphere.api.java.operators;
 
-import eu.stratosphere.api.common.io.InputFormat;
-import eu.stratosphere.api.common.operators.GenericDataSource;
 import eu.stratosphere.api.java.DataSet;
-import eu.stratosphere.api.java.ExecutionEnvironment;
-import eu.stratosphere.api.java.operators.translation.PlanDataSource;
+import eu.stratosphere.api.java.functions.CrossFunction;
+import eu.stratosphere.api.java.typeutils.TypeExtractor;
 import eu.stratosphere.api.java.typeutils.TypeInformation;
 
 /**
  *
  */
-public class DataSource<OUT> extends DataSet<OUT> {
-	
-	private final InputFormat<OUT, ?> inputFormat;
-	
-	private String name;
+public class CrossOperator<I1, I2, OUT> extends TwoInputUdfOperator<I1, I2, OUT, CrossOperator<I1, I2, OUT>> {
+	private final CrossFunction<I1, I2, OUT> function;
+
+	protected CrossOperator(DataSet<I1> input1, DataSet<I2> input2,
+							CrossFunction<I1, I2, OUT> function,
+							TypeInformation<OUT> returnType)
+	{
+		super(input1, input2, returnType);
+
+		this.function = function;
+	}
 
 	// --------------------------------------------------------------------------------------------
+	// Builder classes for incremental construction
+	// --------------------------------------------------------------------------------------------
 	
-	public DataSource(ExecutionEnvironment context, InputFormat<OUT, ?> inputFormat, TypeInformation<OUT> type) {
-		super(context, type);
+	public static final class CrossOperatorSets<I1, I2> {
 		
-		if (inputFormat == null)
-			throw new IllegalArgumentException("The input format may not be null.");
+		private final DataSet<I1> input1;
+		private final DataSet<I2> input2;
 		
-		this.inputFormat = inputFormat;
-	}
+		public CrossOperatorSets(DataSet<I1> input1, DataSet<I2> input2) {
+			if (input1 == null || input2 == null)
+				throw new NullPointerException();
+			
+			this.input1 = input1;
+			this.input2 = input2;
+		}
 
-	public InputFormat<OUT, ?> getInputFormat() {
-		return this.inputFormat;
-	}
-	
-	// --------------------------------------------------------------------------------------------
-	
-	public DataSource<OUT> name(String name) {
-		this.name = name;
-		return this;
-	}
-	
-	// --------------------------------------------------------------------------------------------
-	
-	protected GenericDataSource<InputFormat<OUT, ?>> translateToDataFlow() {
-		String name = this.name != null ? this.name : this.inputFormat.toString();
-		PlanDataSource<OUT> source = new PlanDataSource<OUT>(this.inputFormat, name, getType());
-		return source;
+		public <R> CrossOperator<I1, I2, R> with(CrossFunction<I1, I2, R> function) {
+			TypeInformation<R> returnType = TypeExtractor.getCrossReturnTypes(function);
+			return new CrossOperator<I1, I2, R>(input1, input2, function, returnType);
+		}
 	}
 }

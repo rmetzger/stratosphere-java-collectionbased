@@ -63,6 +63,13 @@ public class CollectionInputFormat<T> extends GenericInputFormat<T> implements U
 	
 	// --------------------------------------------------------------------------------------------
 	
+	@Override
+	public String toString() {
+		return this.dataSet.toString();
+	}
+	
+	// --------------------------------------------------------------------------------------------
+	
 	public static <X> void checkCollection(Collection<X> elements, Class<X> viewedAs) {
 		if (elements == null || viewedAs == null) {
 			throw new NullPointerException();

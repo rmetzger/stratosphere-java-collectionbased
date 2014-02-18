@@ -35,7 +35,7 @@ import eu.stratosphere.api.common.operators.base.CoGroupOperatorBase;
 import eu.stratosphere.api.common.operators.base.CrossOperatorBase;
 import eu.stratosphere.api.common.operators.base.JoinOperatorBase;
 import eu.stratosphere.api.common.operators.base.MapOperatorBase;
-import eu.stratosphere.api.common.operators.base.ReduceOperatorBase;
+import eu.stratosphere.api.common.operators.base.GroupReduceOperatorBase;
 import eu.stratosphere.api.common.io.FileInputFormat;
 import eu.stratosphere.api.common.io.FileOutputFormat;
 import eu.stratosphere.api.common.io.InputFormat;
@@ -50,7 +50,7 @@ public class OperatorUtil {
 
 	static {
 		STUB_CONTRACTS.put(GenericCollectorMap.class, MapOperatorBase.class);
-		STUB_CONTRACTS.put(GenericGroupReduce.class, ReduceOperatorBase.class);
+		STUB_CONTRACTS.put(GenericGroupReduce.class, GroupReduceOperatorBase.class);
 		STUB_CONTRACTS.put(GenericCoGrouper.class, CoGroupOperatorBase.class);
 		STUB_CONTRACTS.put(GenericCrosser.class, CrossOperatorBase.class);
 		STUB_CONTRACTS.put(GenericJoiner.class, JoinOperatorBase.class);

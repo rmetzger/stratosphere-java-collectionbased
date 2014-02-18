@@ -24,6 +24,7 @@ import eu.stratosphere.client.minicluster.NepheleMiniCluster;
 import eu.stratosphere.compiler.DataStatistics;
 import eu.stratosphere.compiler.PactCompiler;
 import eu.stratosphere.compiler.plan.OptimizedPlan;
+import eu.stratosphere.compiler.plandump.PlanJSONDumpGenerator;
 import eu.stratosphere.compiler.plantranslate.NepheleJobGraphGenerator;
 import eu.stratosphere.configuration.ConfigConstants;
 import eu.stratosphere.configuration.Configuration;
@@ -205,6 +206,18 @@ public class LocalDistributedExecutor extends PlanExecutor {
 		synchronized (this) {
 			return run(plan);
 		}
+	}
+	
+	@Override
+	public String getOptimizerPlanAsJSON(Plan plan) throws Exception {
+		if (!this.running) {
+			throw new IllegalStateException("LocalDistributedExecutor has not been started.");
+		}
+		
+		PactCompiler pc = new PactCompiler(new DataStatistics());
+		OptimizedPlan op = pc.compile(plan);
+		PlanJSONDumpGenerator dumper = new PlanJSONDumpGenerator();
+		return dumper.getOptimizerPlanAsJSON(op);
 	}
 	
 	public JobExecutionResult run(JobGraph jobGraph) throws Exception {

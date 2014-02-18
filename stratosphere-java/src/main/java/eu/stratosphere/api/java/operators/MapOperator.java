@@ -16,6 +16,7 @@ package eu.stratosphere.api.java.operators;
 
 import eu.stratosphere.api.java.DataSet;
 import eu.stratosphere.api.java.functions.MapFunction;
+import eu.stratosphere.api.java.operators.translation.PlanMapOperator;
 import eu.stratosphere.api.java.typeutils.TypeExtractor;
 
 /**
@@ -35,5 +36,12 @@ public class MapOperator<IN, OUT> extends SingleInputUdfOperator<IN, OUT, MapOpe
 			throw new NullPointerException("Map function must not be null.");
 		
 		this.function = function;
+	}
+
+
+	@Override
+	protected PlanMapOperator<IN, OUT> translateToDataFlow() {
+		String name = getName() != null ? getName() : function.getClass().getName();
+		return new PlanMapOperator<IN, OUT>(function, name, getInputType(), getResultType());
 	}
 }

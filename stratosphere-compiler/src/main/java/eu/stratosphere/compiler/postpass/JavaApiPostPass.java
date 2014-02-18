@@ -12,25 +12,13 @@
  * specific language governing permissions and limitations under the License.
  *
  **********************************************************************************************************************/
-package eu.stratosphere.api.java.operators.translation;
+package eu.stratosphere.compiler.postpass;
 
-import java.util.List;
+import eu.stratosphere.compiler.plan.OptimizedPlan;
 
-import eu.stratosphere.api.common.Plan;
-import eu.stratosphere.api.common.operators.GenericDataSink;
-
-
-public class JavaPlan extends Plan {
-
-	
-	public JavaPlan(List<GenericDataSink> sinks) {
-		super(sinks);
-	}
-
+public class JavaApiPostPass implements OptimizerPostPass {
 
 	@Override
-	public String getPostPassClassName() {
-		return "eu.stratosphere.compiler.postpass.JavaApiPostPass";
-	}
+	public void postPass(OptimizedPlan plan) {}
 
 }

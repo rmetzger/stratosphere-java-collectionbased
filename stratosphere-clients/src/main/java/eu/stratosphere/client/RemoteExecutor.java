@@ -73,15 +73,15 @@ public class RemoteExecutor extends PlanExecutor {
 		return new InetSocketAddress(host, port);
 	}
 
-	
-	public JobExecutionResult executePlanWithJars(JobWithJars p) throws Exception {
+	@Override
+	public JobExecutionResult executePlan(Plan plan) throws Exception {
+		JobWithJars p = new JobWithJars(plan, this.jarFiles);
 		return this.client.run(p, true);
 	}
 	
 	
-	@Override
-	public JobExecutionResult executePlan(Plan plan) throws Exception {
-		JobWithJars p = new JobWithJars(plan, this.jarFiles);
+	
+	public JobExecutionResult executePlanWithJars(JobWithJars p) throws Exception {
 		return this.client.run(p, true);
 	}
 
@@ -89,5 +89,10 @@ public class RemoteExecutor extends PlanExecutor {
 		File jarFile = new File(jarPath);
 		PackagedProgram program = new PackagedProgram(jarFile, assemblerClass, args);
 		return this.client.run(program.getPlanWithJars(), true);
+	}
+
+	@Override
+	public String getOptimizerPlanAsJSON(Plan plan) throws Exception {
+		return client.getOptimizerPlanAsJSON(new JobWithJars(plan, this.jarFiles));
 	}
 }

@@ -16,19 +16,17 @@ package eu.stratosphere.api.java.operators;
 
 import eu.stratosphere.api.java.DataSet;
 import eu.stratosphere.api.java.functions.ReduceFunction;
+import eu.stratosphere.api.java.operators.translation.PlanReduceOperator;
 
 /**
  *
  * @param <IN> The type of the data set reduced by the operator.
  */
-public class ReduceOperator<IN> extends SingleInputOperator<IN, IN> {
+public class ReduceOperator<IN> extends SingleInputUdfOperator<IN, IN, ReduceOperator<IN>> {
 	
-	@SuppressWarnings("unused")
 	private final ReduceFunction<IN> function;
 	
-	@SuppressWarnings("unused")
 	private final Grouping<IN> grouper;
-	
 	
 	/**
 	 * 
@@ -57,5 +55,13 @@ public class ReduceOperator<IN> extends SingleInputOperator<IN, IN> {
 		this.function = function;
 		this.grouper = input;
 	}
-	
+
+
+	@Override
+	protected PlanReduceOperator<IN> translateToDataFlow() {
+		String name = getName() != null ? getName() : function.getClass().getName();
+		int[] logicalKeyPositions = grouper.getKeys().computeLogicalKeyPositions();
+		
+		return new PlanReduceOperator<IN>(function, logicalKeyPositions, name, getInputType());
+	}
 }

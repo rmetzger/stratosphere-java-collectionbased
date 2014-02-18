@@ -13,8 +13,7 @@
 
 package eu.stratosphere.api.common.operators.base;
 
-import eu.stratosphere.api.common.functions.GenericGroupReduce;
-import eu.stratosphere.api.common.operators.Ordering;
+import eu.stratosphere.api.common.functions.GenericReduce;
 import eu.stratosphere.api.common.operators.SingleInputOperator;
 import eu.stratosphere.api.common.operators.util.UserCodeClassWrapper;
 import eu.stratosphere.api.common.operators.util.UserCodeObjectWrapper;
@@ -22,84 +21,31 @@ import eu.stratosphere.api.common.operators.util.UserCodeWrapper;
 
 
 /**
- * ReduceContract represents a Pact with a Reduce Input Operator.
- * InputContracts are second-order functions. They have one or multiple input sets of records and a first-order
- * user function (stub implementation).
- * <p> 
- * Reduce works on a single input and calls the first-order user function of a {@link GenericGroupReduce} for each group of 
- * records that share the same key.
- * 
- * @see GenericGroupReduce
+ * @see GenericReduce
  */
-public class ReduceOperatorBase<T extends GenericGroupReduce<?, ?>> extends SingleInputOperator<T> {
-	
+public class ReduceOperatorBase<T extends GenericReduce<?>> extends SingleInputOperator<T> {
 
-	/**
-	 * The ordering for the order inside a reduce group.
-	 */
-	private Ordering groupOrder;
-
-	private boolean combinable;
-	
-	
 	public ReduceOperatorBase(UserCodeWrapper<T> udf, int[] keyPositions, String name) {
 		super(udf, keyPositions, name);
-		this.combinable = false;
 	}
 	
 	public ReduceOperatorBase(T udf, int[] keyPositions, String name) {
 		super(new UserCodeObjectWrapper<T>(udf), keyPositions, name);
-		this.combinable = false;
 	}
 	
 	public ReduceOperatorBase(Class<? extends T> udf, int[] keyPositions, String name) {
 		super(new UserCodeClassWrapper<T>(udf), keyPositions, name);
-		this.combinable = false;
 	}
 	
 	public ReduceOperatorBase(UserCodeWrapper<T> udf, String name) {
 		super(udf, name);
-		this.combinable = false;
 	}
 	
 	public ReduceOperatorBase(T udf, String name) {
 		super(new UserCodeObjectWrapper<T>(udf), name);
-		this.combinable = false;
 	}
 	
 	public ReduceOperatorBase(Class<? extends T> udf, String name) {
 		super(new UserCodeClassWrapper<T>(udf), name);
-		this.combinable = false;
 	}
-	
-
-	/**
-	 * Sets the order of the elements within a reduce group.
-	 * 
-	 * @param order The order for the elements in a reduce group.
-	 */
-	public void setGroupOrder(Ordering order) {
-		this.groupOrder = order;
-	}
-
-	/**
-	 * Gets the order of elements within a reduce group. If no such order has been
-	 * set, this method returns null.
-	 * 
-	 * @return The secondary order.
-	 */
-	public Ordering getGroupOrder() {
-		return this.groupOrder;
-	}
-	
-	// --------------------------------------------------------------------------------------------
-	
-	public void setCombinable(boolean combinable) {
-		this.combinable = combinable;
-	}
-	
-	public boolean isCombinable() {
-		return this.combinable;
-	}
-
 }

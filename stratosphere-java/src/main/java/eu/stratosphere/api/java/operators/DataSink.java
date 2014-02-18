@@ -17,6 +17,7 @@ package eu.stratosphere.api.java.operators;
 import eu.stratosphere.api.common.io.OutputFormat;
 import eu.stratosphere.api.common.operators.GenericDataSink;
 import eu.stratosphere.api.java.DataSet;
+import eu.stratosphere.api.java.operators.translation.PlanDataSink;
 import eu.stratosphere.api.java.typeutils.TypeInformation;
 
 
@@ -27,6 +28,8 @@ public class DataSink<T> {
 	private final TypeInformation<T> type;
 	
 	private final DataSet<T> data;
+	
+	private String name;
 	
 	
 	public DataSink(DataSet<T> data, OutputFormat<T> format, TypeInformation<T> type) {
@@ -52,23 +55,30 @@ public class DataSink<T> {
 		return type;
 	}
 	
-	
-	/**
-	 * Gets the data set consumed by this DataSink.
-	 *
-	 * @return The data set.
-	 */
 	public DataSet<T> getDataSet() {
 		return data;
 	}
 	
 	// --------------------------------------------------------------------------------------------
 	
+	public DataSink<T> name(String name) {
+		this.name = name;
+		return this;
+	}
+	
+	// --------------------------------------------------------------------------------------------
+	
 	protected GenericDataSink translateToDataFlow() {
-		GenericDataSink sink = new GenericDataSink(format);
+		// select the name (or create a default one)
+		String name = this.name != null ? this.name : this.format.toString();
+		PlanDataSink<T> sink = new PlanDataSink<T>(this.format, name, this.type);
 		return sink;
 	}
 	
 	// --------------------------------------------------------------------------------------------
-
+	
+	@Override
+	public String toString() {
+		return "DataSink '" + (this.name == null ? "<unnamed>" : this.name) + "' (" + this.format.toString() + ")";
+	}
 }

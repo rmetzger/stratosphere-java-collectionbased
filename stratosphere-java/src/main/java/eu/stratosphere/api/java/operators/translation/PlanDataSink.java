@@ -14,23 +14,17 @@
  **********************************************************************************************************************/
 package eu.stratosphere.api.java.operators.translation;
 
-import java.util.List;
-
-import eu.stratosphere.api.common.Plan;
+import eu.stratosphere.api.common.io.OutputFormat;
 import eu.stratosphere.api.common.operators.GenericDataSink;
+import eu.stratosphere.api.java.typeutils.TypeInformation;
 
 
-public class JavaPlan extends Plan {
+public class PlanDataSink<T> extends GenericDataSink {
 
-	
-	public JavaPlan(List<GenericDataSink> sinks) {
-		super(sinks);
+	private final TypeInformation<T> inputDataType;
+
+	public PlanDataSink(OutputFormat<T> format, String name, TypeInformation<T> inputDataType) {
+		super(format, name);
+		this.inputDataType = inputDataType;
 	}
-
-
-	@Override
-	public String getPostPassClassName() {
-		return "eu.stratosphere.compiler.postpass.JavaApiPostPass";
-	}
-
 }

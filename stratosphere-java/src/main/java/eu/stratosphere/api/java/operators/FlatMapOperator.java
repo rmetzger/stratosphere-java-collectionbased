@@ -16,6 +16,7 @@ package eu.stratosphere.api.java.operators;
 
 import eu.stratosphere.api.java.DataSet;
 import eu.stratosphere.api.java.functions.FlatMapFunction;
+import eu.stratosphere.api.java.operators.translation.PlanFlatMapOperator;
 import eu.stratosphere.api.java.typeutils.TypeExtractor;
 
 /**
@@ -35,5 +36,11 @@ public class FlatMapOperator<IN, OUT> extends SingleInputUdfOperator<IN, OUT, Fl
 			throw new NullPointerException("FlatMap function must not be null.");
 		
 		this.function = function;
+	}
+
+	@Override
+	protected PlanFlatMapOperator<IN, OUT> translateToDataFlow() {
+		String name = getName() != null ? getName() : function.getClass().getName();
+		return new PlanFlatMapOperator<IN, OUT>(function, name, getInputType(), getResultType());
 	}
 }

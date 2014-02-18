@@ -25,7 +25,7 @@ import java.util.Map;
 import eu.stratosphere.api.common.operators.Operator;
 import eu.stratosphere.api.common.operators.Ordering;
 import eu.stratosphere.api.common.operators.RecordOperator;
-import eu.stratosphere.api.common.operators.base.ReduceOperatorBase;
+import eu.stratosphere.api.common.operators.base.GroupReduceOperatorBase;
 import eu.stratosphere.api.common.operators.util.UserCodeClassWrapper;
 import eu.stratosphere.api.common.operators.util.UserCodeObjectWrapper;
 import eu.stratosphere.api.common.operators.util.UserCodeWrapper;
@@ -38,7 +38,7 @@ import eu.stratosphere.types.Key;
  * 
  * @see ReduceFunction
  */
-public class ReduceOperator extends ReduceOperatorBase<ReduceFunction> implements RecordOperator {
+public class ReduceOperator extends GroupReduceOperatorBase<ReduceFunction> implements RecordOperator {
 	
 	private static final String DEFAULT_NAME = "<Unnamed Reducer>";		// the default name for contracts
 	

@@ -21,13 +21,6 @@ import eu.stratosphere.api.common.operators.util.UserCodeObjectWrapper;
 import eu.stratosphere.api.common.operators.util.UserCodeWrapper;
 
 /**
- * CoGroupContract represents a CoGroup InputContract of the PACT Programming Model.
- * InputContracts are second-order functions. They have one or multiple input sets of records and a first-order
- * user function (stub implementation).
- * <p> 
- * CoGroup works on two inputs and calls the first-order user function of a {@link GenericCoGrouper} 
- * with the groups of records sharing the same key (one group per input) independently.
- * 
  * @see GenericCoGrouper
  */
 public class CoGroupOperatorBase<T extends GenericCoGrouper<?, ?, ?>> extends DualInputOperator<T> {

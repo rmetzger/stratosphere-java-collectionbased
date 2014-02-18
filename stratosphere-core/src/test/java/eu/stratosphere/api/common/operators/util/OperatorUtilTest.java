@@ -29,7 +29,7 @@ import eu.stratosphere.api.common.operators.base.CoGroupOperatorBase;
 import eu.stratosphere.api.common.operators.base.CrossOperatorBase;
 import eu.stratosphere.api.common.operators.base.JoinOperatorBase;
 import eu.stratosphere.api.common.operators.base.MapOperatorBase;
-import eu.stratosphere.api.common.operators.base.ReduceOperatorBase;
+import eu.stratosphere.api.common.operators.base.GroupReduceOperatorBase;
 import eu.stratosphere.api.common.operators.util.OperatorUtil;
 import eu.stratosphere.api.common.io.DelimitedInputFormat;
 import eu.stratosphere.api.common.io.FileOutputFormat;
@@ -90,7 +90,7 @@ public class OperatorUtilTest {
 	@Test
 	public void getContractClassShouldReturnReduceForReduceStub() {
 		final Class<?> result = OperatorUtil.getContractClass(Reducer.class);
-		assertEquals(ReduceOperatorBase.class, result);
+		assertEquals(GroupReduceOperatorBase.class, result);
 	}
 
 	/**

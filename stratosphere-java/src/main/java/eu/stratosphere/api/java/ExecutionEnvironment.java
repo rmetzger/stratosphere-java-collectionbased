@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.UUID;
 
 import eu.stratosphere.api.common.JobExecutionResult;
-import eu.stratosphere.api.common.Plan;
 import eu.stratosphere.api.common.io.InputFormat;
 import eu.stratosphere.api.java.io.CollectionInputFormat;
 import eu.stratosphere.api.java.io.CsvReader;
@@ -35,6 +34,7 @@ import eu.stratosphere.api.java.io.TextValueInputFormat;
 import eu.stratosphere.api.java.operators.DataSink;
 import eu.stratosphere.api.java.operators.DataSource;
 import eu.stratosphere.api.java.operators.OperatorTranslation;
+import eu.stratosphere.api.java.operators.translation.JavaPlan;
 import eu.stratosphere.api.java.typeutils.BasicTypeInfo;
 import eu.stratosphere.api.java.typeutils.TypeExtractor;
 import eu.stratosphere.api.java.typeutils.TypeInformation;
@@ -193,10 +193,9 @@ public abstract class ExecutionEnvironment {
 	/**
 	 * Creates a new data set that contains the given elements. The elements must all be of the same type,
 	 * for example, all of the Strings or integers.
-	 * The created data set will represent these l
 	 * 
 	 * @param data The elements to make up the data set.
-	 * @return A data 
+	 * @return A data set representing the given list of elements.
 	 */
 	public <X> DataSet<X> fromElements(X... data) {
 		if (data == null) {
@@ -238,7 +237,7 @@ public abstract class ExecutionEnvironment {
 		this.sinks.add(sink);
 	}
 	
-	protected Plan createPlan(String jobName) {
+	protected JavaPlan createPlan(String jobName) {
 		if (this.sinks.isEmpty()) {
 			throw new RuntimeException("No data sinks have been created yet.");
 		}
@@ -251,6 +250,7 @@ public abstract class ExecutionEnvironment {
 		return translator.translateToPlan(this.sinks, jobName);
 	}
 	
+	public abstract String getExecutionPlan() throws Exception;
 	
 	// --------------------------------------------------------------------------------------------
 	//  Instantiation of Execution Contexts

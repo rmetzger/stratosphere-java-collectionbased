@@ -188,4 +188,34 @@ public final class StringUtils {
 		
 		return "<unknown array type>";
 	}
+	
+	public static final String showControlCharacters(String str) {
+		int len = str.length();
+		StringBuilder sb = new StringBuilder();
+
+		for (int i = 0; i < len; i += 1) {
+			char c = str.charAt(i);
+			switch (c) {
+			case '\b':
+				sb.append("\\b");
+				break;
+			case '\t':
+				sb.append("\\t");
+				break;
+			case '\n':
+				sb.append("\\n");
+				break;
+			case '\f':
+				sb.append("\\f");
+				break;
+			case '\r':
+				sb.append("\\r");
+				break;
+			default:
+				sb.append(c);
+			}
+		}
+
+		return sb.toString();
+	}
 }

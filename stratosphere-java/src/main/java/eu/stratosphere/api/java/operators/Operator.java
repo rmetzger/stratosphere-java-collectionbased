@@ -22,10 +22,29 @@ import eu.stratosphere.api.java.typeutils.TypeInformation;
 
 /**
  * @param <OUT> The type of the data set produced by this operator.
+ * @param <O> The type of the operator, so that we can return it.
  */
-public abstract class Operator<OUT> extends DataSet<OUT> {
-	
+public abstract class Operator<OUT, O extends Operator<OUT, O>> extends DataSet<OUT> {
+
+	private String name;
+
 	protected Operator(ExecutionEnvironment context, TypeInformation<OUT> resultType) {
 		super(context, resultType);
+	}
+	
+	
+	public TypeInformation<OUT> getResultType() {
+		return getType();
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public O name(String newName) {
+		this.name = newName;
+		@SuppressWarnings("unchecked")
+		O returnType = (O) this;
+		return returnType;
 	}
 }

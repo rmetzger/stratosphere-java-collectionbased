@@ -14,23 +14,23 @@
  **********************************************************************************************************************/
 package eu.stratosphere.api.java.operators.translation;
 
-import java.util.List;
+import eu.stratosphere.api.common.functions.GenericFlatMap;
+import eu.stratosphere.api.common.operators.base.FlatMapOperatorBase;
+import eu.stratosphere.api.java.typeutils.TypeInformation;
 
-import eu.stratosphere.api.common.Plan;
-import eu.stratosphere.api.common.operators.GenericDataSink;
+/**
+ *
+ */
+public class PlanFlatMapOperator<T, O> extends FlatMapOperatorBase<GenericFlatMap<T, O>>{
 
-
-public class JavaPlan extends Plan {
-
+	private final TypeInformation<T> inType;
 	
-	public JavaPlan(List<GenericDataSink> sinks) {
-		super(sinks);
+	private final TypeInformation<O> outType;
+	
+	
+	public PlanFlatMapOperator(GenericFlatMap<T, O> udf, String name, TypeInformation<T> inType, TypeInformation<O> outType) {
+		super(udf, name);
+		this.inType = inType;
+		this.outType = outType;
 	}
-
-
-	@Override
-	public String getPostPassClassName() {
-		return "eu.stratosphere.compiler.postpass.JavaApiPostPass";
-	}
-
 }

@@ -19,12 +19,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import eu.stratosphere.api.common.Plan;
 import eu.stratosphere.api.common.operators.AbstractUdfOperator;
 import eu.stratosphere.api.common.operators.GenericDataSink;
 import eu.stratosphere.api.common.operators.GenericDataSource;
 import eu.stratosphere.api.common.operators.Operator;
 import eu.stratosphere.api.java.DataSet;
+import eu.stratosphere.api.java.operators.translation.JavaPlan;
 
 
 /**
@@ -36,14 +36,14 @@ public class OperatorTranslation {
 	private Map<DataSet<?>, Operator> translated = new HashMap<DataSet<?>, Operator>();
 	
 	
-	public Plan translateToPlan(List<DataSink<?>> sinks, String jobName) {
+	public JavaPlan translateToPlan(List<DataSink<?>> sinks, String jobName) {
 		List<GenericDataSink> planSinks = new ArrayList<GenericDataSink>();
 		
 		for (DataSink<?> sink : sinks) {
 			planSinks.add(translate(sink));
 		}
 		
-		return new Plan(planSinks); 
+		return new JavaPlan(planSinks); 
 	}
 	
 	
@@ -72,10 +72,10 @@ public class OperatorTranslation {
 			dataFlowOp = translateSource((DataSource<?>) dataSet);
 		}
 		else if (dataSet instanceof SingleInputOperator) {
-			dataFlowOp =  translateSingleOp((SingleInputOperator<?, ?>) dataSet);
+			dataFlowOp =  translateSingleOp((SingleInputOperator<?, ?, ?>) dataSet);
 		}
 		else if (dataSet instanceof TwoInputOperator) {
-			dataFlowOp =  translateBinaryOp((TwoInputOperator<?, ?, ?>) dataSet);
+			dataFlowOp =  translateBinaryOp((TwoInputOperator<?, ?, ?, ?>) dataSet);
 		}
 		else {
 			throw new RuntimeException("Error while creating the data flow plan for the program: Unknown operator or data set type.");
@@ -90,10 +90,10 @@ public class OperatorTranslation {
 	}
 	
 	private GenericDataSource<?> translateSource(DataSource<?> source) {
-		return null;
+		return source.translateToDataFlow();
 	}
 	
-	private eu.stratosphere.api.common.operators.SingleInputOperator<?> translateSingleOp(SingleInputOperator<?, ?> op) {
+	private eu.stratosphere.api.common.operators.SingleInputOperator<?> translateSingleOp(SingleInputOperator<?, ?, ?> op) {
 		// translate the operation itself
 		eu.stratosphere.api.common.operators.SingleInputOperator<?> dataFlowOp = op.translateToDataFlow();
 		// translate the input 
@@ -103,7 +103,7 @@ public class OperatorTranslation {
 		return dataFlowOp;
 	}
 	
-	private eu.stratosphere.api.common.operators.DualInputOperator<?> translateBinaryOp(TwoInputOperator<?, ?, ?> op) {
+	private eu.stratosphere.api.common.operators.DualInputOperator<?> translateBinaryOp(TwoInputOperator<?, ?, ?, ?> op) {
 		eu.stratosphere.api.common.operators.DualInputOperator<?> dataFlowOp = op.translateToDataFlow();
 		
 		Operator input1 = translate(op.getInput1());

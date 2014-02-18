@@ -18,6 +18,7 @@ package eu.stratosphere.api.java.io;
 import eu.stratosphere.api.common.io.GenericCsvInputFormat;
 import eu.stratosphere.api.java.tuple.Tuple;
 import eu.stratosphere.core.fs.Path;
+import eu.stratosphere.util.StringUtils;
 
 
 public class CsvInputFormat<OUT extends Tuple> extends GenericCsvInputFormat<OUT> {
@@ -39,5 +40,10 @@ public class CsvInputFormat<OUT extends Tuple> extends GenericCsvInputFormat<OUT
 	@Override
 	public OUT readRecord(OUT reuse, byte[] bytes, int offset, int numBytes) {
 		return null;
+	}
+	
+	@Override
+	public String toString() {
+		return "CSV Input (" + StringUtils.showControlCharacters(String.valueOf(getFieldDelim())) + ")";
 	}
 }

@@ -26,6 +26,8 @@ import eu.stratosphere.api.java.functions.ReduceFunction;
 import eu.stratosphere.api.java.io.PrintingOutputFormat;
 import eu.stratosphere.api.java.io.TextOutputFormat;
 import eu.stratosphere.api.java.operators.AggregateOperator;
+import eu.stratosphere.api.java.operators.CoGroupOperator;
+import eu.stratosphere.api.java.operators.CrossOperator;
 import eu.stratosphere.api.java.operators.DataSink;
 import eu.stratosphere.api.java.operators.DistinctOperator;
 import eu.stratosphere.api.java.operators.FilterOperator;
@@ -38,6 +40,7 @@ import eu.stratosphere.api.java.operators.MapOperator;
 import eu.stratosphere.api.java.operators.ReduceGroupOperator;
 import eu.stratosphere.api.java.operators.ReduceOperator;
 import eu.stratosphere.api.java.typeutils.TypeInformation;
+import eu.stratosphere.api.java.typeutils.UnionDataSet;
 import eu.stratosphere.core.fs.Path;
 
 /**
@@ -113,7 +116,7 @@ public abstract class DataSet<T> {
 	}
 	
 	public DistinctOperator<T> distinct(int... fields) {
-		return new DistinctOperator<T>(this, new Keys.FieldPositionKeys<T>(fields, getType()));
+		return new DistinctOperator<T>(this, new Keys.FieldPositionKeys<T>(fields, getType(), true));
 	}
 	
 	// --------------------------------------------------------------------------------------------
@@ -129,7 +132,7 @@ public abstract class DataSet<T> {
 	}
 	
 	public Grouping<T> groupBy(int... fields) {
-		return new Grouping<T>(this, new Keys.FieldPositionKeys<T>(fields, getType()));
+		return new Grouping<T>(this, new Keys.FieldPositionKeys<T>(fields, getType(), false));
 	}
 	
 	// --------------------------------------------------------------------------------------------
@@ -152,14 +155,24 @@ public abstract class DataSet<T> {
 	//  Co-Grouping
 	// --------------------------------------------------------------------------------------------
 
+	public <R> CoGroupOperator.CoGroupOperatorSets<T, R> coGroup(DataSet<R> other) {
+		return new CoGroupOperator.CoGroupOperatorSets<T, R>(this, other);
+	}
+
 	// --------------------------------------------------------------------------------------------
 	//  Cross
 	// --------------------------------------------------------------------------------------------
-	
-	
+
+	public <R> CrossOperator.CrossOperatorSets<T, R> cross(DataSet<R> other) {
+		return new CrossOperator.CrossOperatorSets<T, R>(this, other);
+	}
+
 	// --------------------------------------------------------------------------------------------
 	//  Union
 	// --------------------------------------------------------------------------------------------
+	public UnionDataSet<T> union(DataSet<T> other) {
+		return new UnionDataSet<T>(this, other);
+	}
 
 	// --------------------------------------------------------------------------------------------
 	//  Top-K

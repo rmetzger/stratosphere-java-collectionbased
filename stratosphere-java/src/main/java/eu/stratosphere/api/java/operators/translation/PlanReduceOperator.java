@@ -14,23 +14,20 @@
  **********************************************************************************************************************/
 package eu.stratosphere.api.java.operators.translation;
 
-import java.util.List;
+import eu.stratosphere.api.common.operators.base.GroupReduceOperatorBase;
+import eu.stratosphere.api.java.functions.ReduceFunction;
+import eu.stratosphere.api.java.typeutils.TypeInformation;
 
-import eu.stratosphere.api.common.Plan;
-import eu.stratosphere.api.common.operators.GenericDataSink;
+/**
+ *
+ */
+public class PlanReduceOperator<T> extends GroupReduceOperatorBase<ReduceFunction<T>>{
 
-
-public class JavaPlan extends Plan {
-
+	private final TypeInformation<T> type;
 	
-	public JavaPlan(List<GenericDataSink> sinks) {
-		super(sinks);
+	
+	public PlanReduceOperator(ReduceFunction<T> udf, int[] logicalGroupingFields, String name, TypeInformation<T> type) {
+		super(udf, logicalGroupingFields, name);
+		this.type = type;
 	}
-
-
-	@Override
-	public String getPostPassClassName() {
-		return "eu.stratosphere.compiler.postpass.JavaApiPostPass";
-	}
-
 }

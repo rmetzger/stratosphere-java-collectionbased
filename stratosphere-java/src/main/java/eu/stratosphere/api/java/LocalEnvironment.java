@@ -31,6 +31,15 @@ public class LocalEnvironment extends ExecutionEnvironment {
 	}
 	
 	@Override
+	public String getExecutionPlan() throws Exception {
+		Plan p = createPlan("unnamed job");
+		p.setDefaultParallelism(getDegreeOfParallelism());
+		
+		PlanExecutor executor = PlanExecutor.createLocalExecutor();
+		return executor.getOptimizerPlanAsJSON(p);
+	}
+	
+	@Override
 	public String toString() {
 		return "Local Environment (DOP = " + (getDegreeOfParallelism() == -1 ? "default" : getDegreeOfParallelism()) + ") : " + getIdString();
 	}

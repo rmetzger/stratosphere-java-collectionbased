@@ -39,6 +39,11 @@ public abstract class PlanExecutor {
 	public abstract JobExecutionResult executePlan(Plan plan) throws Exception;
 	
 	
+	public abstract String getOptimizerPlanAsJSON(Plan plan) throws Exception;
+	
+	
+	
+	
 	
 	public static PlanExecutor createLocalExecutor() {
 		Class<? extends PlanExecutor> leClass = loadExecutorClass(LOCAL_EXECUTOR_CLASS);
