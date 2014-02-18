@@ -94,7 +94,7 @@ public class CsvInputFormat extends GenericCsvInputFormat<Record> {
 		
 		// sanity check
 		for (Class<? extends Value> type : fieldTypes) {
-			if (!Value.class.isAssignableFrom(type)) {
+			if (type != null && !Value.class.isAssignableFrom(type)) {
 				throw new IllegalArgumentException("The types must be subclasses if " + Value.class.getName());
 			}
 		}

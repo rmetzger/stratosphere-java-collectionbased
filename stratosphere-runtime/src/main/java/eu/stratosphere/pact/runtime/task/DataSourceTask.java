@@ -148,8 +148,9 @@ public class DataSourceTask<OT> extends AbstractInputTask<InputSplit>
 							while (!this.taskCanceled && !inFormat.reachedEnd()) {
 								// build next pair and ship pair if it is valid
 								typedRecord.clear();
-								if ((typedRecord = inFormat.nextRecord(typedRecord)) != null) {
-									output.collect(typedRecord);
+								Record returnedRecord = null;
+								if ((returnedRecord = inFormat.nextRecord(typedRecord)) != null) {
+									output.collect(returnedRecord);
 								}
 							}
 						} else if (this.output instanceof ChainedMapDriver) {

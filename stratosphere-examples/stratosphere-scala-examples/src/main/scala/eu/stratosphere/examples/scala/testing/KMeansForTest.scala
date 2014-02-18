@@ -11,11 +11,10 @@
  * specific language governing permissions and limitations under the License.
  **********************************************************************************************************************/
 
-package eu.stratosphere.examples.scala.datamining
+package eu.stratosphere.examples.scala.testing
 
 // Uncomment if you need to rebuild it for PackagedProgramEndToEndTest
 
-//import eu.stratosphere.client.LocalExecutor
 //import eu.stratosphere.api.common.Program
 //import eu.stratosphere.api.common.ProgramDescription
 //

@@ -30,7 +30,7 @@ import eu.stratosphere.compiler.dag.MapNode
 import eu.stratosphere.compiler.dag.MatchNode
 import eu.stratosphere.compiler.dag.OptimizerNode
 import eu.stratosphere.compiler.dag.PactConnection
-import eu.stratosphere.compiler.dag.ReduceNode
+import eu.stratosphere.compiler.dag.GroupReduceNode
 import eu.stratosphere.compiler.dag.SinkJoiner
 import eu.stratosphere.compiler.dag.WorksetIterationNode
 import eu.stratosphere.api.common.operators.DeltaIteration
@@ -134,7 +134,7 @@ object Extractors {
 
   object ReduceNode {
     def unapply(node: OptimizerNode): Option[(UDF1[_, _], FieldSelector, PactConnection)] = node match {
-      case node: ReduceNode => node.getPactContract match {
+      case node: GroupReduceNode => node.getPactContract match {
         case contract: ReduceOperator with OneInputKeyedScalaOperator[_, _] => Some((contract.getUDF, contract.key, node.getIncomingConnection))
         case contract: ReduceOperator with OneInputScalaOperator[_, _] => Some((contract.getUDF, new FieldSelector(contract.getUDF.inputUDT, Nil), node.getIncomingConnection))
         case _ => None

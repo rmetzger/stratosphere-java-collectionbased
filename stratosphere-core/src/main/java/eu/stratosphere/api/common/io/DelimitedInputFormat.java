@@ -258,7 +258,7 @@ public abstract class DelimitedInputFormat<OT> extends FileInputFormat<OT> {
 	// --------------------------------------------------------------------------------------------
 	
 	/**
-	 * Configures this input format by reading the path to the file from the configuration and the string that
+	 * Configures this input format by reading the path to the file from the configuration andge the string that
 	 * defines the record delimiter.
 	 * 
 	 * @param parameters The configuration object to read the parameters from.
@@ -408,7 +408,7 @@ public abstract class DelimitedInputFormat<OT> extends FileInputFormat<OT> {
 	 * 
 	 * @param split The input split to open.
 	 * 
-	 * @see eu.stratosphere.pact.common.io.FileInputFormat#open(eu.stratosphere.core.fs.FileInputSplit)
+	 * @see eu.stratosphere.api.common.io.FileInputFormat#open(eu.stratosphere.core.fs.FileInputSplit)
 	 */
 	@Override
 	public void open(FileInputSplit split) throws IOException {

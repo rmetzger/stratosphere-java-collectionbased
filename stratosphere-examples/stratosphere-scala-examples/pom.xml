@@ -160,12 +160,12 @@
                             <classifier>KMeansForTest</classifier>
                             <archive>
                                 <manifestEntries>
-                                    <program-class>eu.stratosphere.examples.scala.datamining.KMeansForTest</program-class>
+                                    <program-class>eu.stratosphere.examples.scala.testing.KMeansForTest</program-class>
                                 </manifestEntries>
                             </archive>
 
                             <includes>
-                                <include>**/datamining/KMeansForTest*.class</include>
+                                <include>**/testing/KMeansForTest*.class</include>
                             </includes>
                         </configuration>
                     </execution>
