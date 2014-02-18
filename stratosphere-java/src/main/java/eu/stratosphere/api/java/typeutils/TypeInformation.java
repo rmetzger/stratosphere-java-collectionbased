@@ -14,6 +14,7 @@
  **********************************************************************************************************************/
 package eu.stratosphere.api.java.typeutils;
 
+import eu.stratosphere.api.common.typeutils.Serializer;
 import eu.stratosphere.types.Value;
 
 
@@ -30,6 +31,11 @@ public abstract class TypeInformation<T> {
 	
 	public abstract Class<T> getTypeClass();
 	
+	public abstract Serializer<T> createSerializer();
+	
+	// --------------------------------------------------------------------------------------------
+	// Static Utilities
+	// --------------------------------------------------------------------------------------------
 	
 	@SuppressWarnings("unchecked")
 	public static <X> TypeInformation<X> getForClass(Class<X> clazz) {

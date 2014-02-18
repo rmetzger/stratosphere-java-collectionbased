@@ -24,6 +24,10 @@ import eu.stratosphere.core.memory.DataOutputView;
 
 public class IntSerializer extends Serializer<Integer> implements ImmutableTypeUtil {
 
+	private static final long serialVersionUID = 1L;
+	
+	public static final IntSerializer INSTANCE = new IntSerializer();
+	
 	private static final Integer ZERO = Integer.valueOf(0);
 
 

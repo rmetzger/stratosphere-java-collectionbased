@@ -14,11 +14,11 @@
  **********************************************************************************************************************/
 package eu.stratosphere.api.java.typeutils;
 
+import eu.stratosphere.api.common.typeutils.Serializer;
 import eu.stratosphere.api.java.tuple.*;
+import eu.stratosphere.api.java.typeutils.runtime.TupleSerializer;
 
-/**
- *
- */
+
 public class TupleTypeInfo<T extends Tuple> extends TypeInformation<T> {
 	
 	private final TypeInformation<?>[] types;
@@ -48,18 +48,34 @@ public class TupleTypeInfo<T extends Tuple> extends TypeInformation<T> {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public Class<T> getTypeClass() {
-		return (Class<T>) CLASSES[getArity() - 1];
+		@SuppressWarnings("unchecked")
+		Class<T> tc = (Class<T>) CLASSES[getArity() - 1];
+		return tc;
 	}
 
-	@SuppressWarnings("unchecked")
+	
 	public <X> TypeInformation<X> getTypeAt(int pos) {
 		if (pos < 0 || pos >= this.types.length)
 			throw new IndexOutOfBoundsException();
-		
-		return (TypeInformation<X>) this.types[pos];
+
+		@SuppressWarnings("unchecked")
+		TypeInformation<X> typed = (TypeInformation<X>) this.types[pos];
+		return typed;
 	}
+	
+	@Override
+	public Serializer<T> createSerializer() {
+		Serializer<?>[] fieldSerializers = new Serializer<?>[getArity()];
+		for (int i = 0; i < types.length; i++) {
+			fieldSerializers[i] = types[i].createSerializer();
+		}
+		
+		Class<T> tupleClass = getTypeClass();
+		
+		return new TupleSerializer<T>(tupleClass, fieldSerializers);
+	}
+	
 	
 	@Override
 	public String toString() {

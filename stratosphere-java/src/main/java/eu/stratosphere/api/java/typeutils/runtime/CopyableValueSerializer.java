@@ -12,51 +12,63 @@
  * specific language governing permissions and limitations under the License.
  *
  **********************************************************************************************************************/
-package eu.stratosphere.api.common.typeutils.base;
+package eu.stratosphere.api.java.typeutils.runtime;
 
 import java.io.IOException;
 
 import eu.stratosphere.api.common.typeutils.Serializer;
 import eu.stratosphere.core.memory.DataInputView;
 import eu.stratosphere.core.memory.DataOutputView;
-import eu.stratosphere.types.LongValue;
+import eu.stratosphere.types.CopyableValue;
+import eu.stratosphere.types.Value;
+import eu.stratosphere.util.InstantiationUtil;
 
 
-public class LongValueSerializer extends Serializer<LongValue> {
+public class CopyableValueSerializer<T extends CopyableValue<T>> extends Serializer<T> {
 
 	private static final long serialVersionUID = 1L;
 	
-	public static final LongValueSerializer INSTANCE = new LongValueSerializer();
 	
+	private final Class<T> valueClass;
+	
+	private final T instance;
+	
+	
+	public CopyableValueSerializer(Class<T> valueClass) {
+		this.valueClass = valueClass;
+		this.instance = createInstance();
+	}
+
+
 	@Override
-	public LongValue createInstance() {
-		return new LongValue();
+	public T createInstance() {
+		return InstantiationUtil.instantiate(this.valueClass, Value.class);
 	}
 
 	@Override
-	public LongValue copy(LongValue from, LongValue reuse) {
-		reuse.setValue(from.getValue());
+	public T copy(T from, T reuse) {
+		from.copyTo(reuse);
 		return reuse;
 	}
 
 	@Override
 	public int getLength() {
-		return 8;
+		return instance.getBinaryLength();
 	}
 
 	@Override
-	public void serialize(LongValue record, DataOutputView target) throws IOException {
-		record.write(target);
+	public void serialize(T value, DataOutputView target) throws IOException {
+		value.write(target);
 	}
 
 	@Override
-	public LongValue deserialize(LongValue reuse, DataInputView source) throws IOException {
+	public T deserialize(T reuse, DataInputView source) throws IOException {
 		reuse.read(source);
 		return reuse;
 	}
 
 	@Override
 	public void copy(DataInputView source, DataOutputView target) throws IOException {
-		target.writeLong(source.readLong());
+		instance.copy(source, target);
 	}
 }

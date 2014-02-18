@@ -28,8 +28,10 @@ import eu.stratosphere.core.memory.DataOutputView;
  * 
  * @param T The data type that the serializer serializes.
  */
-public abstract class Serializer<T> {
+public abstract class Serializer<T> implements java.io.Serializable {
 	
+	private static final long serialVersionUID = 1L;
+
 	/**
 	 * Creates a new instance of the data type.
 	 * 

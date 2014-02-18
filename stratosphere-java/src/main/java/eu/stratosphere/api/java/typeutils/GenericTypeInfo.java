@@ -14,6 +14,8 @@
  **********************************************************************************************************************/
 package eu.stratosphere.api.java.typeutils;
 
+import eu.stratosphere.api.common.typeutils.Serializer;
+
 
 /**
  *
@@ -45,5 +47,15 @@ public class GenericTypeInfo<T> extends TypeInformation<T> {
 	@Override
 	public Class<T> getTypeClass() {
 		return typeClass;
+	}
+
+	@Override
+	public Serializer<T> createSerializer() {
+		throw new UnsupportedOperationException("The generic serialization is not yet implemented.");
+	}
+	
+	@Override
+	public String toString() {
+		return "GenericType<" + typeClass.getCanonicalName() + ">";
 	}
 }

@@ -25,6 +25,10 @@ import eu.stratosphere.types.StringValue;
 
 public class StringSerializer extends Serializer<String> implements ImmutableTypeUtil {
 
+	private static final long serialVersionUID = 1L;
+	
+	public static final StringSerializer INSTANCE = new StringSerializer();
+	
 	private static final String EMPTY = "";
 
 

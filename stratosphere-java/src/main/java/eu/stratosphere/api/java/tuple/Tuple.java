@@ -22,4 +22,6 @@ public abstract class Tuple {
 	public abstract <T> T getField(int pos);
 	
 	public abstract <T> void setField(T value, int pos);
+	
+	public abstract <T> T getFieldFast(int pos);
 }

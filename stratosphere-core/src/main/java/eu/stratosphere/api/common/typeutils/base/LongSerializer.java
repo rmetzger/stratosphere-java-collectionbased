@@ -24,6 +24,10 @@ import eu.stratosphere.core.memory.DataOutputView;
 
 public class LongSerializer extends Serializer<Long> implements ImmutableTypeUtil {
 
+	private static final long serialVersionUID = 1L;
+	
+	public static final LongSerializer INSTANCE = new LongSerializer();
+	
 	private static final Long ZERO = Long.valueOf(0);
 
 

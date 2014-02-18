@@ -14,12 +14,12 @@
  **********************************************************************************************************************/
 package eu.stratosphere.api.java.typeutils;
 
+import eu.stratosphere.api.common.typeutils.Serializer;
+import eu.stratosphere.api.java.typeutils.runtime.CopyableValueSerializer;
+import eu.stratosphere.types.CopyableValue;
 import eu.stratosphere.types.Value;
 
 
-/**
- *
- */
 public class ValueTypeInfo<T extends Value> extends TypeInformation<T> {
 
 	private final Class<T> type;
@@ -52,6 +52,22 @@ public class ValueTypeInfo<T extends Value> extends TypeInformation<T> {
 		return false;
 	}
 	
+	@SuppressWarnings("unchecked")
+	@Override
+	public Serializer<T> createSerializer() {
+		if (CopyableValue.class.isAssignableFrom(type)) {
+			return createCopyableSerializer(type.asSubclass(CopyableValue.class));
+		}
+		else {
+			throw new UnsupportedOperationException("Serialization is not yet implemented for Value types that are not CopyableValue subclasses.");
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	private static <T, X extends CopyableValue<X>> Serializer<T> createCopyableSerializer(Class<X> clazz) {
+		Serializer<X> ser = new CopyableValueSerializer<X>(clazz);
+		return (Serializer<T>) ser;
+	}
 	
 	@Override
 	public String toString() {
@@ -64,7 +80,7 @@ public class ValueTypeInfo<T extends Value> extends TypeInformation<T> {
 			return new ValueTypeInfo<X>(typeClass);
 		}
 		else {
-			throw new IllegalArgumentException("The giveb class is no subclass of " + Value.class.getName());
+			throw new IllegalArgumentException("The given class is no subclass of " + Value.class.getName());
 		}
 	}
 }

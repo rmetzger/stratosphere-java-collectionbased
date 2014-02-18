@@ -24,6 +24,10 @@ import eu.stratosphere.types.StringValue;
 
 public class StringValueSerializer extends Serializer<StringValue> {
 
+	private static final long serialVersionUID = 1L;
+	
+	public static final StringValueSerializer INSTANCE = new StringValueSerializer();
+	
 	@Override
 	public StringValue createInstance() {
 		return new StringValue();

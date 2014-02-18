@@ -19,44 +19,64 @@ import java.io.IOException;
 import eu.stratosphere.api.common.typeutils.Serializer;
 import eu.stratosphere.core.memory.DataInputView;
 import eu.stratosphere.core.memory.DataOutputView;
-import eu.stratosphere.types.LongValue;
 
 
-public class LongValueSerializer extends Serializer<LongValue> {
+public class LongPrimitiveArraySerializer extends Serializer<long[]> {
 
 	private static final long serialVersionUID = 1L;
 	
-	public static final LongValueSerializer INSTANCE = new LongValueSerializer();
+	public static final LongPrimitiveArraySerializer INSTANCE = new LongPrimitiveArraySerializer();
 	
+	private static final long[] EMPTY = new long[0];
+
+
 	@Override
-	public LongValue createInstance() {
-		return new LongValue();
+	public long[] createInstance() {
+		return EMPTY;
 	}
 
 	@Override
-	public LongValue copy(LongValue from, LongValue reuse) {
-		reuse.setValue(from.getValue());
+	public long[] copy(long[] from, long[] reuse) {
+		if (reuse.length != from.length) {
+			reuse = new long[from.length];
+		}
+		
+		System.arraycopy(from, 0, reuse, 0, from.length);
 		return reuse;
 	}
 
 	@Override
 	public int getLength() {
-		return 8;
+		return -1;
 	}
 
 	@Override
-	public void serialize(LongValue record, DataOutputView target) throws IOException {
-		record.write(target);
+	public void serialize(long[] value, DataOutputView target) throws IOException {
+		target.writeInt(value.length);
+		for (int i = 0; i < value.length; i++) {
+			target.writeLong(value[i]);
+		}
 	}
 
 	@Override
-	public LongValue deserialize(LongValue reuse, DataInputView source) throws IOException {
-		reuse.read(source);
+	public long[] deserialize(long[] reuse, DataInputView source) throws IOException {
+		int len = source.readInt();
+		if (reuse.length != len) {
+			reuse = new long[len];
+		}
+		
+		for (int i = 0; i < len; i++) {
+			reuse[i] = source.readLong();
+		}
+		
 		return reuse;
 	}
 
 	@Override
 	public void copy(DataInputView source, DataOutputView target) throws IOException {
-		target.writeLong(source.readLong());
+		int len = source.readInt();
+		target.writeInt(len);
+		
+		target.write(source, len * 8);
 	}
 }
