@@ -38,21 +38,25 @@ public class TypeExtractor {
 	}
 	
 	public static <X> TypeInformation<X> getGroupReduceReturnTypes(GroupReduceFunction<?, X> groupReduceFunction) {
-		return null;
+		throw new RuntimeException("NOT IMPLEMENTED");
 	}
 	
 	public static <X> TypeInformation<X> getJoinReturnTypes(JoinFunction<?, ?, X> joinFunction) {
-		return null;
+		throw new RuntimeException("NOT IMPLEMENTED");
 	}
 
 	public static <X> TypeInformation<X> getCoGroupReturnTypes(CoGroupFunction<?, ?, X> coGroupFunction) {
-		return null;
+		throw new RuntimeException("NOT IMPLEMENTED");
 	}
 
 	public static <X> TypeInformation<X> getCrossReturnTypes(CrossFunction<?, ?, X> crossFunction) {
-		return null;
+		throw new RuntimeException("NOT IMPLEMENTED");
 	}
 
+	public static <X> TypeInformation<X> getKeyExtractorType(KeyExtractor<?, X> extractor) {
+		Type returnType = getTemplateTypes (KeyExtractor.class, extractor.getClass(), 1);
+		return createTypeInfo(returnType);
+	}
 	
 	public static <X> TypeInformation<X> extractInputFormatTypes(InputFormat<X, ?> format) {
 		@SuppressWarnings("unchecked")

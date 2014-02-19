@@ -240,8 +240,8 @@ public abstract class JoinOperator<I1, I2, OUT> extends TwoInputUdfOperator<I1, 
 			return new JoinOperatorSetsPredicate(new Keys.FieldPositionKeys<I1>(fields, input1.getType()));
 		}
 		
-		public <K> JoinOperatorSetsPredicate where(KeyExtractor<I1, K> keyExtractor) {
-			return new JoinOperatorSetsPredicate(new Keys.SelectorFunctionKeys<I1, K>(keyExtractor, input1.getType()));
+		public <K extends Comparable<K>> JoinOperatorSetsPredicate where(KeyExtractor<I1, K> keyExtractor) {
+			return new KeyedJoinOperatorSetsPredicate<K>(new Keys.SelectorFunctionKeys<I1, K>(keyExtractor, input1.getType()));
 		}
 		
 		public JoinOperatorSetsPredicate where(String keyExpression) {
@@ -250,7 +250,7 @@ public abstract class JoinOperator<I1, I2, OUT> extends TwoInputUdfOperator<I1, 
 	
 		// ----------------------------------------------------------------------------------------
 		
-		public final class JoinOperatorSetsPredicate {
+		public class JoinOperatorSetsPredicate {
 			
 			private final Keys<I1> keys1;
 			
@@ -270,17 +270,13 @@ public abstract class JoinOperator<I1, I2, OUT> extends TwoInputUdfOperator<I1, 
 				return createJoinOperator(new Keys.FieldPositionKeys<I2>(fields, input2.getType()));
 				
 			}
-			
-			public <K> DefaultJoin<I1, I2> equalTo(KeyExtractor<I2, K> keyExtractor) {
-				return createJoinOperator(new Keys.SelectorFunctionKeys<I2, K>(keyExtractor, input2.getType()));
-			}
-			
+
 			public DefaultJoin<I1, I2> equalTo(String keyExpression) {
 				return createJoinOperator(new Keys.ExpressionKeys<I2>(keyExpression, input2.getType()));
 			}
 			
 			
-			private DefaultJoin<I1, I2> createJoinOperator(Keys<I2> keys2) {
+			protected DefaultJoin<I1, I2> createJoinOperator(Keys<I2> keys2) {
 				if (keys2 == null)
 					throw new NullPointerException();
 				
@@ -293,6 +289,16 @@ public abstract class JoinOperator<I1, I2, OUT> extends TwoInputUdfOperator<I1, 
 				}
 				
 				return new DefaultJoin<I1, I2>(input1, input2, keys1, keys2, joinHint);
+			}
+		}
+
+		public class KeyedJoinOperatorSetsPredicate<K extends Comparable<K>> extends JoinOperatorSetsPredicate {
+			private KeyedJoinOperatorSetsPredicate(Keys<I1> keys1) {
+			  super(keys1);
+			}
+
+			public DefaultJoin<I1, I2> equalTo(KeyExtractor<I2, K> keyExtractor) {
+				return createJoinOperator(new Keys.SelectorFunctionKeys<I2, K>(keyExtractor, input2.getType()));
 			}
 		}
 	}

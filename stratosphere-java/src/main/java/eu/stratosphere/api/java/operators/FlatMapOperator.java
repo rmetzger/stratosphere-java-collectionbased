@@ -19,6 +19,8 @@ import eu.stratosphere.api.java.functions.FlatMapFunction;
 import eu.stratosphere.api.java.operators.translation.PlanFlatMapOperator;
 import eu.stratosphere.api.java.typeutils.TypeExtractor;
 
+import java.util.*;
+
 /**
  *
  * @param <IN> The type of the data set consumed by the operator.
@@ -39,8 +41,10 @@ public class FlatMapOperator<IN, OUT> extends SingleInputUdfOperator<IN, OUT, Fl
 	}
 
 	@Override
-	protected PlanFlatMapOperator<IN, OUT> translateToDataFlow() {
+	protected List<PlanFlatMapOperator<IN, OUT>> translateToDataFlow() {
 		String name = getName() != null ? getName() : function.getClass().getName();
-		return new PlanFlatMapOperator<IN, OUT>(function, name, getInputType(), getResultType());
+		List<PlanFlatMapOperator<IN, OUT>> result = new ArrayList<PlanFlatMapOperator<IN, OUT>>();
+		result.add(new PlanFlatMapOperator<IN, OUT>(function, name, getInputType(), getResultType()));
+		return result;
 	}
 }

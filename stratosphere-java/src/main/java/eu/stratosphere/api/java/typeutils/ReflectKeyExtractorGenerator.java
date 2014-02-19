@@ -32,7 +32,7 @@ public class ReflectKeyExtractorGenerator {
 	
 	
 	@SuppressWarnings("unused")
-	private static final class DirectReflectKeyAccessor<IN, KEY> implements KeyExtractor<IN, KEY>, Serializable {
+	private static final class DirectReflectKeyAccessor<IN, KEY> extends KeyExtractor<IN, KEY> implements Serializable {
 		private static final long serialVersionUID = 1L;
 		
 		private final Field field;
