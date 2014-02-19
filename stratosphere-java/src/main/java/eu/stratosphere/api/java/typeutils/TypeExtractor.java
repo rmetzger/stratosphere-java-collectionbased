@@ -29,7 +29,8 @@ public class TypeExtractor {
 
 	
 	public static <X> TypeInformation<X> getMapReturnTypes(MapFunction<?, X> mapFunction) {
-		return null;
+		Type returnType = getTemplateTypes (MapFunction.class, mapFunction.getClass(), 1);
+		return createTypeInfo(returnType);
 	}
 	
 	public static <X> TypeInformation<X> getFlatMapReturnTypes(FlatMapFunction<?, X> flatMapFunction) {

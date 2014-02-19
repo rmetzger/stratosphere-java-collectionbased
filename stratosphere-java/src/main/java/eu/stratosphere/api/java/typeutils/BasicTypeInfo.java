@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import eu.stratosphere.api.common.typeutils.Serializer;
+import eu.stratosphere.api.common.typeutils.base.DoubleSerializer;
 import eu.stratosphere.api.common.typeutils.base.IntSerializer;
 import eu.stratosphere.api.common.typeutils.base.LongSerializer;
 import eu.stratosphere.api.common.typeutils.base.StringSerializer;
@@ -35,7 +36,7 @@ public class BasicTypeInfo<T> extends TypeInformation<T> {
 	public static final BasicTypeInfo<Integer> INT_TYPE_INFO = new BasicTypeInfo<Integer>(Integer.class, IntSerializer.INSTANCE);
 	public static final BasicTypeInfo<Long> LONG_TYPE_INFO = new BasicTypeInfo<Long>(Long.class, LongSerializer.INSTANCE);
 	public static final BasicTypeInfo<Float> FLOAT_TYPE_INFO = new BasicTypeInfo<Float>(Float.class, null);
-	public static final BasicTypeInfo<Double> DOUBLE_TYPE_INFO = new BasicTypeInfo<Double>(Double.class, null);
+	public static final BasicTypeInfo<Double> DOUBLE_TYPE_INFO = new BasicTypeInfo<Double>(Double.class, DoubleSerializer.INSTANCE);
 	public static final BasicTypeInfo<Character> CHAR_TYPE_INFO = new BasicTypeInfo<Character>(Character.class, null);
 	
 	// --------------------------------------------------------------------------------------------

@@ -26,7 +26,7 @@ import eu.stratosphere.compiler.dag.CoGroupNode
 import eu.stratosphere.compiler.dag.CrossNode
 import eu.stratosphere.compiler.dag.DataSinkNode
 import eu.stratosphere.compiler.dag.DataSourceNode
-import eu.stratosphere.compiler.dag.MapNode
+import eu.stratosphere.compiler.dag.CollectorMapNode
 import eu.stratosphere.compiler.dag.MatchNode
 import eu.stratosphere.compiler.dag.OptimizerNode
 import eu.stratosphere.compiler.dag.PactConnection
@@ -114,7 +114,7 @@ object Extractors {
 
   object MapNode {
     def unapply(node: OptimizerNode): Option[(UDF1[_, _], PactConnection)] = node match {
-      case node: MapNode => node.getPactContract match {
+      case node: CollectorMapNode => node.getPactContract match {
         case contract: MapOperator with OneInputScalaOperator[_, _] => Some((contract.getUDF, node.getIncomingConnection))
         case _ => None
       }
@@ -124,7 +124,7 @@ object Extractors {
   
   object UnionNode {
     def unapply(node: OptimizerNode): Option[(UDF1[_, _], PactConnection)] = node match {
-      case node: MapNode => node.getPactContract match {
+      case node: CollectorMapNode => node.getPactContract match {
         case contract: MapOperator with UnionScalaOperator[_] => Some((contract.getUDF, node.getIncomingConnection))
         case _ => None
       }
