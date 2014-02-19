@@ -16,8 +16,12 @@ package eu.stratosphere.api.java.operators;
 
 import eu.stratosphere.api.java.DataSet;
 import eu.stratosphere.api.java.functions.MapFunction;
+import eu.stratosphere.api.java.operators.translation.PlanFlatMapOperator;
 import eu.stratosphere.api.java.operators.translation.PlanMapOperator;
 import eu.stratosphere.api.java.typeutils.TypeExtractor;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -40,8 +44,10 @@ public class MapOperator<IN, OUT> extends SingleInputUdfOperator<IN, OUT, MapOpe
 
 
 	@Override
-	protected PlanMapOperator<IN, OUT> translateToDataFlow() {
+	protected List<PlanMapOperator<IN, OUT>> translateToDataFlow() {
 		String name = getName() != null ? getName() : function.getClass().getName();
-		return new PlanMapOperator<IN, OUT>(function, name, getInputType(), getResultType());
+		List<PlanMapOperator<IN, OUT>> result = new ArrayList<PlanMapOperator<IN, OUT>>();
+		result.add(new PlanMapOperator<IN, OUT>(function, name, getInputType(), getResultType()));
+		return result;
 	}
 }

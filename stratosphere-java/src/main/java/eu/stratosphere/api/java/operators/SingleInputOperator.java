@@ -17,6 +17,8 @@ package eu.stratosphere.api.java.operators;
 import eu.stratosphere.api.java.DataSet;
 import eu.stratosphere.api.java.typeutils.TypeInformation;
 
+import java.util.List;
+
 /**
  *
  * @param <IN> The data type of the input data set.
@@ -41,7 +43,7 @@ public abstract class SingleInputOperator<IN, OUT, O extends SingleInputOperator
 	}
 	
 	
-	protected eu.stratosphere.api.common.operators.SingleInputOperator<?> translateToDataFlow() {
+	protected List<? extends eu.stratosphere.api.common.operators.SingleInputOperator<?>> translateToDataFlow() {
 		return null;
 	}
 }

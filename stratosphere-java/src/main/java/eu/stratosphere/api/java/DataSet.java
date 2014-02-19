@@ -48,8 +48,11 @@ public abstract class DataSet<T> {
 	
 	
 	protected DataSet(ExecutionEnvironment context, TypeInformation<T> type) {
-		if (context == null || type == null)
-			throw new NullPointerException();
+		if (context == null)
+			throw new NullPointerException("context is null");
+
+		if (type == null)
+			throw new NullPointerException("type is null");
 		
 		this.context = context;
 		this.type = type;
@@ -100,7 +103,7 @@ public abstract class DataSet<T> {
 	//  distinct
 	// --------------------------------------------------------------------------------------------
 	
-	public <K> DistinctOperator<T> distinct(KeyExtractor<T, K> keyExtractor) {
+	public <K extends Comparable<K>> DistinctOperator<T> distinct(KeyExtractor<T, K> keyExtractor) {
 		return new DistinctOperator<T>(this, new Keys.SelectorFunctionKeys<T, K>(keyExtractor, getType()));
 	}
 	
@@ -116,7 +119,7 @@ public abstract class DataSet<T> {
 	//  Grouping
 	// --------------------------------------------------------------------------------------------
 
-	public <K> Grouping<T> groupBy(KeyExtractor<T, K> keyExtractor) {
+	public <K extends Comparable<K>> Grouping<T> groupBy(KeyExtractor<T, K> keyExtractor) {
 		return new Grouping<T>(this, new Keys.SelectorFunctionKeys<T, K>(keyExtractor, getType()));
 	}
 	

@@ -95,12 +95,14 @@ public class OperatorTranslation {
 	
 	private eu.stratosphere.api.common.operators.SingleInputOperator<?> translateSingleOp(SingleInputOperator<?, ?, ?> op) {
 		// translate the operation itself
-		eu.stratosphere.api.common.operators.SingleInputOperator<?> dataFlowOp = op.translateToDataFlow();
-		// translate the input 
+		List<? extends eu.stratosphere.api.common.operators.SingleInputOperator<?>> dataFlowOps = op.translateToDataFlow();
+		eu.stratosphere.api.common.operators.SingleInputOperator<?> first = dataFlowOps.get(0);
+		eu.stratosphere.api.common.operators.SingleInputOperator<?> last = dataFlowOps.get(dataFlowOps.size()-1);
+		// translate the input
 		Operator input = translate(op.getInput());
-		dataFlowOp.setInput(input);
+		first.setInput(input);
 		
-		return dataFlowOp;
+		return last;
 	}
 	
 	private eu.stratosphere.api.common.operators.DualInputOperator<?> translateBinaryOp(TwoInputOperator<?, ?, ?, ?> op) {

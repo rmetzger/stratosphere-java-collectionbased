@@ -19,6 +19,7 @@ import java.util.Arrays;
 import eu.stratosphere.api.common.InvalidProgramException;
 import eu.stratosphere.api.java.functions.KeyExtractor;
 import eu.stratosphere.api.java.typeutils.TupleTypeInfo;
+import eu.stratosphere.api.java.typeutils.TypeExtractor;
 import eu.stratosphere.api.java.typeutils.TypeInformation;
 
 
@@ -34,7 +35,6 @@ public abstract class Keys<T> {
 	public abstract boolean areCompatibale(Keys<?> other);
 	
 	public abstract int[] computeLogicalKeyPositions();
-	
 	
 	// --------------------------------------------------------------------------------------------
 	//  Specializations for field indexed / expression-based / extractor-based grouping
@@ -80,22 +80,37 @@ public abstract class Keys<T> {
 	// --------------------------------------------------------------------------------------------
 	
 	public static class SelectorFunctionKeys<T, K> extends Keys<T> {
+
+		private final KeyExtractor<T, K> keyExtractor;
+		private final TypeInformation typeInformation;
 		
-		public SelectorFunctionKeys(KeyExtractor<T, K> keyExtractor, TypeInformation<T> type) {}
+		public SelectorFunctionKeys(KeyExtractor<T, K> keyExtractor, TypeInformation<T> type) {
+			this.keyExtractor = keyExtractor;
+			this.typeInformation = TypeExtractor.getKeyExtractorType(keyExtractor);
+		}
+
+		public TypeInformation<K> getTypeInformation() {
+			return typeInformation;
+		}
+
+		public KeyExtractor<T, K> getKeyExtractor() {
+			return keyExtractor;
+		}
 
 		@Override
 		public int getNumberOfKeyFields() {
-			throw new UnsupportedOperationException("SelectorFunctionKeys not yet implemented");
+			return 1;
 		}
 
 		@Override
 		public boolean areCompatibale(Keys<?> other) {
-			throw new UnsupportedOperationException("SelectorFunctionKeys not yet implemented");
+			// They are necessarily compatible, java type checking does it for joins and coGroup.
+			return true;
 		}
 
 		@Override
 		public int[] computeLogicalKeyPositions() {
-			throw new UnsupportedOperationException("SelectorFunctionKeys not yet implemented");
+			return new int[] {0};
 		}
 	}
 	

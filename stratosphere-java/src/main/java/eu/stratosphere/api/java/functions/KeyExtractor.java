@@ -17,7 +17,7 @@ package eu.stratosphere.api.java.functions;
 /**
  *
  */
-public interface KeyExtractor<IN, KEY> {
+public abstract class KeyExtractor<IN, KEY> {
 
-	KEY getKey(IN value);
+	public abstract KEY getKey(IN value);
 }
