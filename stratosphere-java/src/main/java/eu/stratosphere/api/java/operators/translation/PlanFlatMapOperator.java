@@ -16,21 +16,57 @@ package eu.stratosphere.api.java.operators.translation;
 
 import eu.stratosphere.api.common.functions.GenericFlatMap;
 import eu.stratosphere.api.common.operators.base.FlatMapOperatorBase;
+import eu.stratosphere.api.java.functions.FlatMapFunction;
 import eu.stratosphere.api.java.typeutils.TypeInformation;
+import eu.stratosphere.util.Collector;
+import eu.stratosphere.util.Reference;
 
 /**
  *
  */
-public class PlanFlatMapOperator<T, O> extends FlatMapOperatorBase<GenericFlatMap<T, O>>{
-
+public class PlanFlatMapOperator<T, O> extends FlatMapOperatorBase<GenericFlatMap<Reference<T>, Reference<O>>>
+	implements UnaryJavaPlanNode<T, O>
+{
 	private final TypeInformation<T> inType;
 	
 	private final TypeInformation<O> outType;
 	
 	
-	public PlanFlatMapOperator(GenericFlatMap<T, O> udf, String name, TypeInformation<T> inType, TypeInformation<O> outType) {
-		super(udf, name);
+	public PlanFlatMapOperator(FlatMapFunction<T, O> udf, String name, TypeInformation<T> inType, TypeInformation<O> outType) {
+		super(new ReferenceWrappingFlatMapper<T, O>(udf), name);
 		this.inType = inType;
 		this.outType = outType;
+	}
+	
+	@Override
+	public TypeInformation<O> getReturnType() {
+		return this.outType;
+	}
+
+	@Override
+	public TypeInformation<T> getInputType() {
+		return this.inType;
+	}
+	
+	
+	// --------------------------------------------------------------------------------------------
+	
+	public static final class ReferenceWrappingFlatMapper<IN, OUT> extends WrappingFunction<FlatMapFunction<IN, OUT>>
+		implements GenericFlatMap<Reference<IN>, Reference<OUT>>
+	{
+
+		private static final long serialVersionUID = 1L;
+		
+		private final ReferenceWrappingCollector<OUT> coll = new ReferenceWrappingCollector<OUT>();
+		
+		private ReferenceWrappingFlatMapper(FlatMapFunction<IN, OUT> wrapped) {
+			super(wrapped);
+		}
+
+		@Override
+		public final void flatMap(Reference<IN> value, Collector<Reference<OUT>> out) throws Exception {
+			coll.set(out);
+			this.wrappedFunction.flatMap(value.ref, coll);
+		}
 	}
 }

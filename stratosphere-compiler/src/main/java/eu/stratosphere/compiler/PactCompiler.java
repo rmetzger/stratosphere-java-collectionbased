@@ -50,6 +50,7 @@ import eu.stratosphere.compiler.costs.DefaultCostEstimator;
 import eu.stratosphere.compiler.dag.BulkIterationNode;
 import eu.stratosphere.compiler.dag.BulkPartialSolutionNode;
 import eu.stratosphere.compiler.dag.CoGroupNode;
+import eu.stratosphere.compiler.dag.CollectorMapNode;
 import eu.stratosphere.compiler.dag.CrossNode;
 import eu.stratosphere.compiler.dag.DataSinkNode;
 import eu.stratosphere.compiler.dag.DataSourceNode;
@@ -822,7 +823,7 @@ public class PactCompiler {
 				n = dsn;
 			}
 			else if (c instanceof MapOperatorBase) {
-				n = new MapNode((MapOperatorBase<?>) c);
+				n = new CollectorMapNode((MapOperatorBase<?>) c);
 			}
 			else if (c instanceof PlainMapOperatorBase) {
 				n = new MapNode((PlainMapOperatorBase<?>) c);

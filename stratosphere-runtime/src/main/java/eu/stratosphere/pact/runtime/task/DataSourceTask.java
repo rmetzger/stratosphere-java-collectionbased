@@ -32,7 +32,7 @@ import eu.stratosphere.nephele.template.AbstractInputTask;
 import eu.stratosphere.pact.runtime.shipping.OutputCollector;
 import eu.stratosphere.pact.runtime.shipping.RecordOutputCollector;
 import eu.stratosphere.pact.runtime.task.chaining.ChainedDriver;
-import eu.stratosphere.pact.runtime.task.chaining.ChainedMapDriver;
+import eu.stratosphere.pact.runtime.task.chaining.ChainedCollectorMapDriver;
 import eu.stratosphere.pact.runtime.task.util.TaskConfig;
 import eu.stratosphere.types.Record;
 import eu.stratosphere.util.Collector;
@@ -153,10 +153,10 @@ public class DataSourceTask<OT> extends AbstractInputTask<InputSplit>
 									output.collect(returnedRecord);
 								}
 							}
-						} else if (this.output instanceof ChainedMapDriver) {
+						} else if (this.output instanceof ChainedCollectorMapDriver) {
 							// Record going to a chained map task
 							@SuppressWarnings("unchecked")
-							final ChainedMapDriver<Record, ?> output = (ChainedMapDriver<Record, ?>) this.output;
+							final ChainedCollectorMapDriver<Record, ?> output = (ChainedCollectorMapDriver<Record, ?>) this.output;
 							
 							// as long as there is data to read
 							while (!this.taskCanceled && !inFormat.reachedEnd()) {
@@ -192,9 +192,9 @@ public class DataSourceTask<OT> extends AbstractInputTask<InputSplit>
 									output.collect(record);
 								}
 							}
-						} else if (this.output instanceof ChainedMapDriver) {
+						} else if (this.output instanceof ChainedCollectorMapDriver) {
 							@SuppressWarnings("unchecked")
-							final ChainedMapDriver<OT, ?> output = (ChainedMapDriver<OT, ?>) this.output;
+							final ChainedCollectorMapDriver<OT, ?> output = (ChainedCollectorMapDriver<OT, ?>) this.output;
 							// as long as there is data to read
 							while (!this.taskCanceled && !format.reachedEnd()) {
 								// build next pair and ship pair if it is valid

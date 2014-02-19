@@ -148,20 +148,20 @@ public final class Tuple14<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T1
 	@SuppressWarnings("unchecked")
 	public <T> T getField(int pos) {
 		switch(pos) {
-			case 1: return (T) this._1;
-			case 2: return (T) this._2;
-			case 3: return (T) this._3;
-			case 4: return (T) this._4;
-			case 5: return (T) this._5;
-			case 6: return (T) this._6;
-			case 7: return (T) this._7;
-			case 8: return (T) this._8;
-			case 9: return (T) this._9;
-			case 10: return (T) this._10;
-			case 11: return (T) this._11;
-			case 12: return (T) this._12;
-			case 13: return (T) this._13;
-			case 14: return (T) this._14;
+			case 0: return (T) this._1;
+			case 1: return (T) this._2;
+			case 2: return (T) this._3;
+			case 3: return (T) this._4;
+			case 4: return (T) this._5;
+			case 5: return (T) this._6;
+			case 6: return (T) this._7;
+			case 7: return (T) this._8;
+			case 8: return (T) this._9;
+			case 9: return (T) this._10;
+			case 10: return (T) this._11;
+			case 11: return (T) this._12;
+			case 12: return (T) this._13;
+			case 13: return (T) this._14;
 			default: throw new IndexOutOfBoundsException(String.valueOf(pos));
 		}
 	}
@@ -169,46 +169,46 @@ public final class Tuple14<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T1
 	@SuppressWarnings("unchecked")
 	public <T> void setField(T value, int pos) {
 		switch(pos) {
-			case 1:
+			case 0:
 				this._1 = (T1) value;
 				break;
-			case 2:
+			case 1:
 				this._2 = (T2) value;
 				break;
-			case 3:
+			case 2:
 				this._3 = (T3) value;
 				break;
-			case 4:
+			case 3:
 				this._4 = (T4) value;
 				break;
-			case 5:
+			case 4:
 				this._5 = (T5) value;
 				break;
-			case 6:
+			case 5:
 				this._6 = (T6) value;
 				break;
-			case 7:
+			case 6:
 				this._7 = (T7) value;
 				break;
-			case 8:
+			case 7:
 				this._8 = (T8) value;
 				break;
-			case 9:
+			case 8:
 				this._9 = (T9) value;
 				break;
-			case 10:
+			case 9:
 				this._10 = (T10) value;
 				break;
-			case 11:
+			case 10:
 				this._11 = (T11) value;
 				break;
-			case 12:
+			case 11:
 				this._12 = (T12) value;
 				break;
-			case 13:
+			case 12:
 				this._13 = (T13) value;
 				break;
-			case 14:
+			case 13:
 				this._14 = (T14) value;
 				break;
 			default: throw new IndexOutOfBoundsException(String.valueOf(pos));
@@ -253,20 +253,20 @@ public final class Tuple14<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T1
 
 	static {
 		try {
-			offsets[0] = UNSAFE.objectFieldOffset(Tuple14.class.getField("_1"));
-			offsets[1] = UNSAFE.objectFieldOffset(Tuple14.class.getField("_2"));
-			offsets[2] = UNSAFE.objectFieldOffset(Tuple14.class.getField("_3"));
-			offsets[3] = UNSAFE.objectFieldOffset(Tuple14.class.getField("_4"));
-			offsets[4] = UNSAFE.objectFieldOffset(Tuple14.class.getField("_5"));
-			offsets[5] = UNSAFE.objectFieldOffset(Tuple14.class.getField("_6"));
-			offsets[6] = UNSAFE.objectFieldOffset(Tuple14.class.getField("_7"));
-			offsets[7] = UNSAFE.objectFieldOffset(Tuple14.class.getField("_8"));
-			offsets[8] = UNSAFE.objectFieldOffset(Tuple14.class.getField("_9"));
-			offsets[9] = UNSAFE.objectFieldOffset(Tuple14.class.getField("_10"));
-			offsets[10] = UNSAFE.objectFieldOffset(Tuple14.class.getField("_11"));
-			offsets[11] = UNSAFE.objectFieldOffset(Tuple14.class.getField("_12"));
-			offsets[12] = UNSAFE.objectFieldOffset(Tuple14.class.getField("_13"));
-			offsets[13] = UNSAFE.objectFieldOffset(Tuple14.class.getField("_14"));
+			offsets[0] = UNSAFE.objectFieldOffset(Tuple14.class.getDeclaredField("_1"));
+			offsets[1] = UNSAFE.objectFieldOffset(Tuple14.class.getDeclaredField("_2"));
+			offsets[2] = UNSAFE.objectFieldOffset(Tuple14.class.getDeclaredField("_3"));
+			offsets[3] = UNSAFE.objectFieldOffset(Tuple14.class.getDeclaredField("_4"));
+			offsets[4] = UNSAFE.objectFieldOffset(Tuple14.class.getDeclaredField("_5"));
+			offsets[5] = UNSAFE.objectFieldOffset(Tuple14.class.getDeclaredField("_6"));
+			offsets[6] = UNSAFE.objectFieldOffset(Tuple14.class.getDeclaredField("_7"));
+			offsets[7] = UNSAFE.objectFieldOffset(Tuple14.class.getDeclaredField("_8"));
+			offsets[8] = UNSAFE.objectFieldOffset(Tuple14.class.getDeclaredField("_9"));
+			offsets[9] = UNSAFE.objectFieldOffset(Tuple14.class.getDeclaredField("_10"));
+			offsets[10] = UNSAFE.objectFieldOffset(Tuple14.class.getDeclaredField("_11"));
+			offsets[11] = UNSAFE.objectFieldOffset(Tuple14.class.getDeclaredField("_12"));
+			offsets[12] = UNSAFE.objectFieldOffset(Tuple14.class.getDeclaredField("_13"));
+			offsets[13] = UNSAFE.objectFieldOffset(Tuple14.class.getDeclaredField("_14"));
 		} catch (Throwable t) {
 			throw new RuntimeException("Could not initialize fast field accesses for tuple data type.");
 		}

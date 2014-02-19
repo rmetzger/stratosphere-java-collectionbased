@@ -12,23 +12,33 @@
  * specific language governing permissions and limitations under the License.
  *
  **********************************************************************************************************************/
-package eu.stratosphere.util;
+package eu.stratosphere.api.java.operators.translation;
+
+import eu.stratosphere.util.Collector;
+import eu.stratosphere.util.Reference;
 
 
 /**
- * A reference object that simply holds a reference to another object.
+ *
  */
-public class Reference<T> implements java.io.Serializable {
+public class ReferenceWrappingCollector<T> implements Collector<T>, java.io.Serializable {
 
 	private static final long serialVersionUID = 1L;
+
+	private final Reference<T> ref = new Reference<T>();
 	
-	/** The reference.*/
-	public T ref;
+	private Collector<Reference<T>> delegate;
 	
-	
-	public Reference() {}
-	
-	public Reference(T ref) {
-		this.ref = ref;
+	public void set(Collector<Reference<T>> delegate) {
+		this.delegate = delegate;
 	}
+
+	@Override
+	public void collect(T value) {
+		ref.ref = value;
+		this.delegate.collect(ref);
+	}
+	
+	@Override
+	public void close() {}
 }

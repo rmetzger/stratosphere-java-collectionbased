@@ -12,23 +12,38 @@
  * specific language governing permissions and limitations under the License.
  *
  **********************************************************************************************************************/
-package eu.stratosphere.util;
+package eu.stratosphere.api.java.operators.translation;
+
+import eu.stratosphere.api.common.functions.AbstractFunction;
+import eu.stratosphere.api.common.functions.RuntimeContext;
+import eu.stratosphere.configuration.Configuration;
 
 
-/**
- * A reference object that simply holds a reference to another object.
- */
-public class Reference<T> implements java.io.Serializable {
-
+public abstract class WrappingFunction<T extends AbstractFunction> extends AbstractFunction {
+	
 	private static final long serialVersionUID = 1L;
+
+	protected final T wrappedFunction;
 	
-	/** The reference.*/
-	public T ref;
 	
+	protected WrappingFunction(T wrappedFunction) {
+		this.wrappedFunction = wrappedFunction;
+	}
+
 	
-	public Reference() {}
+	@Override
+	public void open(Configuration parameters) throws Exception {
+		this.wrappedFunction.open(parameters);
+	}
 	
-	public Reference(T ref) {
-		this.ref = ref;
+	@Override
+	public void close() throws Exception {
+		this.wrappedFunction.close();
+	}
+	
+	@Override
+	public void setRuntimeContext(RuntimeContext t) {
+		super.setRuntimeContext(t);
+		this.wrappedFunction.setRuntimeContext(t);
 	}
 }

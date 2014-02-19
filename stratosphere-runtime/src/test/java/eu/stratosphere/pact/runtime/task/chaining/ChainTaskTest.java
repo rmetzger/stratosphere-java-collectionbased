@@ -28,7 +28,7 @@ import eu.stratosphere.pact.runtime.plugable.pactrecord.RecordComparatorFactory;
 import eu.stratosphere.pact.runtime.plugable.pactrecord.RecordSerializerFactory;
 import eu.stratosphere.pact.runtime.shipping.ShipStrategyType;
 import eu.stratosphere.pact.runtime.task.DriverStrategy;
-import eu.stratosphere.pact.runtime.task.MapDriver;
+import eu.stratosphere.pact.runtime.task.CollectorMapDriver;
 import eu.stratosphere.pact.runtime.task.MapTaskTest.MockMapStub;
 import eu.stratosphere.pact.runtime.task.ReduceTaskTest.MockReduceStub;
 import eu.stratosphere.pact.runtime.task.RegularPactTask;
@@ -87,7 +87,7 @@ public class ChainTaskTest extends TaskTestBase {
 			{
 				RegularPactTask<GenericCollectorMap<Record, Record>, Record> testTask = 
 											new RegularPactTask<GenericCollectorMap<Record, Record>, Record>();
-				registerTask(testTask, MapDriver.class, MockMapStub.class);
+				registerTask(testTask, CollectorMapDriver.class, MockMapStub.class);
 				
 				try {
 					testTask.invoke();
@@ -144,7 +144,7 @@ public class ChainTaskTest extends TaskTestBase {
 				final RegularPactTask<GenericCollectorMap<Record, Record>, Record> testTask = 
 											new RegularPactTask<GenericCollectorMap<Record, Record>, Record>();
 				
-				super.registerTask(testTask, MapDriver.class, MockMapStub.class);
+				super.registerTask(testTask, CollectorMapDriver.class, MockMapStub.class);
 	
 				boolean stubFailed = false;
 				

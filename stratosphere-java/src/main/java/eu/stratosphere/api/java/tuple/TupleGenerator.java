@@ -115,8 +115,8 @@ public class TupleGenerator {
 		w.println("\t@SuppressWarnings(\"unchecked\")");
 		w.println("\tpublic <T> T getField(int pos) {");
 		w.println("\t\tswitch(pos) {");
-		for (int i = 1; i <= numFields; i++) {
-			w.println("\t\t\tcase " + i + ": return (T) this._" + i + ';');
+		for (int i = 0; i < numFields; i++) {
+			w.println("\t\t\tcase " + i + ": return (T) this._" + (i+1) + ';');
 		}
 		w.println("\t\t\tdefault: throw new IndexOutOfBoundsException(String.valueOf(pos));");
 		w.println("\t\t}");
@@ -127,9 +127,9 @@ public class TupleGenerator {
 		w.println("\t@SuppressWarnings(\"unchecked\")");
 		w.println("\tpublic <T> void setField(T value, int pos) {");
 		w.println("\t\tswitch(pos) {");
-		for (int i = 1; i <= numFields; i++) {
+		for (int i = 0; i < numFields; i++) {
 			w.println("\t\t\tcase " + i + ':');
-			w.println("\t\t\t\tthis._" + i + " = (" + GEN_TYPE_PREFIX + i + ") value;");
+			w.println("\t\t\t\tthis._" + (i+1) + " = (" + GEN_TYPE_PREFIX + (i+1) + ") value;");
 			w.println("\t\t\t\tbreak;");
 		}
 		w.println("\t\t\tdefault: throw new IndexOutOfBoundsException(String.valueOf(pos));");
@@ -170,7 +170,7 @@ public class TupleGenerator {
 		w.println("\t\ttry {");
 		
 		for (int i = 0; i < numFields; i++) {
-			w.println("\t\t\toffsets[" + i + "] = UNSAFE.objectFieldOffset(Tuple" + numFields + ".class.getField(\"_" + (i+1) + "\"));");
+			w.println("\t\t\toffsets[" + i + "] = UNSAFE.objectFieldOffset(Tuple" + numFields + ".class.getDeclaredField(\"_" + (i+1) + "\"));");
 		}
 		
 		w.println("\t\t} catch (Throwable t) {");

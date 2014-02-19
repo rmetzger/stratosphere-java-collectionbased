@@ -14,20 +14,73 @@
  **********************************************************************************************************************/
 package eu.stratosphere.api.java.operators.translation;
 
+import java.util.Iterator;
+
+import eu.stratosphere.api.common.functions.GenericGroupReduce;
 import eu.stratosphere.api.common.operators.base.GroupReduceOperatorBase;
 import eu.stratosphere.api.java.functions.ReduceFunction;
 import eu.stratosphere.api.java.typeutils.TypeInformation;
+import eu.stratosphere.util.Collector;
+import eu.stratosphere.util.Reference;
 
 /**
  *
  */
-public class PlanReduceOperator<T> extends GroupReduceOperatorBase<ReduceFunction<T>>{
+public class PlanReduceOperator<T> extends GroupReduceOperatorBase<GenericGroupReduce<Reference<T>,Reference<T>>>
+	implements UnaryJavaPlanNode<T, T>
+{
 
 	private final TypeInformation<T> type;
 	
 	
 	public PlanReduceOperator(ReduceFunction<T> udf, int[] logicalGroupingFields, String name, TypeInformation<T> type) {
-		super(udf, logicalGroupingFields, name);
+		super(new ReferenceWrappingReducer<T>(udf), logicalGroupingFields, name);
 		this.type = type;
+	}
+	
+	
+	@Override
+	public TypeInformation<T> getReturnType() {
+		return this.type;
+	}
+
+	@Override
+	public TypeInformation<T> getInputType() {
+		return this.type;
+	}
+	
+	
+	// --------------------------------------------------------------------------------------------
+	
+	public static final class ReferenceWrappingReducer<T> extends WrappingFunction<ReduceFunction<T>>
+		implements GenericGroupReduce<Reference<T>, Reference<T>>
+	{
+
+		private static final long serialVersionUID = 1L;
+		
+		private final Reference<T> ref = new Reference<T>();
+		
+		private ReferenceWrappingReducer(ReduceFunction<T> wrapped) {
+			super(wrapped);
+		}
+
+
+		@Override
+		public void reduce(Iterator<Reference<T>> values, Collector<Reference<T>> out) throws Exception {
+			T curr = values.next().ref;
+			
+			while (values.hasNext()) {
+				curr = this.wrappedFunction.reduce(curr, values.next().ref);
+			}
+			
+			ref.ref = curr;
+			out.collect(ref);
+		}
+
+		@Override
+		public void combine(Iterator<Reference<T>> values, Collector<Reference<T>> out) throws Exception {
+			reduce(values, out);
+		}
+
 	}
 }

@@ -54,11 +54,11 @@ public class WordCount1 {
 		
 		DataSet<String> text = env.fromElements("To be", "or not to be", "or to be still", "and certainly not to be not at all", "is that the question?");
 		
-		DataSet<Tuple2<String, Integer>> result = text.flatMap(new Tokenizer()).groupBy(0).reduce(new Counter());
+		DataSet<Tuple2<String, Integer>> result = text.flatMap(new Tokenizer()); //.groupBy(0).reduce(new Counter());
 		
 		result.print();
 		
-		System.out.println(env.getExecutionPlan());
-//		env.execute();
+//		System.out.println(env.getExecutionPlan());
+		env.execute();
 	}
 }

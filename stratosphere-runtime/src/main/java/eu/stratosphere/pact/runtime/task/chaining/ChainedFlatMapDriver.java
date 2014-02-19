@@ -14,22 +14,22 @@
 package eu.stratosphere.pact.runtime.task.chaining;
 
 import eu.stratosphere.api.common.functions.Function;
-import eu.stratosphere.api.common.functions.GenericMap;
+import eu.stratosphere.api.common.functions.GenericFlatMap;
 import eu.stratosphere.configuration.Configuration;
 import eu.stratosphere.nephele.template.AbstractInvokable;
 import eu.stratosphere.pact.runtime.task.RegularPactTask;
 
-public class ChainedMapDriver<IT, OT> extends ChainedDriver<IT, OT> {
+public class ChainedFlatMapDriver<IT, OT> extends ChainedDriver<IT, OT> {
 
-	private GenericMap<IT, OT> mapper;
+	private GenericFlatMap<IT, OT> mapper;
 
 	// --------------------------------------------------------------------------------------------
 
 	@Override
 	public void setup(AbstractInvokable parent) {
 		@SuppressWarnings("unchecked")
-		final GenericMap<IT, OT> mapper =
-			RegularPactTask.instantiateUserCode(this.config, userCodeClassLoader, GenericMap.class);
+		final GenericFlatMap<IT, OT> mapper =
+			RegularPactTask.instantiateUserCode(this.config, userCodeClassLoader, GenericFlatMap.class);
 		this.mapper = mapper;
 		mapper.setRuntimeContext(getUdfRuntimeContext());
 	}
@@ -68,7 +68,7 @@ public class ChainedMapDriver<IT, OT> extends ChainedDriver<IT, OT> {
 	@Override
 	public void collect(IT record) {
 		try {
-			this.outputCollector.collect(this.mapper.map(record));
+			this.mapper.flatMap(record, this.outputCollector);
 		} catch (Exception ex) {
 			throw new ExceptionInChainedStubException(this.taskName, ex);
 		}

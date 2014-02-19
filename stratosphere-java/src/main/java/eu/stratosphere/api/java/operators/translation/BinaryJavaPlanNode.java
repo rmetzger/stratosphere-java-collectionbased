@@ -12,23 +12,17 @@
  * specific language governing permissions and limitations under the License.
  *
  **********************************************************************************************************************/
-package eu.stratosphere.util;
+package eu.stratosphere.api.java.operators.translation;
+
+import eu.stratosphere.api.java.typeutils.TypeInformation;
 
 
 /**
- * A reference object that simply holds a reference to another object.
+ *
  */
-public class Reference<T> implements java.io.Serializable {
+public interface BinaryJavaPlanNode<I1, I2, T> extends JavaPlanNode<T> {
 
-	private static final long serialVersionUID = 1L;
+	TypeInformation<I1> getInputType1();
 	
-	/** The reference.*/
-	public T ref;
-	
-	
-	public Reference() {}
-	
-	public Reference(T ref) {
-		this.ref = ref;
-	}
+	TypeInformation<I2> getInputType2();
 }

@@ -51,7 +51,7 @@ public class MapTaskTest extends DriverTestBase<GenericCollectorMap<Record, Reco
 		addInput(new UniformRecordGenerator(keyCnt, valCnt, false));
 		setOutput(this.output);
 		
-		final MapDriver<Record, Record> testDriver = new MapDriver<Record, Record>();
+		final CollectorMapDriver<Record, Record> testDriver = new CollectorMapDriver<Record, Record>();
 		
 		try {
 			testDriver(testDriver, MockMapStub.class);
@@ -71,7 +71,7 @@ public class MapTaskTest extends DriverTestBase<GenericCollectorMap<Record, Reco
 		addInput(new UniformRecordGenerator(keyCnt, valCnt, false));
 		setOutput(new DiscardingOutputCollector());
 		
-		final MapDriver<Record, Record> testTask = new MapDriver<Record, Record>();
+		final CollectorMapDriver<Record, Record> testTask = new CollectorMapDriver<Record, Record>();
 		try {
 			testDriver(testTask, MockFailingMapStub.class);
 			Assert.fail("Function exception was not forwarded.");
@@ -88,7 +88,7 @@ public class MapTaskTest extends DriverTestBase<GenericCollectorMap<Record, Reco
 		addInput(new InfiniteInputIterator());
 		setOutput(new DiscardingOutputCollector());
 		
-		final MapDriver<Record, Record> testTask = new MapDriver<Record, Record>();
+		final CollectorMapDriver<Record, Record> testTask = new CollectorMapDriver<Record, Record>();
 		
 		final AtomicBoolean success = new AtomicBoolean(false);
 		

@@ -13,7 +13,7 @@
 
 package eu.stratosphere.pact.runtime.task;
 
-import eu.stratosphere.api.common.functions.GenericMap;
+import eu.stratosphere.api.common.functions.GenericFlatMap;
 import eu.stratosphere.util.Collector;
 import eu.stratosphere.util.MutableObjectIterator;
 
@@ -30,15 +30,15 @@ import eu.stratosphere.util.MutableObjectIterator;
  * @param <IT> The mapper's input data type.
  * @param <OT> The mapper's output data type.
  */
-public class MapDriver<IT, OT> implements PactDriver<GenericMap<IT, OT>, OT> {
+public class FlatMapDriver<IT, OT> implements PactDriver<GenericFlatMap<IT, OT>, OT> {
 	
-	private PactTaskContext<GenericMap<IT, OT>, OT> taskContext;
+	private PactTaskContext<GenericFlatMap<IT, OT>, OT> taskContext;
 	
 	private volatile boolean running;
 	
 	
 	@Override
-	public void setup(PactTaskContext<GenericMap<IT, OT>, OT> context) {
+	public void setup(PactTaskContext<GenericFlatMap<IT, OT>, OT> context) {
 		this.taskContext = context;
 		this.running = true;
 	}
@@ -49,9 +49,9 @@ public class MapDriver<IT, OT> implements PactDriver<GenericMap<IT, OT>, OT> {
 	}
 
 	@Override
-	public Class<GenericMap<IT, OT>> getStubType() {
+	public Class<GenericFlatMap<IT, OT>> getStubType() {
 		@SuppressWarnings("unchecked")
-		final Class<GenericMap<IT, OT>> clazz = (Class<GenericMap<IT, OT>>) (Class<?>) GenericMap.class;
+		final Class<GenericFlatMap<IT, OT>> clazz = (Class<GenericFlatMap<IT, OT>>) (Class<?>) GenericFlatMap.class;
 		return clazz;
 	}
 
@@ -69,13 +69,13 @@ public class MapDriver<IT, OT> implements PactDriver<GenericMap<IT, OT>, OT> {
 	public void run() throws Exception {
 		// cache references on the stack
 		final MutableObjectIterator<IT> input = this.taskContext.getInput(0);
-		final GenericMap<IT, OT> function = this.taskContext.getStub();
+		final GenericFlatMap<IT, OT> function = this.taskContext.getStub();
 		final Collector<OT> output = this.taskContext.getOutputCollector();
 
 		final IT record = this.taskContext.<IT>getInputSerializer(0).createInstance();
 
 		while (this.running && input.next(record)) {
-			output.collect(function.map(record));
+			function.flatMap(record, output);
 		}
 	}
 

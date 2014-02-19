@@ -44,7 +44,7 @@ public final class Tuple1<T1> extends Tuple {
 	@SuppressWarnings("unchecked")
 	public <T> T getField(int pos) {
 		switch(pos) {
-			case 1: return (T) this._1;
+			case 0: return (T) this._1;
 			default: throw new IndexOutOfBoundsException(String.valueOf(pos));
 		}
 	}
@@ -52,7 +52,7 @@ public final class Tuple1<T1> extends Tuple {
 	@SuppressWarnings("unchecked")
 	public <T> void setField(T value, int pos) {
 		switch(pos) {
-			case 1:
+			case 0:
 				this._1 = (T1) value;
 				break;
 			default: throw new IndexOutOfBoundsException(String.valueOf(pos));
@@ -84,7 +84,7 @@ public final class Tuple1<T1> extends Tuple {
 
 	static {
 		try {
-			offsets[0] = UNSAFE.objectFieldOffset(Tuple1.class.getField("_1"));
+			offsets[0] = UNSAFE.objectFieldOffset(Tuple1.class.getDeclaredField("_1"));
 		} catch (Throwable t) {
 			throw new RuntimeException("Could not initialize fast field accesses for tuple data type.");
 		}

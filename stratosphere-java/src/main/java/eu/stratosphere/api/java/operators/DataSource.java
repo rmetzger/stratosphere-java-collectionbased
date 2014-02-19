@@ -54,7 +54,7 @@ public class DataSource<OUT> extends DataSet<OUT> {
 	
 	// --------------------------------------------------------------------------------------------
 	
-	protected GenericDataSource<InputFormat<OUT, ?>> translateToDataFlow() {
+	protected GenericDataSource<?> translateToDataFlow() {
 		String name = this.name != null ? this.name : this.inputFormat.toString();
 		PlanDataSource<OUT> source = new PlanDataSource<OUT>(this.inputFormat, name, getType());
 		return source;

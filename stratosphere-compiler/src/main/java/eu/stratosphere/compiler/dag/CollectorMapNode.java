@@ -16,42 +16,37 @@ package eu.stratosphere.compiler.dag;
 import java.util.Collections;
 import java.util.List;
 
-import eu.stratosphere.api.common.operators.base.FlatMapOperatorBase;
+import eu.stratosphere.api.common.operators.SingleInputOperator;
 import eu.stratosphere.compiler.DataStatistics;
-import eu.stratosphere.compiler.operators.FlatMapDescriptor;
+import eu.stratosphere.compiler.operators.CollectorMapDescriptor;
 import eu.stratosphere.compiler.operators.OperatorDescriptorSingle;
 
 /**
- * The optimizer's internal representation of a <i>FlatMap</i> operator node.
+ * The optimizer's internal representation of a <i>Map</i> operator node.
  */
-public class FlatMapNode extends SingleInputNode {
+public class CollectorMapNode extends SingleInputNode {
 	
 
-	public FlatMapNode(FlatMapOperatorBase<?> operator) {
+	public CollectorMapNode(SingleInputOperator<?> operator) {
 		super(operator);
 	}
 
 	@Override
-	public FlatMapOperatorBase<?> getPactContract() {
-		return (FlatMapOperatorBase<?>) super.getPactContract();
-	}
-
-	@Override
 	public String getName() {
-		return "FlatMap";
+		return "Map";
 	}
 
 	@Override
 	protected List<OperatorDescriptorSingle> getPossibleProperties() {
-		return Collections.<OperatorDescriptorSingle>singletonList(new FlatMapDescriptor());
+		return Collections.<OperatorDescriptorSingle>singletonList(new CollectorMapDescriptor());
 	}
 
 	/**
-	 * Computes the estimates for the FlatMap operator. Since it un-nests, we assume a cardinality
-	 * increase. To give the system a hint at data increase, we take a default magic number of a 5 times increase. 
+	 * Computes the estimates for the Map operator. Map takes one value and transforms it into another value.
+	 * The cardinality consequently stays the same.
 	 */
 	@Override
 	protected void computeOperatorSpecificDefaultEstimates(DataStatistics statistics) {
-		this.estimatedNumRecords = getPredecessorNode().getEstimatedNumRecords() * 5;
+		this.estimatedNumRecords = getPredecessorNode().getEstimatedNumRecords();
 	}
 }
