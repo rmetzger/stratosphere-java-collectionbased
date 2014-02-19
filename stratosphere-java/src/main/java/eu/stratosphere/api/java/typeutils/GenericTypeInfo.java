@@ -15,6 +15,7 @@
 package eu.stratosphere.api.java.typeutils;
 
 import eu.stratosphere.api.common.typeutils.Serializer;
+import eu.stratosphere.api.java.typeutils.runtime.AvroSerializer;
 
 
 /**
@@ -51,7 +52,7 @@ public class GenericTypeInfo<T> extends TypeInformation<T> {
 
 	@Override
 	public Serializer<T> createSerializer() {
-		throw new UnsupportedOperationException("The generic serialization is not yet implemented.");
+		return new AvroSerializer<T>(this.typeClass);
 	}
 	
 	@Override

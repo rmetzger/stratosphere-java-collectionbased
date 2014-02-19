@@ -256,7 +256,7 @@ public class Plan implements Visitable<Operator> {
 	 * @param defaultParallelism The default parallelism for the plan.
 	 */
 	public void setDefaultParallelism(int defaultParallelism) {
-		checkArgument(defaultParallelism >= 1 || defaultParallelism < -1,
+		checkArgument(defaultParallelism >= 1 || defaultParallelism == -1,
 			"The default degree of parallelism must be positive, or -1 if the system should use the globally comfigured default.");
 		
 		this.defaultParallelism = defaultParallelism;

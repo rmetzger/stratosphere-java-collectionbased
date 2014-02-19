@@ -12,7 +12,7 @@
  * specific language governing permissions and limitations under the License.
  *
  **********************************************************************************************************************/
-package eu.stratosphere.api.avro;
+package eu.stratosphere.api.java.typeutils.runtime;
 
 import java.io.DataOutput;
 import java.io.IOException;
@@ -26,7 +26,7 @@ public final class DataOutputEncoder extends Encoder implements java.io.Serializ
 	
 	private static final long serialVersionUID = 1L;
 	
-	private DataOutput out;
+	private transient DataOutput out;
 	
 	
 	public void setOut(DataOutput out) {
@@ -174,5 +174,12 @@ public final class DataOutputEncoder extends Encoder implements java.io.Serializ
 			val >>>= 7;
 		}
 		out.write((int) val);
+	}
+	
+	private void readObject(java.io.ObjectInputStream s) throws java.io.IOException, ClassNotFoundException {
+		// Read in size, and any hidden stuff
+		s.defaultReadObject();
+
+		this.out = null;
 	}
 }

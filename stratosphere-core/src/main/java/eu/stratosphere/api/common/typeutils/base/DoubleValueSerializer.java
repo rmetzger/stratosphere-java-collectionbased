@@ -18,7 +18,6 @@ import eu.stratosphere.api.common.typeutils.Serializer;
 import eu.stratosphere.core.memory.DataInputView;
 import eu.stratosphere.core.memory.DataOutputView;
 import eu.stratosphere.types.DoubleValue;
-import eu.stratosphere.types.LongValue;
 
 import java.io.IOException;
 

@@ -46,6 +46,7 @@ public abstract class TypeInformation<T> {
 				return basicTypeInfo;
 			}
 		}
+		
 		// check for arrays
 		{
 			TypeInformation<X> arrayInfo = ArrayTypeInfo.getInfoFor(clazz);

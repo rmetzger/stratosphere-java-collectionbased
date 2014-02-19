@@ -17,9 +17,8 @@ package eu.stratosphere.api.java.typeutils;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.Map;
 
-import com.google.common.collect.Maps;
+
 import eu.stratosphere.api.common.io.InputFormat;
 import eu.stratosphere.api.java.functions.*;
 import eu.stratosphere.api.java.tuple.Tuple;
@@ -92,11 +91,8 @@ public class TypeExtractor {
 			}
 			
 		} else if (t instanceof Class) {
-			// basic or arbitrary
-			TypeInformation<?> basic = BasicTypeInfo.getInfoFor((Class) t);
-			if (basic != null) {
-				return (TypeInformation<X>) basic;
-			}
+			// non tuple
+			return TypeInformation.getForClass((Class<X>) t);
 		}
 		
 		return null;

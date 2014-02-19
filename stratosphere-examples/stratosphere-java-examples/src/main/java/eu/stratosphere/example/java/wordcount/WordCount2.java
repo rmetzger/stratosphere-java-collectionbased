@@ -43,7 +43,6 @@ public class WordCount2 {
 		}
 	}
 	
-	@SuppressWarnings("serial")
 	public static final class Tokenizer extends FlatMapFunction<String, WC> {
 		
 		@Override
@@ -55,32 +54,29 @@ public class WordCount2 {
 		}
 	}
 	
-	@SuppressWarnings("serial")
-	public static void main(String[] args) {
-		if (args.length < 2) {
-			System.out.println("Usage: <input path> <output path>");
-			return;
-		}
+	public static void main(String[] args) throws Exception {
 		
-		final String inputPath = args[0];
-		final String outputPath = args[1];
+		final ExecutionEnvironment env = ExecutionEnvironment.getExecutionEnvironment();
+		env.setDegreeOfParallelism(1);
 		
-		final ExecutionEnvironment context = ExecutionEnvironment.getExecutionEnvironment();
-		
-		DataSet<String> text = context.readTextFile(inputPath);
+		DataSet<String> text = env.fromElements("To be", "or not to be", "or to be still", "and certainly not to be not at all", "is that the question?");
 		
 		DataSet<WC> tokenized = text.flatMap(new Tokenizer());
 		
-		DataSet<WC> result = tokenized
-				
-				.groupBy(new KeyExtractor<WC, String>() { public String getKey(WC v) { return v.word; } })
-				
-				.reduce(new ReduceFunction<WC>() {
-					public WC reduce(WC value1, WC value2) {
-						return new WC(value1.word, value1.count + value2.count);
-					}
-				});
+		tokenized.print();
 		
-		result.writeAsText(new Path(outputPath));
+		env.execute();
+		
+//		DataSet<WC> result = tokenized
+//				
+//				.groupBy(new KeyExtractor<WC, String>() { public String getKey(WC v) { return v.word; } })
+//				
+//				.reduce(new ReduceFunction<WC>() {
+//					public WC reduce(WC value1, WC value2) {
+//						return new WC(value1.word, value1.count + value2.count);
+//					}
+//				});
+		
+//		result.writeAsText(new Path(outputPath));
 	}
 }
