@@ -16,6 +16,7 @@ package eu.stratosphere.api.java.operators;
 
 import eu.stratosphere.api.java.DataSet;
 import eu.stratosphere.api.java.aggregation.Aggregations;
+import eu.stratosphere.api.java.operators.translation.UnaryNodeTranslation;
 
 /**
  * @param <IN> The type of the data set aggregated by the operator.
@@ -81,5 +82,10 @@ public class AggregateOperator<IN> extends SingleInputOperator<IN, IN, Aggregate
 		
 		// get the grouping fields
 		this.groupingFields = null; //input.getGroupingFields();
+	}
+	
+	@Override
+	protected UnaryNodeTranslation translateToDataFlow() {
+		throw new UnsupportedOperationException("NOT IMPLEMENTED");
 	}
 }

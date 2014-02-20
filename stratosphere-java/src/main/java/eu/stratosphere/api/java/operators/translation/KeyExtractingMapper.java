@@ -12,35 +12,34 @@
  * specific language governing permissions and limitations under the License.
  *
  **********************************************************************************************************************/
-package eu.stratosphere.api.java.operators;
+package eu.stratosphere.api.java.operators.translation;
 
-import eu.stratosphere.api.java.DataSet;
-import eu.stratosphere.api.java.operators.translation.UnaryNodeTranslation;
-import eu.stratosphere.api.java.typeutils.TypeInformation;
+import eu.stratosphere.api.java.functions.KeySelector;
+import eu.stratosphere.api.java.functions.MapFunction;
+import eu.stratosphere.api.java.tuple.Tuple2;
 
-/**
- *
- * @param <IN> The data type of the input data set.
- * @param <OUT> The data type of the returned data set.
- */
-public abstract class SingleInputOperator<IN, OUT, O extends SingleInputOperator<IN, OUT, O>> extends Operator<OUT, O> {
+
+public final class KeyExtractingMapper<T, K> extends MapFunction<T, Tuple2<K, T>> {
 	
-	private final DataSet<IN> input;
+	private static final long serialVersionUID = 1L;
+	
+	private final KeySelector<T, K> keySelector;
+	
+	private final Tuple2<K, T> tuple = new Tuple2<K, T>();
 	
 	
-	protected SingleInputOperator(DataSet<IN> input, TypeInformation<OUT> resultType) {
-		super(input.getExecutionEnvironment(), resultType);
-		this.input = input;
-	}
-	
-	public DataSet<IN> getInput() {
-		return this.input;
-	}
-	
-	public TypeInformation<IN> getInputType() {
-		return this.input.getType();
+	public KeyExtractingMapper(KeySelector<T, K> keySelector) {
+		this.keySelector = keySelector;
 	}
 	
 	
-	protected abstract UnaryNodeTranslation translateToDataFlow();
+	@Override
+	public Tuple2<K, T> map(T value) throws Exception {
+		
+		K key = keySelector.getKey(value);
+		tuple.T1(key);
+		tuple.T2(value);
+		
+		return tuple;
+	}
 }

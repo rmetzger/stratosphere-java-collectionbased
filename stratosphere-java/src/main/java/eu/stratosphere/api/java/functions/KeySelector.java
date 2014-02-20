@@ -14,10 +14,11 @@
  **********************************************************************************************************************/
 package eu.stratosphere.api.java.functions;
 
-/**
- *
- */
-public abstract class KeyExtractor<IN, KEY> {
+
+public abstract class KeySelector<IN, KEY> implements java.io.Serializable {
+	
+	private static final long serialVersionUID = 1L;
+	
 
 	public abstract KEY getKey(IN value);
 }

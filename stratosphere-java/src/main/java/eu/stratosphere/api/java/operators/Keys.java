@@ -17,7 +17,7 @@ package eu.stratosphere.api.java.operators;
 import java.util.Arrays;
 
 import eu.stratosphere.api.common.InvalidProgramException;
-import eu.stratosphere.api.java.functions.KeyExtractor;
+import eu.stratosphere.api.java.functions.KeySelector;
 import eu.stratosphere.api.java.typeutils.TupleTypeInfo;
 import eu.stratosphere.api.java.typeutils.TypeExtractor;
 import eu.stratosphere.api.java.typeutils.TypeInformation;
@@ -81,19 +81,19 @@ public abstract class Keys<T> {
 	
 	public static class SelectorFunctionKeys<T, K> extends Keys<T> {
 
-		private final KeyExtractor<T, K> keyExtractor;
-		private final TypeInformation typeInformation;
+		private final KeySelector<T, K> keyExtractor;
+		private final TypeInformation<K> keyType;
 		
-		public SelectorFunctionKeys(KeyExtractor<T, K> keyExtractor, TypeInformation<T> type) {
+		public SelectorFunctionKeys(KeySelector<T, K> keyExtractor, TypeInformation<T> type) {
 			this.keyExtractor = keyExtractor;
-			this.typeInformation = TypeExtractor.getKeyExtractorType(keyExtractor);
+			this.keyType = TypeExtractor.getKeyExtractorType(keyExtractor);
 		}
 
-		public TypeInformation<K> getTypeInformation() {
-			return typeInformation;
+		public TypeInformation<K> getKeyType() {
+			return keyType;
 		}
 
-		public KeyExtractor<T, K> getKeyExtractor() {
+		public KeySelector<T, K> getKeyExtractor() {
 			return keyExtractor;
 		}
 
@@ -104,8 +104,16 @@ public abstract class Keys<T> {
 
 		@Override
 		public boolean areCompatibale(Keys<?> other) {
-			// They are necessarily compatible, java type checking does it for joins and coGroup.
-			return true;
+			
+			if (other instanceof SelectorFunctionKeys) {
+				@SuppressWarnings("unchecked")
+				SelectorFunctionKeys<?, K> sfk = (SelectorFunctionKeys<?, K>) other;
+				
+				return sfk.keyType.equals(this.keyType);
+			}
+			else {
+				return false;
+			}
 		}
 
 		@Override

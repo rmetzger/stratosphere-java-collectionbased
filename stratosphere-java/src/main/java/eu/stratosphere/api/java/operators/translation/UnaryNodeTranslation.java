@@ -12,35 +12,34 @@
  * specific language governing permissions and limitations under the License.
  *
  **********************************************************************************************************************/
-package eu.stratosphere.api.java.operators;
+package eu.stratosphere.api.java.operators.translation;
 
-import eu.stratosphere.api.java.DataSet;
-import eu.stratosphere.api.java.operators.translation.UnaryNodeTranslation;
-import eu.stratosphere.api.java.typeutils.TypeInformation;
+import eu.stratosphere.api.common.operators.SingleInputOperator;
 
-/**
- *
- * @param <IN> The data type of the input data set.
- * @param <OUT> The data type of the returned data set.
- */
-public abstract class SingleInputOperator<IN, OUT, O extends SingleInputOperator<IN, OUT, O>> extends Operator<OUT, O> {
+
+
+public class UnaryNodeTranslation {
 	
-	private final DataSet<IN> input;
+	private final SingleInputOperator<?> inputOperator;
 	
+	private final SingleInputOperator<?> outputOperator;
+
 	
-	protected SingleInputOperator(DataSet<IN> input, TypeInformation<OUT> resultType) {
-		super(input.getExecutionEnvironment(), resultType);
-		this.input = input;
+	public UnaryNodeTranslation(SingleInputOperator<?> operator) {
+		this(operator, operator);
 	}
 	
-	public DataSet<IN> getInput() {
-		return this.input;
+	public UnaryNodeTranslation(SingleInputOperator<?> inputOperator, SingleInputOperator<?> outputOperator) {
+		this.inputOperator = inputOperator;
+		this.outputOperator = outputOperator;
+	}
+
+	
+	public SingleInputOperator<?> getInputOperator() {
+		return inputOperator;
 	}
 	
-	public TypeInformation<IN> getInputType() {
-		return this.input.getType();
+	public SingleInputOperator<?> getOutputOperator() {
+		return outputOperator;
 	}
-	
-	
-	protected abstract UnaryNodeTranslation translateToDataFlow();
 }

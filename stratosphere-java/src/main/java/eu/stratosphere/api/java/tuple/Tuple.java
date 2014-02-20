@@ -15,9 +15,12 @@ package eu.stratosphere.api.java.tuple;
 /**
  *
  */
-public abstract class Tuple {
+public abstract class Tuple implements java.io.Serializable {
+	
+	private static final long serialVersionUID = 1L;
 	
 	public static final int MAX_ARITY = 22;
+	
 	
 	public abstract <T> T getField(int pos);
 	

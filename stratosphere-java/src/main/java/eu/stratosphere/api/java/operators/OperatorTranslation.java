@@ -25,6 +25,7 @@ import eu.stratosphere.api.common.operators.GenericDataSource;
 import eu.stratosphere.api.common.operators.Operator;
 import eu.stratosphere.api.java.DataSet;
 import eu.stratosphere.api.java.operators.translation.JavaPlan;
+import eu.stratosphere.api.java.operators.translation.UnaryNodeTranslation;
 
 
 /**
@@ -95,14 +96,13 @@ public class OperatorTranslation {
 	
 	private eu.stratosphere.api.common.operators.SingleInputOperator<?> translateSingleOp(SingleInputOperator<?, ?, ?> op) {
 		// translate the operation itself
-		List<? extends eu.stratosphere.api.common.operators.SingleInputOperator<?>> dataFlowOps = op.translateToDataFlow();
-		eu.stratosphere.api.common.operators.SingleInputOperator<?> first = dataFlowOps.get(0);
-		eu.stratosphere.api.common.operators.SingleInputOperator<?> last = dataFlowOps.get(dataFlowOps.size()-1);
+		UnaryNodeTranslation translated = op.translateToDataFlow();
+
 		// translate the input
 		Operator input = translate(op.getInput());
-		first.setInput(input);
+		translated.getInputOperator().setInput(input);
 		
-		return last;
+		return translated.getOutputOperator();
 	}
 	
 	private eu.stratosphere.api.common.operators.DualInputOperator<?> translateBinaryOp(TwoInputOperator<?, ?, ?, ?> op) {
@@ -124,7 +124,7 @@ public class OperatorTranslation {
 				throw new RuntimeException("Error while creating the data flow plan for the program: A UDF operation was not translated to a UDF operator.");
 			}
 			
-			UdfOperator udfOp = (UdfOperator) setOrOp;
+			UdfOperator<?> udfOp = (UdfOperator<?>) setOrOp;
 			AbstractUdfOperator<?> udfDataFlowOp = (AbstractUdfOperator<?>) dataFlowOp;
 		
 			for (Map.Entry<String, DataSet<?>> bcVariable : udfOp.getBroadcastSets().entrySet()) {

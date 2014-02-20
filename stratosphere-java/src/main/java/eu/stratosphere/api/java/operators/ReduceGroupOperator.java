@@ -16,6 +16,7 @@ package eu.stratosphere.api.java.operators;
 
 import eu.stratosphere.api.java.DataSet;
 import eu.stratosphere.api.java.functions.GroupReduceFunction;
+import eu.stratosphere.api.java.operators.translation.UnaryNodeTranslation;
 import eu.stratosphere.api.java.typeutils.TypeExtractor;
 
 /**
@@ -25,10 +26,8 @@ import eu.stratosphere.api.java.typeutils.TypeExtractor;
  */
 public class ReduceGroupOperator<IN, OUT> extends SingleInputUdfOperator<IN, OUT, ReduceGroupOperator<IN, OUT>> {
 	
-	@SuppressWarnings("unused")
 	private final GroupReduceFunction<IN, OUT> function;
 	
-	@SuppressWarnings("unused")
 	private final Grouping<IN> grouper;
 	
 	private boolean combinable;
@@ -64,5 +63,11 @@ public class ReduceGroupOperator<IN, OUT> extends SingleInputUdfOperator<IN, OUT
 	
 	public void setCombinable(boolean combinable) {
 		this.combinable = combinable;
+	}
+
+
+	@Override
+	protected UnaryNodeTranslation translateToDataFlow() {
+		throw new UnsupportedOperationException();
 	}
 }

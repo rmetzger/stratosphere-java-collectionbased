@@ -1,3 +1,4 @@
+package eu.stratosphere.example.java.wordcount;
 /***********************************************************************************************************************
  *
  * Copyright (C) 2010-2013 by the Stratosphere project (http://stratosphere.eu)

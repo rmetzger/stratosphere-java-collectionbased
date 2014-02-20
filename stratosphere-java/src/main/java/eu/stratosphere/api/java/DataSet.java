@@ -20,7 +20,7 @@ import eu.stratosphere.api.java.aggregation.Aggregations;
 import eu.stratosphere.api.java.functions.FilterFunction;
 import eu.stratosphere.api.java.functions.FlatMapFunction;
 import eu.stratosphere.api.java.functions.GroupReduceFunction;
-import eu.stratosphere.api.java.functions.KeyExtractor;
+import eu.stratosphere.api.java.functions.KeySelector;
 import eu.stratosphere.api.java.functions.MapFunction;
 import eu.stratosphere.api.java.functions.ReduceFunction;
 import eu.stratosphere.api.java.io.PrintingOutputFormat;
@@ -33,7 +33,6 @@ import eu.stratosphere.api.java.operators.MapOperator;
 import eu.stratosphere.api.java.operators.ReduceGroupOperator;
 import eu.stratosphere.api.java.operators.ReduceOperator;
 import eu.stratosphere.api.java.typeutils.TypeInformation;
-import eu.stratosphere.api.java.typeutils.UnionDataSet;
 import eu.stratosphere.core.fs.Path;
 
 /**
@@ -103,7 +102,7 @@ public abstract class DataSet<T> {
 	//  distinct
 	// --------------------------------------------------------------------------------------------
 	
-	public <K extends Comparable<K>> DistinctOperator<T> distinct(KeyExtractor<T, K> keyExtractor) {
+	public <K extends Comparable<K>> DistinctOperator<T> distinct(KeySelector<T, K> keyExtractor) {
 		return new DistinctOperator<T>(this, new Keys.SelectorFunctionKeys<T, K>(keyExtractor, getType()));
 	}
 	
@@ -119,7 +118,7 @@ public abstract class DataSet<T> {
 	//  Grouping
 	// --------------------------------------------------------------------------------------------
 
-	public <K extends Comparable<K>> Grouping<T> groupBy(KeyExtractor<T, K> keyExtractor) {
+	public <K extends Comparable<K>> Grouping<T> groupBy(KeySelector<T, K> keyExtractor) {
 		return new Grouping<T>(this, new Keys.SelectorFunctionKeys<T, K>(keyExtractor, getType()));
 	}
 	
@@ -166,9 +165,6 @@ public abstract class DataSet<T> {
 	// --------------------------------------------------------------------------------------------
 	//  Union
 	// --------------------------------------------------------------------------------------------
-	public UnionDataSet<T> union(DataSet<T> other) {
-		return new UnionDataSet<T>(this, other);
-	}
 
 	// --------------------------------------------------------------------------------------------
 	//  Top-K

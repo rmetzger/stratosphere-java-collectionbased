@@ -22,7 +22,7 @@ import eu.stratosphere.api.java.tuple.*;
 import eu.stratosphere.util.Collector;
 
 
-public class WordCount1 {
+public class WordCountTuples {
 	
 	public static final class Tokenizer extends FlatMapFunction<String, Tuple2<String, Integer>> {
 		

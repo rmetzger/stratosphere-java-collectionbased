@@ -17,13 +17,13 @@ package eu.stratosphere.example.java.wordcount;
 import eu.stratosphere.api.java.DataSet;
 import eu.stratosphere.api.java.ExecutionEnvironment;
 import eu.stratosphere.api.java.functions.FlatMapFunction;
-import eu.stratosphere.api.java.functions.KeyExtractor;
+import eu.stratosphere.api.java.functions.KeySelector;
 import eu.stratosphere.api.java.functions.ReduceFunction;
-import eu.stratosphere.core.fs.Path;
 import eu.stratosphere.util.Collector;
 
 
-public class WordCount2 {
+@SuppressWarnings("serial")
+public class WordCountCustomType {
 	
 	public static class WC {
 		
@@ -54,29 +54,30 @@ public class WordCount2 {
 		}
 	}
 	
+	
 	public static void main(String[] args) throws Exception {
 		
 		final ExecutionEnvironment env = ExecutionEnvironment.getExecutionEnvironment();
-		env.setDegreeOfParallelism(1);
+		env.setDegreeOfParallelism(4);
 		
 		DataSet<String> text = env.fromElements("To be", "or not to be", "or to be still", "and certainly not to be not at all", "is that the question?");
 		
 		DataSet<WC> tokenized = text.flatMap(new Tokenizer());
+
 		
-		tokenized.print();
+		DataSet<WC> result = tokenized
+				
+				.groupBy(new KeySelector<WC, String>() { public String getKey(WC v) { return v.word; } })
+				
+				.reduce(new ReduceFunction<WC>() {
+					public WC reduce(WC value1, WC value2) {
+						return new WC(value1.word, value1.count + value2.count);
+					}
+				});
+		
+		
+		result.print();
 		
 		env.execute();
-		
-//		DataSet<WC> result = tokenized
-//				
-//				.groupBy(new KeyExtractor<WC, String>() { public String getKey(WC v) { return v.word; } })
-//				
-//				.reduce(new ReduceFunction<WC>() {
-//					public WC reduce(WC value1, WC value2) {
-//						return new WC(value1.word, value1.count + value2.count);
-//					}
-//				});
-		
-//		result.writeAsText(new Path(outputPath));
 	}
 }

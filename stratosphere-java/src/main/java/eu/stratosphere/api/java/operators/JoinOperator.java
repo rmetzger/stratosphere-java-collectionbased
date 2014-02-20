@@ -17,7 +17,7 @@ package eu.stratosphere.api.java.operators;
 import eu.stratosphere.api.common.InvalidProgramException;
 import eu.stratosphere.api.java.DataSet;
 import eu.stratosphere.api.java.functions.JoinFunction;
-import eu.stratosphere.api.java.functions.KeyExtractor;
+import eu.stratosphere.api.java.functions.KeySelector;
 import eu.stratosphere.api.java.tuple.Tuple2;
 import eu.stratosphere.api.java.typeutils.TupleTypeInfo;
 import eu.stratosphere.api.java.typeutils.TypeExtractor;
@@ -240,7 +240,7 @@ public abstract class JoinOperator<I1, I2, OUT> extends TwoInputUdfOperator<I1, 
 			return new JoinOperatorSetsPredicate(new Keys.FieldPositionKeys<I1>(fields, input1.getType()));
 		}
 		
-		public <K extends Comparable<K>> JoinOperatorSetsPredicate where(KeyExtractor<I1, K> keyExtractor) {
+		public <K extends Comparable<K>> JoinOperatorSetsPredicate where(KeySelector<I1, K> keyExtractor) {
 			return new KeyedJoinOperatorSetsPredicate<K>(new Keys.SelectorFunctionKeys<I1, K>(keyExtractor, input1.getType()));
 		}
 		
@@ -297,7 +297,7 @@ public abstract class JoinOperator<I1, I2, OUT> extends TwoInputUdfOperator<I1, 
 			  super(keys1);
 			}
 
-			public DefaultJoin<I1, I2> equalTo(KeyExtractor<I2, K> keyExtractor) {
+			public DefaultJoin<I1, I2> equalTo(KeySelector<I2, K> keyExtractor) {
 				return createJoinOperator(new Keys.SelectorFunctionKeys<I2, K>(keyExtractor, input2.getType()));
 			}
 		}

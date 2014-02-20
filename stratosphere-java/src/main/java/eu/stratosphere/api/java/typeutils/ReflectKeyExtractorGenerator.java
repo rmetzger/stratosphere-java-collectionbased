@@ -17,7 +17,7 @@ package eu.stratosphere.api.java.typeutils;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 
-import eu.stratosphere.api.java.functions.KeyExtractor;
+import eu.stratosphere.api.java.functions.KeySelector;
 
 
 /**
@@ -26,13 +26,13 @@ import eu.stratosphere.api.java.functions.KeyExtractor;
 public class ReflectKeyExtractorGenerator {
 	
 	
-	public static <IN, KEY> KeyExtractor<IN, KEY> generateKeyExtractor(TypeInformation<IN> type, String expression) {
+	public static <IN, KEY> KeySelector<IN, KEY> generateKeyExtractor(TypeInformation<IN> type, String expression) {
 		return null;
 	}
 	
 	
 	@SuppressWarnings("unused")
-	private static final class DirectReflectKeyAccessor<IN, KEY> extends KeyExtractor<IN, KEY> implements Serializable {
+	private static final class DirectReflectKeyAccessor<IN, KEY> extends KeySelector<IN, KEY> implements Serializable {
 		private static final long serialVersionUID = 1L;
 		
 		private final Field field;

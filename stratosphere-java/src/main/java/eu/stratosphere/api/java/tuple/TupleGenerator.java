@@ -62,7 +62,7 @@ public class TupleGenerator {
 		w.println();
 		
 		// class declaration
-		w.println("@SuppressWarnings({ \"restriction\"})");;
+		w.println("@SuppressWarnings({\"restriction\"})");;
 		w.print("public final class " + className + "<");
 		for (int i = 1; i <= numFields; i++) {
 			if (i > 1) {
@@ -71,6 +71,9 @@ public class TupleGenerator {
 			w.print(GEN_TYPE_PREFIX + i);
 		}
 		w.println("> extends Tuple {");
+		w.println();
+		
+		w.println("\tprivate static final long serialVersionUID = 1L;");
 		w.println();
 		
 		// fields

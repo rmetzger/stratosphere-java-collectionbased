@@ -20,7 +20,7 @@ import eu.stratosphere.api.java.functions.MapFunction;
 import eu.stratosphere.api.java.functions.ReduceFunction;
 
 
-public class WordCount1_1 {
+public class WordCountAll {
 	
 	public static final class Tokenizer extends MapFunction<String, Integer> {
 		

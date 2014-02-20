@@ -16,6 +16,8 @@ package eu.stratosphere.api.java.operators;
 
 import eu.stratosphere.api.java.DataSet;
 import eu.stratosphere.api.java.functions.FilterFunction;
+import eu.stratosphere.api.java.operators.translation.PlanFilterOperator;
+import eu.stratosphere.api.java.operators.translation.UnaryNodeTranslation;
 
 /**
  *
@@ -33,5 +35,12 @@ public class FilterOperator<IN> extends SingleInputUdfOperator<IN, IN, FilterOpe
 			throw new NullPointerException("Filter function must not be null.");
 		
 		this.function = function;
+	}
+
+
+	@Override
+	protected UnaryNodeTranslation translateToDataFlow() {
+		String name = getName() != null ? getName() : function.getClass().getName();
+		return new UnaryNodeTranslation(new PlanFilterOperator<IN>(function, name, getInputType()));
 	}
 }

@@ -26,6 +26,8 @@ import eu.stratosphere.util.StringUtils;
 @SuppressWarnings({ "restriction"})
 public final class Tuple6<T1, T2, T3, T4, T5, T6> extends Tuple {
 
+	private static final long serialVersionUID = 1L;
+
 	private T1 _1;
 	private T2 _2;
 	private T3 _3;

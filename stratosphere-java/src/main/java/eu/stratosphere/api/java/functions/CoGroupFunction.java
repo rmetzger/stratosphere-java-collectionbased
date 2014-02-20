@@ -15,11 +15,16 @@
 package eu.stratosphere.api.java.functions;
 
 import eu.stratosphere.api.common.functions.AbstractFunction;
+import eu.stratosphere.api.common.functions.GenericCoGrouper;
+import eu.stratosphere.util.Collector;
 
 import java.util.Iterator;
 
 
-public abstract class CoGroupFunction<IN1, IN2, OUT> extends AbstractFunction {
+public abstract class CoGroupFunction<IN1, IN2, OUT> extends AbstractFunction implements GenericCoGrouper<IN1, IN2, OUT> {
 
-	public abstract OUT coGroup(Iterator<IN1> first, Iterator<IN2> second) throws Exception;
+	private static final long serialVersionUID = 1L;
+
+	@Override
+	public abstract void coGroup(Iterator<IN1> first, Iterator<IN2> second, Collector<OUT> out) throws Exception;
 }

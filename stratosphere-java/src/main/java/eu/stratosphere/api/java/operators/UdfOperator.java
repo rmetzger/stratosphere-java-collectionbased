@@ -20,7 +20,7 @@ import eu.stratosphere.api.java.DataSet;
 import eu.stratosphere.configuration.Configuration;
 
 
-public interface UdfOperator {
+public interface UdfOperator<O extends UdfOperator<O>> {
 	
 	// --------------------------------------------------------------------------------------------
 	// Accessors
@@ -34,7 +34,7 @@ public interface UdfOperator {
 	// Fluent API methods
 	// --------------------------------------------------------------------------------------------
 	
-	UdfOperator withParameters(Configuration parameters);
+	O withParameters(Configuration parameters);
 	 
-	UdfOperator withBroadcastSet(DataSet<?> data, String name);
+	O withBroadcastSet(DataSet<?> data, String name);
 }

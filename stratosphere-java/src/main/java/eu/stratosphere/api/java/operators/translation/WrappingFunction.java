@@ -14,9 +14,22 @@
  **********************************************************************************************************************/
 package eu.stratosphere.api.java.operators.translation;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+
+import eu.stratosphere.api.common.accumulators.Accumulator;
+import eu.stratosphere.api.common.accumulators.DoubleCounter;
+import eu.stratosphere.api.common.accumulators.Histogram;
+import eu.stratosphere.api.common.accumulators.IntCounter;
+import eu.stratosphere.api.common.accumulators.LongCounter;
+import eu.stratosphere.api.common.aggregators.Aggregator;
 import eu.stratosphere.api.common.functions.AbstractFunction;
+import eu.stratosphere.api.common.functions.IterationRuntimeContext;
 import eu.stratosphere.api.common.functions.RuntimeContext;
 import eu.stratosphere.configuration.Configuration;
+import eu.stratosphere.types.Value;
+import eu.stratosphere.util.Reference;
 
 
 public abstract class WrappingFunction<T extends AbstractFunction> extends AbstractFunction {
@@ -44,6 +57,110 @@ public abstract class WrappingFunction<T extends AbstractFunction> extends Abstr
 	@Override
 	public void setRuntimeContext(RuntimeContext t) {
 		super.setRuntimeContext(t);
-		this.wrappedFunction.setRuntimeContext(t);
+		
+		if (t instanceof IterationRuntimeContext) {
+			this.wrappedFunction.setRuntimeContext(new WrappingIterationRuntimeContext(t));
+		}
+		else{
+			this.wrappedFunction.setRuntimeContext(new WrappingRuntimeContext(t));
+		}
+	}
+	
+	
+	
+	private static class WrappingRuntimeContext implements RuntimeContext {
+
+		protected final RuntimeContext context;
+		
+		
+		protected WrappingRuntimeContext(RuntimeContext context) {
+			this.context = context;
+		}
+
+		@Override
+		public String getTaskName() {
+			return context.getTaskName();
+		}
+
+		@Override
+		public int getNumberOfParallelSubtasks() {
+			return context.getNumberOfParallelSubtasks();
+		}
+
+		@Override
+		public int getIndexOfThisSubtask() {
+			return context.getIndexOfThisSubtask();
+		}
+
+
+		@Override
+		public <V, A> void addAccumulator(String name, Accumulator<V, A> accumulator) {
+			context.<V, A>addAccumulator(name, accumulator);
+		}
+
+		@Override
+		public <V, A> Accumulator<V, A> getAccumulator(String name) {
+			return context.<V, A>getAccumulator(name);
+		}
+
+		@Override
+		public HashMap<String, Accumulator<?, ?>> getAllAccumulators() {
+			return context.getAllAccumulators();
+		}
+
+		@Override
+		public IntCounter getIntCounter(String name) {
+			return context.getIntCounter(name);
+		}
+
+		@Override
+		public LongCounter getLongCounter(String name) {
+			return context.getLongCounter(name);
+		}
+
+		@Override
+		public DoubleCounter getDoubleCounter(String name) {
+			return context.getDoubleCounter(name);
+		}
+
+		@Override
+		public Histogram getHistogram(String name) {
+			return context.getHistogram(name);
+		}
+
+		@Override
+		public <RT> Collection<RT> getBroadcastVariable(String name) {
+			Collection<Reference<RT>> refColl = context.getBroadcastVariable(name);
+			
+			ArrayList<RT> list = new ArrayList<RT>(refColl.size());
+			for (Reference<RT> e : refColl) {
+				list.add(e.ref);
+			}
+			
+			return list;
+		}
+	}
+	
+	private static class WrappingIterationRuntimeContext extends WrappingRuntimeContext implements IterationRuntimeContext {
+
+		protected WrappingIterationRuntimeContext(RuntimeContext context) {
+			super(context);
+		}
+
+		@Override
+		public int getSuperstepNumber() {
+			return ((IterationRuntimeContext) context).getSuperstepNumber();
+		}
+
+		@Override
+		public <T extends Value> Aggregator<T> getIterationAggregator(String name) {
+			return ((IterationRuntimeContext) context).<T>getIterationAggregator(name);
+		}
+
+		@Override
+		public <T extends Value> T getPreviousIterationAggregate(String name) {
+			return ((IterationRuntimeContext) context).<T>getPreviousIterationAggregate(name);
+		}
+		
 	}
 }

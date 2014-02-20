@@ -38,33 +38,33 @@ public class TypeExtractor {
 	}
 	
 	public static <X> TypeInformation<X> getGroupReduceReturnTypes(GroupReduceFunction<?, X> groupReduceFunction) {
-		throw new RuntimeException("NOT IMPLEMENTED");
+		Type returnType = getTemplateTypes (GroupReduceFunction.class, groupReduceFunction.getClass(), 1);
+		return createTypeInfo(returnType);
 	}
 	
 	public static <X> TypeInformation<X> getJoinReturnTypes(JoinFunction<?, ?, X> joinFunction) {
-		throw new RuntimeException("NOT IMPLEMENTED");
+		Type returnType = getTemplateTypes (JoinFunction.class, joinFunction.getClass(), 2);
+		return createTypeInfo(returnType);
 	}
 
 	public static <X> TypeInformation<X> getCoGroupReturnTypes(CoGroupFunction<?, ?, X> coGroupFunction) {
-		throw new RuntimeException("NOT IMPLEMENTED");
+		Type returnType = getTemplateTypes (CoGroupFunction.class, coGroupFunction.getClass(), 2);
+		return createTypeInfo(returnType);
 	}
 
 	public static <X> TypeInformation<X> getCrossReturnTypes(CrossFunction<?, ?, X> crossFunction) {
-		throw new RuntimeException("NOT IMPLEMENTED");
+		Type returnType = getTemplateTypes (CrossFunction.class, crossFunction.getClass(), 2);
+		return createTypeInfo(returnType);
 	}
 
-	public static <X> TypeInformation<X> getKeyExtractorType(KeyExtractor<?, X> extractor) {
-		Type returnType = getTemplateTypes (KeyExtractor.class, extractor.getClass(), 1);
+	public static <X> TypeInformation<X> getKeyExtractorType(KeySelector<?, X> extractor) {
+		Type returnType = getTemplateTypes (KeySelector.class, extractor.getClass(), 1);
 		return createTypeInfo(returnType);
 	}
 	
 	public static <X> TypeInformation<X> extractInputFormatTypes(InputFormat<X, ?> format) {
 		@SuppressWarnings("unchecked")
 		Class<InputFormat<X, ?>> formatClass = (Class<InputFormat<X, ?>>) format.getClass();
-		return extractInputFormatTypes(formatClass);
-	}
-	
-	public static <X> TypeInformation<X> extractInputFormatTypes(Class<InputFormat<X, ?>> formatClass) {
 		Type type = findGenericParameter(formatClass, InputFormat.class, 0);
 		return getTypeInformation(type);
 	}

@@ -15,16 +15,15 @@
 package eu.stratosphere.api.java.operators;
 
 import eu.stratosphere.api.java.DataSet;
-import eu.stratosphere.api.java.functions.MapFunction;
 import eu.stratosphere.api.java.functions.ReduceFunction;
+import eu.stratosphere.api.java.operators.translation.KeyExtractingMapper;
 import eu.stratosphere.api.java.operators.translation.PlanMapOperator;
 import eu.stratosphere.api.java.operators.translation.PlanReduceOperator;
 import eu.stratosphere.api.java.operators.translation.PlanUnwrappingReduceOperator;
+import eu.stratosphere.api.java.operators.translation.UnaryNodeTranslation;
 import eu.stratosphere.api.java.tuple.Tuple2;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import eu.stratosphere.api.java.typeutils.TupleTypeInfo;
+import eu.stratosphere.api.java.typeutils.TypeInformation;
 
 /**
  *
@@ -64,43 +63,54 @@ public class ReduceOperator<IN> extends SingleInputUdfOperator<IN, IN, ReduceOpe
 		this.grouper = input;
 	}
 
-
+	
 	@Override
-	protected List<? extends eu.stratosphere.api.common.operators.SingleInputOperator<?>> translateToDataFlow() {
+	protected UnaryNodeTranslation translateToDataFlow() {
+		
 		String name = getName() != null ? getName() : function.getClass().getName();
 		
 		// distinguish between grouped reduce and non-grouped reduce
 		if (grouper == null) {
 			// non grouped reduce
-			return Collections.singletonList(new PlanReduceOperator<IN>(function, new int[0], name, getInputType()));
+			return new UnaryNodeTranslation(new PlanReduceOperator<IN>(function, new int[0], name, getInputType()));
 		}
 		
 		
-		if (grouper.getKeys() instanceof Keys.SelectorFunctionKeys<?, ?>) {
+		if (grouper.getKeys() instanceof Keys.SelectorFunctionKeys) {
 			
-			final Keys.SelectorFunctionKeys<IN, ?> keys = (Keys.SelectorFunctionKeys<IN, ?>) grouper.getKeys();
-
-			List<eu.stratosphere.api.common.operators.SingleInputOperator<?>> result = new ArrayList<eu.stratosphere.api.common.operators.SingleInputOperator<?>>();
-
-			PlanUnwrappingReduceOperator<IN> reducer = new PlanUnwrappingReduceOperator<IN>(function, keys, name, getInputType());
-			PlanMapOperator<IN, Tuple2<?, IN>> mapper = new PlanMapOperator<IN, Tuple2<?, IN>>(new MapFunction<IN, Tuple2<?, IN>>() {
-				@Override
-				public Tuple2<?, IN> map(IN value) throws Exception {
-					Object key = keys.getKeyExtractor().getKey(value);
-					return new Tuple2<Object, IN>(key, value);
-				}
-			}, "Key Extractor", getInputType(), reducer.getInputType());
-
-			reducer.setInput(mapper);
-			result.add(mapper);
-			result.add(reducer);
-			return result;
-		} else {
+			@SuppressWarnings("unchecked")
+			Keys.SelectorFunctionKeys<IN, ?> selectorKeys = (Keys.SelectorFunctionKeys<IN, ?>) grouper.getKeys();
+			
+			return translateSelectorFunctionReducer(selectorKeys, function, getInputType(), name);
+		}
+		else if (grouper.getKeys() instanceof Keys.FieldPositionKeys) {
 			int[] logicalKeyPositions = grouper.getKeys().computeLogicalKeyPositions();
 
-			List<PlanReduceOperator<IN>> result = new ArrayList<PlanReduceOperator<IN>>();
-			result.add(new PlanReduceOperator<IN>(function, logicalKeyPositions, name, getInputType()));
-			return result;
+			return new UnaryNodeTranslation(new PlanReduceOperator<IN>(function, logicalKeyPositions, name, getInputType()));
 		}
+		else {
+			throw new UnsupportedOperationException("Unrecognized key type.");
+		}
+	}
+	
+	// --------------------------------------------------------------------------------------------
+	
+	private static <T, K> UnaryNodeTranslation translateSelectorFunctionReducer(Keys.SelectorFunctionKeys<T, ?> rawKeys,
+			ReduceFunction<T> function, TypeInformation<T> inputType, String name)
+	{
+		@SuppressWarnings("unchecked")
+		final Keys.SelectorFunctionKeys<T, K> keys = (Keys.SelectorFunctionKeys<T, K>) rawKeys;
+		
+		TypeInformation<Tuple2<K, T>> typeInfoWithKey = new TupleTypeInfo<Tuple2<K, T>>(keys.getKeyType(), inputType);
+		
+		KeyExtractingMapper<T, K> extractor = new KeyExtractingMapper<T, K>(keys.getKeyExtractor());
+		
+		PlanUnwrappingReduceOperator<T, K> reducer = new PlanUnwrappingReduceOperator<T, K>(function, keys, name, inputType, typeInfoWithKey);
+		
+		PlanMapOperator<T, Tuple2<K, T>> mapper = new PlanMapOperator<T, Tuple2<K, T>>(extractor, "Key Extractor", inputType, typeInfoWithKey);
+
+		reducer.setInput(mapper);
+		
+		return new UnaryNodeTranslation(mapper, reducer);
 	}
 }
