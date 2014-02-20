@@ -116,13 +116,14 @@ public class DataSourceTask<OT> extends AbstractInputTask<InputSplit>
 			
 			// get input splits to read
 			final Iterator<InputSplit> splitIterator = getInputSplits();
-			OT record = this.serializer.createInstance();
-	
+			
 			// for each assigned input split
 			while (!this.taskCanceled && splitIterator.hasNext())
 			{
 				// get start and end
 				final InputSplit split = splitIterator.next();
+				
+				OT record = this.serializer.createInstance();
 	
 				if (LOG.isDebugEnabled())
 					LOG.debug(getLogString("Opening input split " + split.toString()));
