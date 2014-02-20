@@ -14,13 +14,21 @@
  **********************************************************************************************************************/
 package eu.stratosphere.compiler.postpass;
 
+import java.util.Arrays;
+
 import eu.stratosphere.api.common.operators.Operator;
+import eu.stratosphere.api.common.operators.util.FieldList;
 import eu.stratosphere.api.common.typeutils.Serializer;
+import eu.stratosphere.api.common.typeutils.TypeComparator;
+import eu.stratosphere.api.common.typeutils.TypeComparatorFactory;
 import eu.stratosphere.api.common.typeutils.TypeSerializerFactory;
 import eu.stratosphere.api.java.operators.translation.JavaPlanNode;
 import eu.stratosphere.api.java.operators.translation.PlanDataSource;
 import eu.stratosphere.api.java.operators.translation.UnaryJavaPlanNode;
+import eu.stratosphere.api.java.typeutils.AtomicType;
+import eu.stratosphere.api.java.typeutils.CompositeType;
 import eu.stratosphere.api.java.typeutils.TypeInformation;
+import eu.stratosphere.api.java.typeutils.runtime.ReferenceWrappedComparator;
 import eu.stratosphere.api.java.typeutils.runtime.ReferenceWrappedSerializer;
 import eu.stratosphere.compiler.CompilerPostPassException;
 import eu.stratosphere.compiler.plan.Channel;
@@ -225,23 +233,15 @@ public class JavaApiPostPass implements OptimizerPostPass {
 			UnaryJavaPlanNode<?, ?> javaNode = (UnaryJavaPlanNode<?, ?>) sn.getOptimizerNode().getPactContract();
 			
 			
-//			if (createUtilities) {
-//				// parameterize the node's driver strategy
-//				if (sn.getDriverStrategy().requiresComparator()) {
-//					try {
-//						sn.setComparator(createComparator(sn.getKeys(), sn.getSortOrders(), schema));
-//					} catch (MissingFieldTypeInfoException e) {
-//						throw new CompilerPostPassException("Could not set up runtime strategy for node '" + 
-//								optNode.getPactContract().getName() + "'. Missing type information for key field " +
-//								e.getFieldNumber());
-//					}
-//				}
-//			}
+			// parameterize the node's driver strategy
+			if (sn.getDriverStrategy().requiresComparator()) {
+				sn.setComparator(createComparator(javaNode.getInputType(), sn.getKeys(), 
+					getSortOrders(sn.getKeys(), sn.getSortOrders())));
+			}
 			
 			// done, we can now propagate our info down
 			
 			traverseChannel(sn.getInput());
-
 			
 			// don't forget the broadcast inputs
 			for (Channel c: sn.getBroadcastInputs()) {
@@ -416,28 +416,18 @@ public class JavaApiPostPass implements OptimizerPostPass {
 			
 		// parameterize the ship strategy
 		if (channel.getShipStrategy().requiresComparator()) {
-			throw new UnsupportedOperationException("Comparators are not yet implemented.");
-//			channel.setShipStrategyComparator(
-//				createComparator(channel.getShipStrategyKeys(), channel.getShipStrategySortOrder(), schema));
+			channel.setShipStrategyComparator(createComparator(type, channel.getShipStrategyKeys(), 
+				getSortOrders(channel.getShipStrategyKeys(), channel.getShipStrategySortOrder())));
 		}
 			
 		// parameterize the local strategy
 		if (channel.getLocalStrategy().requiresComparator()) {
-			throw new UnsupportedOperationException("Comparators are not yet implemented.");
-//			channel.setLocalStrategyComparator(
-//				createComparator(channel.getLocalStrategyKeys(), channel.getLocalStrategySortOrder(), schema));
+			channel.setLocalStrategyComparator(createComparator(type, channel.getLocalStrategyKeys(),
+				getSortOrders(channel.getLocalStrategyKeys(), channel.getLocalStrategySortOrder())));
 		}
 		
 		// descend to the channel's source
 		traverse(channel.getSource());
-	}
-	
-	private static <T> TypeSerializerFactory<?> createSerializer(TypeInformation<T> typeInfo) {
-		Serializer<T> serializer = typeInfo.createSerializer();
-		
-		ReferenceWrappedSerializer<T> wrapper = new ReferenceWrappedSerializer<T>(serializer);
-		
-		return new ReferenceWrappedSerializer.ReferenceWrappedSerializerFactory<T>(wrapper);
 	}
 	
 	
@@ -452,4 +442,42 @@ public class JavaApiPostPass implements OptimizerPostPass {
 		}
 	}
 
+	
+	private static <T> TypeSerializerFactory<?> createSerializer(TypeInformation<T> typeInfo) {
+		Serializer<T> serializer = typeInfo.createSerializer();
+		
+		ReferenceWrappedSerializer<T> wrapper = new ReferenceWrappedSerializer<T>(serializer);
+		
+		return new ReferenceWrappedSerializer.ReferenceWrappedSerializerFactory<T>(wrapper);
+	}
+	
+	
+	@SuppressWarnings("unchecked")
+	private static <T> TypeComparatorFactory<?> createComparator(TypeInformation<T> typeInfo, FieldList keys, boolean[] sortOrder) {
+		
+		TypeComparator<T> comparator;
+		if (typeInfo instanceof CompositeType) {
+			comparator = ((CompositeType<T>) typeInfo).createComparator(keys.toArray(), sortOrder);
+		}
+		else if (typeInfo instanceof AtomicType) {
+			// handle grouping of atomic types
+			throw new UnsupportedOperationException("Grouping on atomic types is currently not implemented.");
+		}
+		else {
+			throw new RuntimeException("Unrecognized type: " + typeInfo);
+		}
+		
+		ReferenceWrappedComparator<T> wrappingComparator = new ReferenceWrappedComparator<T>(comparator);
+		
+		return new ReferenceWrappedComparator.ReferenceWrappedComparatorFactory<T>(wrappingComparator);
+	}
+	
+	
+	private static final boolean[] getSortOrders(FieldList keys, boolean[] orders) {
+		if (orders == null) {
+			orders = new boolean[keys.size()];
+			Arrays.fill(orders, true);
+		}
+		return orders;
+	}
 }

@@ -397,6 +397,10 @@ public class PlanJSONDumpGenerator {
 			case UNARY_NO_OP:
 				break;
 			case COLLECTOR_MAP:
+			case MAP:
+				locString = "Map";
+				break;
+			case FLAT_MAP:
 				locString = "Map";
 				break;
 			case PARTIAL_GROUP:

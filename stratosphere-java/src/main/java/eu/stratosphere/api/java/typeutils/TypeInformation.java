@@ -18,9 +18,6 @@ import eu.stratosphere.api.common.typeutils.Serializer;
 import eu.stratosphere.types.Value;
 
 
-/**
- *
- */
 public abstract class TypeInformation<T> {
 	
 	public abstract boolean isBasicType();
@@ -30,6 +27,8 @@ public abstract class TypeInformation<T> {
 	public abstract int getArity();
 	
 	public abstract Class<T> getTypeClass();
+	
+	public abstract boolean isKeyType();
 	
 	public abstract Serializer<T> createSerializer();
 	
@@ -44,14 +43,6 @@ public abstract class TypeInformation<T> {
 			TypeInformation<X> basicTypeInfo = BasicTypeInfo.getInfoFor(clazz);
 			if (basicTypeInfo != null) {
 				return basicTypeInfo;
-			}
-		}
-		
-		// check for arrays
-		{
-			TypeInformation<X> arrayInfo = ArrayTypeInfo.getInfoFor(clazz);
-			if (arrayInfo != null) {
-				return arrayInfo;
 			}
 		}
 		

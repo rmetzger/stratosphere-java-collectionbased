@@ -16,43 +16,45 @@ package eu.stratosphere.example.java.wordcount;
 
 import eu.stratosphere.api.java.DataSet;
 import eu.stratosphere.api.java.ExecutionEnvironment;
-import eu.stratosphere.api.java.functions.FlatMapFunction;
-import eu.stratosphere.api.java.tuple.*;
-import eu.stratosphere.util.Collector;
-
-import static eu.stratosphere.api.java.aggregation.Aggregations.*;
+import eu.stratosphere.api.java.functions.MapFunction;
+import eu.stratosphere.api.java.functions.ReduceFunction;
 
 
-public class WordCount {
+public class WordCount1_1 {
 	
-	public static final class Tokenizer extends FlatMapFunction<String, Tuple2<String, Integer>> {
+	public static final class Tokenizer extends MapFunction<String, Integer> {
 		
 		private static final long serialVersionUID = 1L;
 
 		@Override
-		public void flatMap(String value, Collector<Tuple2<String, Integer>> out) {
+		public Integer map(String value) {
 			String[] tokens = value.toLowerCase().split("\\W");
-			for (String token : tokens) {
-				out.collect(new Tuple2<String, Integer>(token, 1));
-			}
+			return Integer.valueOf(tokens.length);
 		}
 	}
 	
-	public static void main(String[] args) {
-		if (args.length < 2) {
-			System.out.println("Usage: <input path> <output path>");
-			return;
+	public static final class Counter extends ReduceFunction<Integer> {
+		
+		private static final long serialVersionUID = 1L;
+
+		@Override
+		public Integer reduce(Integer val1, Integer val2) {
+			return val1 + val2;
 		}
+	}
+	
+	public static void main(String[] args) throws Exception {
 		
-		final String inputPath = args[0];
-		final String outputPath = args[1];
+		final ExecutionEnvironment env = ExecutionEnvironment.getExecutionEnvironment();
+		env.setDegreeOfParallelism(1);
 		
-		final ExecutionEnvironment context = ExecutionEnvironment.getExecutionEnvironment();
+		DataSet<String> text = env.fromElements("To be", "or not to be", "or to be still", "and certainly not to be not at all", "is that the question?");
 		
-		DataSet<String> text = context.readTextFile(inputPath);
+		DataSet<Integer> result = text.map(new Tokenizer()).reduce(new Counter());
+				
+		result.print();
 		
-		DataSet<Tuple2<String, Integer>> result = text.flatMap(new Tokenizer()).groupBy(0).aggregate(SUM, 1);
-		
-		result.writeAsText(outputPath);
+//		System.out.println(env.getExecutionPlan());
+		env.execute();
 	}
 }

@@ -15,12 +15,14 @@
 package eu.stratosphere.api.java.typeutils;
 
 import eu.stratosphere.api.common.typeutils.Serializer;
+import eu.stratosphere.api.common.typeutils.TypeComparator;
 import eu.stratosphere.api.java.typeutils.runtime.CopyableValueSerializer;
 import eu.stratosphere.types.CopyableValue;
+import eu.stratosphere.types.Key;
 import eu.stratosphere.types.Value;
 
 
-public class ValueTypeInfo<T extends Value> extends TypeInformation<T> {
+public class ValueTypeInfo<T extends Value> extends TypeInformation<T> implements AtomicType<T> {
 
 	private final Class<T> type;
 
@@ -52,8 +54,14 @@ public class ValueTypeInfo<T extends Value> extends TypeInformation<T> {
 		return false;
 	}
 	
-	@SuppressWarnings("unchecked")
+	
 	@Override
+	public boolean isKeyType() {
+		return Key.class.isAssignableFrom(type);
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
 	public Serializer<T> createSerializer() {
 		if (CopyableValue.class.isAssignableFrom(type)) {
 			return createCopyableSerializer(type.asSubclass(CopyableValue.class));
@@ -63,10 +71,14 @@ public class ValueTypeInfo<T extends Value> extends TypeInformation<T> {
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
-	private static <T, X extends CopyableValue<X>> Serializer<T> createCopyableSerializer(Class<X> clazz) {
+	private static <X extends CopyableValue<X>> Serializer<X> createCopyableSerializer(Class<X> clazz) {
 		Serializer<X> ser = new CopyableValueSerializer<X>(clazz);
-		return (Serializer<T>) ser;
+		return ser;
+	}
+	
+	@Override
+	public TypeComparator<T> createComparator(boolean sortOrderAscending) {
+		throw new UnsupportedOperationException("Value comparators not yet implemented.");
 	}
 	
 	@Override

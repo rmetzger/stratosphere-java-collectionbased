@@ -20,7 +20,6 @@ import java.util.Map;
 import eu.stratosphere.api.common.typeutils.Serializer;
 
 
-
 public class ArrayTypeInfo<T, C> extends TypeInformation<T> {
 
 	public static final ArrayTypeInfo<String[], String> STRING_ARRAY_TYPE_INFO = new ArrayTypeInfo<String[], String>(String[].class);
@@ -72,6 +71,11 @@ public class ArrayTypeInfo<T, C> extends TypeInformation<T> {
 	
 	public Class<C> getComponentTypeClass() {
 		return this.componentClass;
+	}
+	
+	@Override
+	public boolean isKeyType() {
+		return false;
 	}
 	
 	@Override

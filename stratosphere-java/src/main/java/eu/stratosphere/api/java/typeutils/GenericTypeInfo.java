@@ -15,13 +15,14 @@
 package eu.stratosphere.api.java.typeutils;
 
 import eu.stratosphere.api.common.typeutils.Serializer;
+import eu.stratosphere.api.common.typeutils.TypeComparator;
 import eu.stratosphere.api.java.typeutils.runtime.AvroSerializer;
 
 
 /**
  *
  */
-public class GenericTypeInfo<T> extends TypeInformation<T> {
+public class GenericTypeInfo<T> extends TypeInformation<T> implements AtomicType<T> {
 
 	private final Class<T> typeClass;
 	
@@ -49,10 +50,20 @@ public class GenericTypeInfo<T> extends TypeInformation<T> {
 	public Class<T> getTypeClass() {
 		return typeClass;
 	}
+	
+	@Override
+	public boolean isKeyType() {
+		return Comparable.class.isAssignableFrom(typeClass);
+	}
 
 	@Override
 	public Serializer<T> createSerializer() {
 		return new AvroSerializer<T>(this.typeClass);
+	}
+	
+	@Override
+	public TypeComparator<T> createComparator(boolean sortOrderAscending) {
+		throw new UnsupportedOperationException("Generic type comparators are not yet implemented.");
 	}
 	
 	@Override

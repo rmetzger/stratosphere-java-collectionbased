@@ -43,8 +43,6 @@ public class FlatMapOperator<IN, OUT> extends SingleInputUdfOperator<IN, OUT, Fl
 	@Override
 	protected List<PlanFlatMapOperator<IN, OUT>> translateToDataFlow() {
 		String name = getName() != null ? getName() : function.getClass().getName();
-		List<PlanFlatMapOperator<IN, OUT>> result = new ArrayList<PlanFlatMapOperator<IN, OUT>>();
-		result.add(new PlanFlatMapOperator<IN, OUT>(function, name, getInputType(), getResultType()));
-		return result;
+		return Collections.singletonList(new PlanFlatMapOperator<IN, OUT>(function, name, getInputType(), getResultType()));
 	}
 }

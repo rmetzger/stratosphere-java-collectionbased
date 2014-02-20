@@ -15,11 +15,14 @@
 package eu.stratosphere.api.java.typeutils;
 
 import eu.stratosphere.api.common.typeutils.Serializer;
+import eu.stratosphere.api.common.typeutils.TypeComparator;
 import eu.stratosphere.api.java.tuple.*;
+import eu.stratosphere.api.java.typeutils.runtime.TupleComparator;
 import eu.stratosphere.api.java.typeutils.runtime.TupleSerializer;
+import eu.stratosphere.api.java.typeutils.runtime.TupleSingleFieldComparator;
 
 
-public class TupleTypeInfo<T extends Tuple> extends TypeInformation<T> {
+public class TupleTypeInfo<T extends Tuple> extends TypeInformation<T> implements CompositeType<T> {
 	
 	private final TypeInformation<?>[] types;
 	
@@ -65,6 +68,11 @@ public class TupleTypeInfo<T extends Tuple> extends TypeInformation<T> {
 	}
 	
 	@Override
+	public boolean isKeyType() {
+		return false;
+	}
+	
+	@Override
 	public Serializer<T> createSerializer() {
 		Serializer<?>[] fieldSerializers = new Serializer<?>[getArity()];
 		for (int i = 0; i < types.length; i++) {
@@ -76,6 +84,37 @@ public class TupleTypeInfo<T extends Tuple> extends TypeInformation<T> {
 		return new TupleSerializer<T>(tupleClass, fieldSerializers);
 	}
 	
+	@Override
+	public TypeComparator<T> createComparator(int[] logicalKeyFields, boolean[] orders) {
+		// sanity checks
+		if (logicalKeyFields == null || orders == null || logicalKeyFields.length != orders.length ||
+				logicalKeyFields.length > types.length)
+		{
+			throw new IllegalArgumentException();
+		}
+		
+		if (logicalKeyFields.length == 1) {
+			return createSinglefieldComparator(logicalKeyFields[0], orders[0], types[logicalKeyFields[0]]);
+		}
+		
+		// create the comparators for the individual fields
+		TypeComparator<?>[] fieldComparators = new TypeComparator<?>[logicalKeyFields.length];
+		
+		for (int i = 0; i < logicalKeyFields.length; i++) {
+			int field = logicalKeyFields[i];
+			
+			if (field < 0 || field >= logicalKeyFields.length) {
+				throw new IllegalArgumentException("The field position " + field + " is out of range [0," + logicalKeyFields.length + ")");
+			}
+			if (types[field].isKeyType() && types[field] instanceof AtomicType) {
+				fieldComparators[i] = ((AtomicType<?>) types[field]).createComparator(orders[i]);
+			} else {
+				throw new IllegalArgumentException("The field at position " + field + " (" + types[field] + ") is no atomic key type.");
+			}
+		}
+		
+		return new TupleComparator<T>(logicalKeyFields, fieldComparators);
+	}
 	
 	@Override
 	public String toString() {
@@ -125,4 +164,16 @@ public class TupleTypeInfo<T extends Tuple> extends TypeInformation<T> {
 		Tuple16.class, Tuple17.class, Tuple18.class, Tuple19.class, Tuple20.class,
 		Tuple21.class, Tuple22.class
 	};
+	
+	
+	private static final <T extends Tuple, K extends Comparable<K>> TypeComparator<T> createSinglefieldComparator(int pos, boolean ascending, TypeInformation<?> info) {
+		if (!(info.isKeyType() && info instanceof AtomicType)) {
+			throw new IllegalArgumentException("The field at position " + pos + " (" + info + ") is no atomic key type.");
+		}
+		
+		
+		@SuppressWarnings("unchecked")
+		AtomicType<K> typedInfo = (AtomicType<K>) info;
+		return new TupleSingleFieldComparator<T, K>(pos, typedInfo.createComparator(ascending));
+	}
 }

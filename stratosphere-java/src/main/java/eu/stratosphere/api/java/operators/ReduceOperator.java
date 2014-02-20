@@ -17,14 +17,13 @@ package eu.stratosphere.api.java.operators;
 import eu.stratosphere.api.java.DataSet;
 import eu.stratosphere.api.java.functions.MapFunction;
 import eu.stratosphere.api.java.functions.ReduceFunction;
-import eu.stratosphere.api.java.operators.translation.PlanFlatMapOperator;
 import eu.stratosphere.api.java.operators.translation.PlanMapOperator;
 import eu.stratosphere.api.java.operators.translation.PlanReduceOperator;
 import eu.stratosphere.api.java.operators.translation.PlanUnwrappingReduceOperator;
 import eu.stratosphere.api.java.tuple.Tuple2;
-import eu.stratosphere.api.java.typeutils.TypeExtractor;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -68,8 +67,17 @@ public class ReduceOperator<IN> extends SingleInputUdfOperator<IN, IN, ReduceOpe
 
 	@Override
 	protected List<? extends eu.stratosphere.api.common.operators.SingleInputOperator<?>> translateToDataFlow() {
+		String name = getName() != null ? getName() : function.getClass().getName();
+		
+		// distinguish between grouped reduce and non-grouped reduce
+		if (grouper == null) {
+			// non grouped reduce
+			return Collections.singletonList(new PlanReduceOperator<IN>(function, new int[0], name, getInputType()));
+		}
+		
+		
 		if (grouper.getKeys() instanceof Keys.SelectorFunctionKeys<?, ?>) {
-			String name = getName() != null ? getName() : function.getClass().getName();
+			
 			final Keys.SelectorFunctionKeys<IN, ?> keys = (Keys.SelectorFunctionKeys<IN, ?>) grouper.getKeys();
 
 			List<eu.stratosphere.api.common.operators.SingleInputOperator<?>> result = new ArrayList<eu.stratosphere.api.common.operators.SingleInputOperator<?>>();
@@ -81,14 +89,13 @@ public class ReduceOperator<IN> extends SingleInputUdfOperator<IN, IN, ReduceOpe
 					Object key = keys.getKeyExtractor().getKey(value);
 					return new Tuple2<Object, IN>(key, value);
 				}
-			}, "Key Extraction Mapp", getInputType(), reducer.getInputType());
+			}, "Key Extractor", getInputType(), reducer.getInputType());
 
 			reducer.setInput(mapper);
 			result.add(mapper);
 			result.add(reducer);
 			return result;
 		} else {
-			String name = getName() != null ? getName() : function.getClass().getName();
 			int[] logicalKeyPositions = grouper.getKeys().computeLogicalKeyPositions();
 
 			List<PlanReduceOperator<IN>> result = new ArrayList<PlanReduceOperator<IN>>();

@@ -14,30 +14,36 @@
  **********************************************************************************************************************/
 package eu.stratosphere.api.java.typeutils;
 
+import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.Map;
 
 import eu.stratosphere.api.common.typeutils.Serializer;
+import eu.stratosphere.api.common.typeutils.TypeComparator;
+import eu.stratosphere.api.common.typeutils.base.DoubleComparator;
 import eu.stratosphere.api.common.typeutils.base.DoubleSerializer;
+import eu.stratosphere.api.common.typeutils.base.IntComparator;
 import eu.stratosphere.api.common.typeutils.base.IntSerializer;
+import eu.stratosphere.api.common.typeutils.base.LongComparator;
 import eu.stratosphere.api.common.typeutils.base.LongSerializer;
+import eu.stratosphere.api.common.typeutils.base.StringComparator;
 import eu.stratosphere.api.common.typeutils.base.StringSerializer;
 
 
 /**
  *
  */
-public class BasicTypeInfo<T> extends TypeInformation<T> {
+public class BasicTypeInfo<T> extends TypeInformation<T> implements AtomicType<T> {
 
-	public static final BasicTypeInfo<String> STRING_TYPE_INFO = new BasicTypeInfo<String>(String.class, StringSerializer.INSTANCE);
-	public static final BasicTypeInfo<Boolean> BOOLEAN_TYPE_INFO = new BasicTypeInfo<Boolean>(Boolean.class, null);
-	public static final BasicTypeInfo<Byte> BYTE_TYPE_INFO = new BasicTypeInfo<Byte>(Byte.class, null);
-	public static final BasicTypeInfo<Short> SHORT_TYPE_INFO = new BasicTypeInfo<Short>(Short.class, null);
-	public static final BasicTypeInfo<Integer> INT_TYPE_INFO = new BasicTypeInfo<Integer>(Integer.class, IntSerializer.INSTANCE);
-	public static final BasicTypeInfo<Long> LONG_TYPE_INFO = new BasicTypeInfo<Long>(Long.class, LongSerializer.INSTANCE);
-	public static final BasicTypeInfo<Float> FLOAT_TYPE_INFO = new BasicTypeInfo<Float>(Float.class, null);
-	public static final BasicTypeInfo<Double> DOUBLE_TYPE_INFO = new BasicTypeInfo<Double>(Double.class, DoubleSerializer.INSTANCE);
-	public static final BasicTypeInfo<Character> CHAR_TYPE_INFO = new BasicTypeInfo<Character>(Character.class, null);
+	public static final BasicTypeInfo<String> STRING_TYPE_INFO = new BasicTypeInfo<String>(String.class, StringSerializer.INSTANCE, StringComparator.class);
+	public static final BasicTypeInfo<Boolean> BOOLEAN_TYPE_INFO = new BasicTypeInfo<Boolean>(Boolean.class, null, null);
+	public static final BasicTypeInfo<Byte> BYTE_TYPE_INFO = new BasicTypeInfo<Byte>(Byte.class, null, null);
+	public static final BasicTypeInfo<Short> SHORT_TYPE_INFO = new BasicTypeInfo<Short>(Short.class, null, null);
+	public static final BasicTypeInfo<Integer> INT_TYPE_INFO = new BasicTypeInfo<Integer>(Integer.class, IntSerializer.INSTANCE, IntComparator.class);
+	public static final BasicTypeInfo<Long> LONG_TYPE_INFO = new BasicTypeInfo<Long>(Long.class, LongSerializer.INSTANCE, LongComparator.class);
+	public static final BasicTypeInfo<Float> FLOAT_TYPE_INFO = new BasicTypeInfo<Float>(Float.class, null, null);
+	public static final BasicTypeInfo<Double> DOUBLE_TYPE_INFO = new BasicTypeInfo<Double>(Double.class, DoubleSerializer.INSTANCE, DoubleComparator.class);
+	public static final BasicTypeInfo<Character> CHAR_TYPE_INFO = new BasicTypeInfo<Character>(Character.class, null, null);
 	
 	// --------------------------------------------------------------------------------------------
 
@@ -45,10 +51,13 @@ public class BasicTypeInfo<T> extends TypeInformation<T> {
 	
 	private final Serializer<T> serializer;
 	
+	private final Class<? extends TypeComparator<T>> comparatorClass;
 	
-	private BasicTypeInfo(Class<T> clazz, Serializer<T> serializer) {
+	
+	private BasicTypeInfo(Class<T> clazz, Serializer<T> serializer, Class<? extends TypeComparator<T>> comparatorClass) {
 		this.clazz = clazz;
 		this.serializer = serializer;
+		this.comparatorClass = comparatorClass;
 	}
 	
 	// --------------------------------------------------------------------------------------------
@@ -74,8 +83,18 @@ public class BasicTypeInfo<T> extends TypeInformation<T> {
 	}
 	
 	@Override
+	public boolean isKeyType() {
+		return true;
+	}
+	
+	@Override
 	public Serializer<T> createSerializer() {
 		return this.serializer;
+	}
+	
+	@Override
+	public TypeComparator<T> createComparator(boolean sortOrderAscending) {
+		return instantiateComparator(comparatorClass, sortOrderAscending);
 	}
 
 	@Override
@@ -92,6 +111,16 @@ public class BasicTypeInfo<T> extends TypeInformation<T> {
 		@SuppressWarnings("unchecked")
 		BasicTypeInfo<X> info = (BasicTypeInfo<X>) TYPES.get(type);
 		return info;
+	}
+	
+	private static <X> TypeComparator<X> instantiateComparator(Class<? extends TypeComparator<X>> comparatorClass, boolean ascendingOrder) {
+		try {
+			Constructor<? extends TypeComparator<X>> constructor = comparatorClass.getConstructor(boolean.class);
+			return constructor.newInstance(ascendingOrder);
+		}
+		catch (Exception e) {
+			throw new RuntimeException("Could not initialize basic comparator " + comparatorClass.getName(), e);
+		}
 	}
 	
 	private static final Map<Class<?>, BasicTypeInfo<?>> TYPES = new HashMap<Class<?>, BasicTypeInfo<?>>();

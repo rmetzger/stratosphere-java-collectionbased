@@ -90,7 +90,7 @@ public class AvroSerializer<T> extends Serializer<T> {
 	// --------------------------------------------------------------------------------------------
 	
 	private void readObject(java.io.ObjectInputStream s) throws java.io.IOException, ClassNotFoundException {
-		// Read in size, and any hidden stuff
+		// read basic object and the type
 		s.defaultReadObject();
 		
 		this.reader = new ReflectDatumReader<T>(type);
