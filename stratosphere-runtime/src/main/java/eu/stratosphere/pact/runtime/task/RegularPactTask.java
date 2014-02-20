@@ -787,7 +787,7 @@ public class RegularPactTask<S extends Function, OT> extends AbstractTask implem
 
 		for (int i = 0; i < numBroadcastInputs; i++) {
 			//  ---------------- create the serializer first ---------------------
-			final TypeSerializerFactory<?> serializerFactory = this.config.getInputSerializer(i, this.userCodeClassLoader);
+			final TypeSerializerFactory<?> serializerFactory = this.config.getBroadcastInputSerializer(i, this.userCodeClassLoader);
 			this.broadcastInputSerializers[i] = serializerFactory.getSerializer();
 
 			this.broadcastInputIterators[i] = createInputIterator(this.broadcastInputReaders[i], this.broadcastInputSerializers[i]);
