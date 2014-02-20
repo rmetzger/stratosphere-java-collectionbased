@@ -151,6 +151,7 @@ public abstract class GenericCsvInputFormat<OT> extends DelimitedInputFormat<OT>
 	}
 	
 	protected void setFieldsGeneric(int[] sourceFieldIndices, Class<?>[] fieldTypes) {
+		Preconditions.checkNotNull(sourceFieldIndices);
 		Preconditions.checkNotNull(fieldTypes);
 		Preconditions.checkArgument(sourceFieldIndices.length == fieldTypes.length,
 			"Number of field indices and field types must match.");

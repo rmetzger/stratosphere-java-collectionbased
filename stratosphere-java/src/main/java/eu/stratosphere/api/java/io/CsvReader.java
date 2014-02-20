@@ -27,6 +27,8 @@ import eu.stratosphere.core.fs.Path;
  *
  */
 public class CsvReader {
+	
+	private static final int MAX_FIELDS = Tuple.MAX_ARITY;
 
 	private final Path path;
 	
@@ -59,6 +61,10 @@ public class CsvReader {
 	// --------------------------------------------------------------------------------------------
 	
 	public CsvReader lineDelimiter(String delimiter) {
+		if (delimiter == null || delimiter.length() == 0) {
+			throw new IllegalArgumentException("The delimiter must not be null or an empty string");
+		}
+		
 		this.lineDelimiter = delimiter;
 		return this;
 	}
@@ -70,13 +76,20 @@ public class CsvReader {
 	
 	
 	public CsvReader includeFields(boolean ... fields) {
+		if (fields == null || fields.length == 0) {
+			throw new IllegalArgumentException("The set of included fields must not be null or empty.");
+		}
+		
 		this.includedMask = fields;
 		return this;
 	}
 
 	public CsvReader includeFields(int ... fields) {
-		// TODO: implement this
-		return this;
+		if (fields == null || fields.length == 0) {
+			throw new IllegalArgumentException("The set of included fields must not be null or empty.");
+		}
+		
+		return null;
 	}
 	
 	public CsvReader includeFields(String mask) {

@@ -107,8 +107,8 @@ public class DataSourceTask<OT> extends AbstractInputTask<InputSplit>
 	@Override
 	public void invoke() throws Exception {
 		
-		if (LOG.isInfoEnabled())
-			LOG.info(getLogString("Start PACT code"));
+		if (LOG.isDebugEnabled())
+			LOG.debug(getLogString("Starting data source operator"));
 		
 		try {
 			// start all chained tasks
@@ -249,24 +249,20 @@ public class DataSourceTask<OT> extends AbstractInputTask<InputSplit>
 		}
 
 		if (!this.taskCanceled) {
-			if (LOG.isInfoEnabled())
-				LOG.info(getLogString("Finished PACT code"));
+			if (LOG.isDebugEnabled())
+				LOG.debug(getLogString("Finished data source operator"));
 		}
 		else {
-			if (LOG.isWarnEnabled())
-				LOG.warn(getLogString("PACT code cancelled"));
+			if (LOG.isDebugEnabled())
+				LOG.debug(getLogString("Data source operator cancelled"));
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see eu.stratosphere.nephele.template.AbstractInvokable#cancel()
-	 */
 	@Override
 	public void cancel() throws Exception {
 		this.taskCanceled = true;
-		if (LOG.isWarnEnabled())
-			LOG.warn(getLogString("Cancelling PACT code"));
+		if (LOG.isDebugEnabled())
+			LOG.debug(getLogString("Cancelling data source operator"));
 	}
 	
 	/**

@@ -96,8 +96,12 @@ public class PlanDataSource<T> extends GenericDataSource<InputFormat<Reference<T
 		@Override
 		public Reference<T> nextRecord(Reference<T> reuse) throws IOException {
 			T value = format.nextRecord(reuse.ref);
-			ref.ref = value;
-			return ref;
+			if (value != null) {
+				ref.ref = value;
+				return ref;
+			} else {
+				return null;
+			}
 		}
 
 		@Override

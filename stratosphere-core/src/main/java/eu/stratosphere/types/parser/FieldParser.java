@@ -97,6 +97,16 @@ public abstract class FieldParser<T> {
 			new HashMap<Class<?>, Class<? extends FieldParser<?>>>();
 	
 	static {
+		// basic types
+		PARSERS.put(Byte.class, ByteParser.class);
+		PARSERS.put(Short.class, ShortParser.class);
+		PARSERS.put(Integer.class, IntParser.class);
+		PARSERS.put(Long.class, LongParser.class);
+		PARSERS.put(String.class, AsciiStringParser.class);
+		PARSERS.put(Float.class, FloatParser.class);
+		PARSERS.put(Double.class, DoubleParser.class);
+		
+		// value types
 		PARSERS.put(ByteValue.class, DecimalTextByteParser.class);
 		PARSERS.put(ShortValue.class, DecimalTextShortParser.class);
 		PARSERS.put(IntValue.class, DecimalTextIntParser.class);
