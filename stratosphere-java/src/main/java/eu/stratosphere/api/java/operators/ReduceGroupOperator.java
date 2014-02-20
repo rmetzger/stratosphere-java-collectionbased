@@ -16,8 +16,15 @@ package eu.stratosphere.api.java.operators;
 
 import eu.stratosphere.api.java.DataSet;
 import eu.stratosphere.api.java.functions.GroupReduceFunction;
+import eu.stratosphere.api.java.operators.translation.KeyExtractingMapper;
+import eu.stratosphere.api.java.operators.translation.PlanGroupReduceOperator;
+import eu.stratosphere.api.java.operators.translation.PlanMapOperator;
+import eu.stratosphere.api.java.operators.translation.PlanUnwrappingReduceGroupOperator;
 import eu.stratosphere.api.java.operators.translation.UnaryNodeTranslation;
+import eu.stratosphere.api.java.tuple.Tuple2;
+import eu.stratosphere.api.java.typeutils.TupleTypeInfo;
 import eu.stratosphere.api.java.typeutils.TypeExtractor;
+import eu.stratosphere.api.java.typeutils.TypeInformation;
 
 /**
  *
@@ -68,6 +75,51 @@ public class ReduceGroupOperator<IN, OUT> extends SingleInputUdfOperator<IN, OUT
 
 	@Override
 	protected UnaryNodeTranslation translateToDataFlow() {
-		throw new UnsupportedOperationException();
+		String name = getName() != null ? getName() : function.getClass().getName();
+		
+		// distinguish between grouped reduce and non-grouped reduce
+		if (grouper == null) {
+			// non grouped reduce
+			return new UnaryNodeTranslation(new PlanGroupReduceOperator<IN, OUT>(function, new int[0], name, getInputType(), getResultType()));
+		}
+		
+		
+		if (grouper.getKeys() instanceof Keys.SelectorFunctionKeys) {
+			
+			@SuppressWarnings("unchecked")
+			Keys.SelectorFunctionKeys<IN, ?> selectorKeys = (Keys.SelectorFunctionKeys<IN, ?>) grouper.getKeys();
+			
+			return translateSelectorFunctionReducer(selectorKeys, function, getInputType(),getResultType(), name);
+		}
+		else if (grouper.getKeys() instanceof Keys.FieldPositionKeys) {
+			int[] logicalKeyPositions = grouper.getKeys().computeLogicalKeyPositions();
+
+			return new UnaryNodeTranslation(new PlanGroupReduceOperator<IN, OUT>(function, logicalKeyPositions, name, getInputType(), getResultType()));
+		}
+		else {
+			throw new UnsupportedOperationException("Unrecognized key type.");
+		}
+	}
+	
+	
+	// --------------------------------------------------------------------------------------------
+	
+	private static <IN, OUT, K> UnaryNodeTranslation translateSelectorFunctionReducer(Keys.SelectorFunctionKeys<IN, ?> rawKeys,
+			GroupReduceFunction<IN, OUT> function, TypeInformation<IN> inputType, TypeInformation<OUT> outputType, String name)
+	{
+		@SuppressWarnings("unchecked")
+		final Keys.SelectorFunctionKeys<IN, K> keys = (Keys.SelectorFunctionKeys<IN, K>) rawKeys;
+		
+		TypeInformation<Tuple2<K, IN>> typeInfoWithKey = new TupleTypeInfo<Tuple2<K, IN>>(keys.getKeyType(), inputType);
+		
+		KeyExtractingMapper<IN, K> extractor = new KeyExtractingMapper<IN, K>(keys.getKeyExtractor());
+		
+		PlanUnwrappingReduceGroupOperator<IN, OUT, K> reducer = new PlanUnwrappingReduceGroupOperator<IN, OUT, K>(function, keys, name, inputType, outputType, typeInfoWithKey);
+		
+		PlanMapOperator<IN, Tuple2<K, IN>> mapper = new PlanMapOperator<IN, Tuple2<K, IN>>(extractor, "Key Extractor", inputType, typeInfoWithKey);
+
+		reducer.setInput(mapper);
+		
+		return new UnaryNodeTranslation(mapper, reducer);
 	}
 }

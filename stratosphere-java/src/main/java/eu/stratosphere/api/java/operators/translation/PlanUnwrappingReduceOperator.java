@@ -35,8 +35,6 @@ public class PlanUnwrappingReduceOperator<T, K> extends GroupReduceOperatorBase<
 	private final TypeInformation<T> type;
 	
 	private final TypeInformation<Tuple2<K, T>> typeInfoWithKey;
-	
-	private final Keys.SelectorFunctionKeys<T, K> key;
 
 
 	public PlanUnwrappingReduceOperator(ReduceFunction<T> udf, Keys.SelectorFunctionKeys<T, K> key, String name,
@@ -44,7 +42,6 @@ public class PlanUnwrappingReduceOperator<T, K> extends GroupReduceOperatorBase<
 	{
 		super(new ReferenceWrappingReducer<T, K>(udf), key.computeLogicalKeyPositions(), name);
 		this.type = type;
-		this.key = key;
 		
 		this.typeInfoWithKey = typeInfoWithKey;
 	}
