@@ -14,6 +14,8 @@
  **********************************************************************************************************************/
 package eu.stratosphere.api.java.operators;
 
+import java.util.Collection;
+
 import eu.stratosphere.api.java.DataSet;
 import eu.stratosphere.api.java.operators.translation.UnaryNodeTranslation;
 import eu.stratosphere.api.java.typeutils.TypeInformation;
@@ -43,4 +45,6 @@ public abstract class SingleInputOperator<IN, OUT, O extends SingleInputOperator
 	
 	
 	protected abstract UnaryNodeTranslation translateToDataFlow();
+	
+	protected abstract Collection<OUT> executeAsCollection();
 }
